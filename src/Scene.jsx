@@ -109,7 +109,7 @@ export function Scene(props) {
           scale={5.25}
           onClick={handleMeshClick}
         />
-        <RobinBird position={[0.2, 2, 3.85]} rotation={[0, Math.PI *1.2 , 0]}/>
+        <RobinBird position={[3.85, 0.7, 2.2]} rotation={[0, Math.PI *1.2 , 0]}/>
       </group>
       {selectedMesh && (
         console.log('Mesh clicked:', {selectedMesh}),
