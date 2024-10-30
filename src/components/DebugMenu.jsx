@@ -29,17 +29,9 @@ export const DebugMenu = () => {
       },
     })
 
-    const transformControls = useControls('Transform Controls', {
-      mode: {
-        value: transformMode,
-        options: ['translate', 'rotate', 'scale'],
-        onChange: (value) => setTransformMode(value),
-      },
-    })
-
     const [perfControls, setPerfControls] = useControls('Performance', () => ({
         togglePerf: button(() => setShowPerf(prev => !prev))
     }))
   
-    return { ...sunControls, transformMode, showPerf }
+    return { ...sunControls, showPerf }
 }
