@@ -1,45 +1,49 @@
-import { useState } from 'react'
-import { useGLTF, PivotControls } from '@react-three/drei'
+import React, { useState } from 'react';
+import { useGLTF, PivotControls } from '@react-three/drei';
+
+function CustomObject({ object, isVisible, onClick, ...props }) {
+  return (
+    <PivotControls
+      visible={isVisible}
+      enabled={isVisible}
+      anchor={[0, 0, 0]}
+      autoTransform={true}
+      disableScaling={true}
+      annotations={true}
+      depthTest={false}
+    >
+      <primitive
+        {...props}
+        object={object}
+        castShadow
+        receiveShadow
+        onClick={(e) => {
+          e.stopPropagation(); // 防止事件冒泡
+          onClick(); // 點擊後更新選擇的物件
+        }}
+      />
+    </PivotControls>
+  );
+}
 
 export function Scene(props) {
-  const { nodes }= useGLTF('/SmallRoomSimulation.glb')
-  const [selected, setSelected] = useState(null);
-
-  const handleSelect = (object) => {
-    // 切換選取狀態，如果再次點擊已選中物件就取消選取
-    setSelected(selected === object ? null : object);
-  };
+  const { nodes } = useGLTF('/SmallRoomSimulation.glb');
+  const [selectedObject, setSelectedObject] = useState(null);
 
   return (
     <>
-      <group {...props} dispose={null}>
-          {Object.keys(nodes).map((key) => (
-            <primitive
-              key={key}
-              object={nodes[key]}
-              castShadow
-              receiveShadow
-              onPointerDown={(e) => {
-                e.stopPropagation(); // 防止事件冒泡
-                handleSelect(nodes[key]); // 設定選取的物件
-              }}
-            />
-          ))}
+      <group {...props} dispose={null} onPointerMissed={()=>{setSelectedObject(null)}}>
+        {Object.keys(nodes).map((key) => (
+          <CustomObject
+            key={key}
+            object={nodes[key]}
+            isVisible={key === selectedObject} // 當前物件被選中時顯示 PivotControls
+            onClick={() => setSelectedObject(key)} // 更新選中的物件
+          />
+        ))}
       </group>
-
-      {selected && (
-        <PivotControls
-          anchor={[0, 0, 0]}
-          scale={75}
-          lineWidth={2}
-          fixed
-          depthTest={false}
-        >
-          <primitive object={selected} />
-        </PivotControls>
-      )}
     </>
-  )
+  );
 }
 
-useGLTF.preload('/SmallRoomSimulation.glb')
+useGLTF.preload('/SmallRoomSimulation.glb');
