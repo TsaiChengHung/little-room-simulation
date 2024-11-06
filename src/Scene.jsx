@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { useGLTF, PivotControls } from '@react-three/drei';
-import Room from './components/Room';
+import { useState } from 'react'
+import { useGLTF, PivotControls } from '@react-three/drei'
+import Room from './components/Room'
+import Droparea from './components/Droparea';
 
 function CustomObject({ object, isVisible, onClick, ...props }) {
   return (
@@ -45,6 +46,7 @@ export function Scene(props) {
           />
         ))}
         <Room/>
+
       </group>
     </>
   );

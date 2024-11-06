@@ -4,13 +4,21 @@ import { Sky, OrbitControls, Environment } from "@react-three/drei"
 import { EffectComposer, Outline, TiltShift2, ToneMapping } from "@react-three/postprocessing"
 import { Scene } from "./Scene"
 import { DebugMenu } from "./components/DebugMenu"
+import InteractiveUI from "./components/InteractiveUI"
+import useSelectionStore from "./components/Store"
 
 export const App = () => {
 
   const { sunPositionX, sunPositionY, sunPositionZ, showPerf } = DebugMenu()
-  
+  const { clearSelectedObject, selectedObject } = useSelectionStore();
+
+  const handleCanvasClick = () => {
+    clearSelectedObject();
+  }
+
   return (
-  <Canvas shadows flat dpr={[1, 1.5]} gl={{ antialias: false }} camera={{ position: [0,0,10], fov: 25, near: 1, far: 100 }} >
+    <>
+  <Canvas shadows flat dpr={[1, 1.5]} gl={{ antialias: false }} camera={{ position: [0,0,10], fov: 25, near: 1, far: 100 }} onPointerMissed={handleCanvasClick} >
     {showPerf && <Perf position="top-left" />}
     <OrbitControls makeDefault />
     <ambientLight intensity={0.2} />
@@ -37,6 +45,9 @@ export const App = () => {
       
 
   </Canvas>
+  <InteractiveUI/>
+  </>
+
   )
 }
 
