@@ -1,8 +1,7 @@
-import * as THREE from "three"
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useGLTF } from "@react-three/drei";
 import useSelectionStore from './Store';
-import { useTexture } from "@react-three/drei";
+
 
 const Room = (props) => {
   const { nodes } = useGLTF('/little_room_0.glb');
@@ -12,17 +11,16 @@ const Room = (props) => {
     initializeRoomMaterials(nodes)
   }, [nodes, initializeRoomMaterials])
 
-  const handleClick = (e, key) => {
-    e.stopPropagation(); // 防止事件冒泡到 Canvas 上
+  const handleClick = useCallback((e, key) => {
+    e.stopPropagation();
     if (selectedObject === key) {
       setSelectedObject(null);
       console.log(`Deselected: ${key}`);
     } else {
-      setSelectedObject(key); // 設置選取的物件名稱
-      console.log(e.object.material)
+      setSelectedObject(key);
       console.log(`Selected: ${key}`);
     }
-  };
+  }, [selectedObject, setSelectedObject]);
 
   return (
     <group {...props} dispose={null}>

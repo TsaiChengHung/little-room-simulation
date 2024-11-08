@@ -4,13 +4,13 @@ import useSelectionStore from './Store'
 
 export const DebugMenu = () => {
     const [showPerf, setShowPerf] = useState(false)
-    const {isChangingRoomMaterial, setIsChangingRoomMaterial} = useSelectionStore()
+    const {isChangingRoomMaterial, setIsChangingRoomMaterial, clearSelectedObject} = useSelectionStore()
 
     const sunControls = useControls('Sun Control', {
       sunPositionX: {
         value: 0,
-        min: -100,
-        max: 100,
+        min: -180,
+        max: 180,
         step: 1,
         label: 'Sun Position X (East to West)',
       },
@@ -39,11 +39,19 @@ export const DebugMenu = () => {
       enableChangingMaterial: {
           value: isChangingRoomMaterial, // 從 Zustand 獲取當前的狀態
           label: 'Enable Changing Room Material',
-          onChange: (value) => setIsChangingRoomMaterial(value), // 更新 Zustand 的狀態
+          onChange: (value) => {setIsChangingRoomMaterial(value), clearSelectedObject()} // 更新 Zustand 的狀態
       },
   });
   
 
+    // New Environment Control
+    const environmentControls = useControls('Environment', {
+        preset: {
+            options: ['dawn', 'city', 'night', 'apartment', 'forest', 'lobby', 'park', 'studio', 'sunset', 'warehouse'], // Add more presets as needed
+            value: 'dawn', // Default value
+            label: 'Environment Preset',
+        },
+    });
 
-    return { ...sunControls, showPerf, materialControls }
+    return { ...sunControls, showPerf, materialControls, environmentControls }
 }

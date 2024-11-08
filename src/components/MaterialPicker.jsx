@@ -67,8 +67,17 @@ const MaterialPicker = () => {
           variant="contained"
           onClick={() => handleApplyMaterial(materials.dry)}
           fullWidth
+          sx={{ mb: 1 }}
         >
           Dry
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => handleApplyMaterial(materials.wallpapper)}
+          fullWidth
+          sx={{ mb: 1 }}
+        >
+          Wall Papper
         </Button>
       </Box>
     </Modal>
