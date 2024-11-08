@@ -1,17 +1,26 @@
 import { create } from "zustand";
-import * as THREE from 'three';
 
 const useSelectionStore = create((set) => ({
   selectedObject: null, // 儲存選中的物件名稱
   roomMaterials: {},
-  
-  // 定義三個材質
-  material1: new THREE.MeshStandardMaterial({ color: '#FF5733' }), // 紅色
-  material2: new THREE.MeshStandardMaterial({ color: '#33FF57' }), // 綠色
-  material3: new THREE.MeshStandardMaterial({ color: '#3357FF' }), // 藍色
+  isChangingRoomMaterial: false,
   
   setSelectedObject: (object) => set({ selectedObject: object }),
   clearSelectedObject: () => set({ selectedObject: null }),
+  
+  setIsChangingRoomMaterial: (value) => set({ isChangingRoomMaterial: value }),
+
+  // 初始化 roomMaterials
+  initializeRoomMaterials: (nodes) => {
+    const initialMaterials = {};
+    Object.keys(nodes).forEach((key) => {
+      const node = nodes[key];
+      if (node.isMesh) {
+        initialMaterials[key] = node.material;
+      }
+    });
+    set({ roomMaterials: initialMaterials });
+  },
   
   // 設定並保存材質到 objectMaterials
   setMaterial: (material) =>

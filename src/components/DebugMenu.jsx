@@ -1,9 +1,10 @@
 import { useControls, button } from 'leva'
 import { useState, useEffect } from 'react'
+import useSelectionStore from './Store'
 
 export const DebugMenu = () => {
-    const [transformMode, setTransformMode] = useState('translate')
     const [showPerf, setShowPerf] = useState(false)
+    const {isChangingRoomMaterial, setIsChangingRoomMaterial} = useSelectionStore()
 
     const sunControls = useControls('Sun Control', {
       sunPositionX: {
@@ -29,9 +30,20 @@ export const DebugMenu = () => {
       },
     })
 
-    const [perfControls, setPerfControls] = useControls('Performance', () => ({
-        togglePerf: button(() => setShowPerf(prev => !prev))
+    useControls('Performance', () => ({
+        active: button(() => setShowPerf(prev => !prev))
     }))
+
+
+    const materialControls = useControls('Room Material', {
+      enableChangingMaterial: {
+          value: isChangingRoomMaterial, // 從 Zustand 獲取當前的狀態
+          label: 'Enable Changing Room Material',
+          onChange: (value) => setIsChangingRoomMaterial(value), // 更新 Zustand 的狀態
+      },
+  });
   
-    return { ...sunControls, showPerf }
+
+
+    return { ...sunControls, showPerf, materialControls }
 }

@@ -2,6 +2,7 @@
 import React from "react";
 import { Modal, Box, Typography, Button } from "@mui/material";
 import useSelectionStore from "./Store";
+import { materials } from "./Materials";
 
 const style = {
   position: "absolute",
@@ -16,7 +17,7 @@ const style = {
 };
 
 const MaterialPicker = () => {
-  const { selectedObject, setMaterial, clearSelectedObject, material1, material2, material3 } =
+  const { selectedObject, setMaterial, clearSelectedObject, isChangingRoomMaterial } =
     useSelectionStore();
 
   const handleApplyMaterial = (material) => {
@@ -32,7 +33,7 @@ const MaterialPicker = () => {
 
   return (
     <Modal
-      open={!!selectedObject}
+      open={!!selectedObject && isChangingRoomMaterial}
       onClose={handleClose}
       aria-labelledby="material-picker-title"
       aria-describedby="material-picker-description"
@@ -48,26 +49,26 @@ const MaterialPicker = () => {
         </Typography>
         <Button
           variant="contained"
-          onClick={() => handleApplyMaterial(material1)}
+          onClick={() => handleApplyMaterial(materials.brick)}
           fullWidth
           sx={{ mb: 1 }}
         >
-          Material1
+          Brick
         </Button>
         <Button
           variant="contained"
-          onClick={() => handleApplyMaterial(material2)}
+          onClick={() => handleApplyMaterial(materials.concrete)}
           fullWidth
           sx={{ mb: 1 }}
         >
-          Material2
+          Concrete
         </Button>
         <Button
           variant="contained"
-          onClick={() => handleApplyMaterial(material3)}
+          onClick={() => handleApplyMaterial(materials.dry)}
           fullWidth
         >
-          Material3
+          Dry
         </Button>
       </Box>
     </Modal>
