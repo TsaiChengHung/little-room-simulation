@@ -1,26 +1,37 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 import { useGLTF } from "@react-three/drei";
+import { MeshStandardMaterial, Clock } from "three";
 import useSelectionStore from './Store';
-
 
 const Room = (props) => {
   const { nodes } = useGLTF('/little_room_0.glb');
-  const { setSelectedObject, selectedObject, roomMaterials, initializeRoomMaterials } = useSelectionStore();
+  const { setSelectedObject, selectedObject, roomMaterials, initializeRoomMaterials, enableChangingRoomMaterial, selectedObjectType } = useSelectionStore();
+  const clock = useMemo(() => new Clock(), []);
 
-  useEffect(()=>{
-    initializeRoomMaterials(nodes)
-  }, [nodes, initializeRoomMaterials])
+  useEffect(() => {
+    initializeRoomMaterials(nodes);
+  }, [nodes, initializeRoomMaterials]);
+
+  // 使用 useMemo 來創建一個特殊的選取材質，並讓其緩慢閃爍
+  const selectedMaterial = useMemo(() => {
+    const material = new MeshStandardMaterial({ color: "yellow", emissive: "yellow", emissiveIntensity: 0.5 });
+    const updateEmissiveIntensity = () => {
+      const time = clock.getElapsedTime();
+      material.emissiveIntensity = 0.5 + 0.5 * Math.sin(time * 2); // 緩慢閃爍效果
+      requestAnimationFrame(updateEmissiveIntensity);
+    };
+    updateEmissiveIntensity();
+    return material;
+  }, [clock]);
 
   const handleClick = useCallback((e, key) => {
-    e.stopPropagation();
-    if (selectedObject === key) {
-      setSelectedObject(null);
-      console.log(`Deselected: ${key}`);
+    e.stopPropagation(); // 防止事件冒泡到父級 group
+    if (selectedObject === key && selectedObjectType === 'room') {
+      setSelectedObject(null, null);
     } else {
-      setSelectedObject(key);
-      console.log(`Selected: ${key}`);
+      setSelectedObject(key, 'room');
     }
-  }, [selectedObject, setSelectedObject]);
+  }, [selectedObject, setSelectedObject, selectedObjectType]);
 
   return (
     <group {...props} dispose={null}>
@@ -31,7 +42,7 @@ const Room = (props) => {
             <mesh
               key={key}
               geometry={node.geometry}
-              material={roomMaterials[key] || node.material}
+              material={enableChangingRoomMaterial && selectedObject === key && selectedObjectType === 'room' ? selectedMaterial : (roomMaterials[key] || node.material)}
               onClick={(e) => handleClick(e, key)}
               position={node.position}
               rotation={node.rotation}
@@ -42,8 +53,8 @@ const Room = (props) => {
         }
         return null;
       })}
-    </group> )
+    </group>
+  );
 };
 
 export default Room;
-useGLTF.preload('/little_room_0.glb');

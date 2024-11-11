@@ -1,10 +1,9 @@
-import AddModelButton from "./AddModelButton"
-import ColorPicker from "./MaterialPicker"
-
+import MaterialSelector from "./MaterialSelector"
+import ModelManager from "./ModelsManager.JSX"
 
 export default function InteractiveUI(){
     return <>
-    <AddModelButton/>
-    <ColorPicker/>
+    <ModelManager />
+    <MaterialSelector />
     </>
 }

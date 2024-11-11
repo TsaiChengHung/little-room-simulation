@@ -4,7 +4,7 @@ import useSelectionStore from './Store'
 
 export const DebugMenu = () => {
     const [showPerf, setShowPerf] = useState(false)
-    const {isChangingRoomMaterial, setIsChangingRoomMaterial, clearSelectedObject} = useSelectionStore()
+    const {enableChangingRoomMaterial, setIsChangingRoomMaterial, clearSelectedObject} = useSelectionStore()
 
     const sunControls = useControls('Sun Control', {
       sunPositionX: {
@@ -37,7 +37,7 @@ export const DebugMenu = () => {
 
     const materialControls = useControls('Room Material', {
       enableChangingMaterial: {
-          value: isChangingRoomMaterial, // 從 Zustand 獲取當前的狀態
+          value: enableChangingRoomMaterial, // 從 Zustand 獲取當前的狀態
           label: 'Enable Changing Room Material',
           onChange: (value) => {setIsChangingRoomMaterial(value), clearSelectedObject()} // 更新 Zustand 的狀態
       },

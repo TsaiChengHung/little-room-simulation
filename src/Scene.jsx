@@ -1,55 +1,49 @@
-import { useState } from 'react'
-import { useGLTF, PivotControls } from '@react-three/drei'
-import Room from './components/Room'
-import Droparea from './components/Droparea';
-
-function CustomObject({ object, isVisible, onClick, ...props }) {
-  return (
-    <PivotControls
-      visible={isVisible}
-      enabled={isVisible}
-      anchor={[0, 0, 0]}
-      scale={0.5}
-      autoTransform={true}
-      disableScaling={true}
-      annotations={true}
-      depthTest={false}
-    >
-      <primitive
-        {...props}
-        object={object}
-        castShadow
-        receiveShadow
-        onClick={(e) => {
-          e.stopPropagation(); // 防止事件冒泡
-          onClick(); // 點擊後更新選擇的物件
-        }}
-      />
-    </PivotControls>
-  );
-}
+import { useGLTF, PivotControls } from '@react-three/drei';
+import { useEffect } from 'react';
+import Room from './components/Room';
+import useSelectionStore from './components/Store';
 
 export function Scene(props) {
   const { nodes } = useGLTF('/default_deco_0.glb');
-  const [selectedObject, setSelectedObject] = useState(null);
+  const { setSelectedObject, selectedObject, selectedObjectType, initializeObjects, objects } = useSelectionStore();
+
+  // Initialize the objects in the store
+  useEffect(() => {
+    initializeObjects(nodes);
+  }, [nodes, initializeObjects]);
 
   return (
     <>
-
-      <group {...props} dispose={null} onPointerMissed={()=>{setSelectedObject(null)}}>
-        {Object.keys(nodes).map((key) => (
-          <CustomObject
+      <group {...props} dispose={null} onPointerMissed={() => setSelectedObject(null, null)}>
+        {Object.keys(objects).map((key) => (
+          <PivotControls
             key={key}
-            object={nodes[key]}
-            isVisible={key === selectedObject} // 當前物件被選中時顯示 PivotControls
-            onClick={() => setSelectedObject(key)} // 更新選中的物件
-          />
+            visible={selectedObject === key && selectedObjectType === 'customObject'}
+            enabled={selectedObject === key && selectedObjectType === 'customObject'}
+            anchor={[0, 0, 0]}
+            scale={0.5}
+            autoTransform={true}
+            disableScaling={true}
+            annotations={true}
+            depthTest={false}
+          >
+            <mesh
+              geometry={objects[key].geometry}
+              material={objects[key].material}
+              position={objects[key].position}
+              rotation={objects[key].rotation}
+              scale={objects[key].scale}
+              castShadow
+              receiveShadow
+              onClick={(e) => {
+                e.stopPropagation(); // 阻止事件冒泡
+                setSelectedObject(key, 'customObject'); // 更新選中的物件
+              }}
+            />
+          </PivotControls>
         ))}
-        <Room/>
-
+        <Room />
       </group>
     </>
   );
 }
-
-useGLTF.preload('/default_deco_0.glb');
