@@ -41,6 +41,7 @@ export default function App() {
             zIndex: 1000,
             padding: 1,
             overflowX: 'auto', // 使按鈕在寬度超過螢幕時可以滑動
+            whiteSpace: 'nowrap',
             maxWidth: '100%',
           }}
         >
