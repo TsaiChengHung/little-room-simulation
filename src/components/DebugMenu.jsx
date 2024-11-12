@@ -1,15 +1,16 @@
 import { useControls, button } from 'leva'
 import { useState, useEffect } from 'react'
+import useSelectionStore from './Store'
 
 export const DebugMenu = () => {
-    const [transformMode, setTransformMode] = useState('translate')
     const [showPerf, setShowPerf] = useState(false)
+    const {enableChangingRoomMaterial, setIsChangingRoomMaterial, clearSelectedObject} = useSelectionStore()
 
     const sunControls = useControls('Sun Control', {
       sunPositionX: {
         value: 0,
-        min: -100,
-        max: 100,
+        min: -180,
+        max: 180,
         step: 1,
         label: 'Sun Position X (East to West)',
       },
@@ -29,17 +30,28 @@ export const DebugMenu = () => {
       },
     })
 
-    const transformControls = useControls('Transform Controls', {
-      mode: {
-        value: transformMode,
-        options: ['translate', 'rotate', 'scale'],
-        onChange: (value) => setTransformMode(value),
-      },
-    })
-
-    const [perfControls, setPerfControls] = useControls('Performance', () => ({
-        togglePerf: button(() => setShowPerf(prev => !prev))
+    useControls('Performance', () => ({
+        active: button(() => setShowPerf(prev => !prev))
     }))
+
+
+    const materialControls = useControls('Room Material', {
+      enableChangingMaterial: {
+          value: enableChangingRoomMaterial, // 從 Zustand 獲取當前的狀態
+          label: 'Enable Changing Room Material',
+          onChange: (value) => {setIsChangingRoomMaterial(value), clearSelectedObject()} // 更新 Zustand 的狀態
+      },
+  });
   
-    return { ...sunControls, transformMode, showPerf }
+
+    // New Environment Control
+    const environmentControls = useControls('Environment', {
+        preset: {
+            options: ['dawn', 'city', 'night', 'apartment', 'forest', 'lobby', 'park', 'studio', 'sunset', 'warehouse'], // Add more presets as needed
+            value: 'dawn', // Default value
+            label: 'Environment Preset',
+        },
+    });
+
+    return { ...sunControls, showPerf, materialControls, environmentControls }
 }
