@@ -55,8 +55,8 @@ export default function App() {
                 backgroundImage: `url(${texture.baseColor})`,
                 backgroundPosition: 'center',
                 color: 'white',
-                width: selectedMaterial === name ? '140px' : '130px',
-                height: selectedMaterial === name ? '60px' : '50px',
+                width: '130px',
+                height: '50px',
                 overflow: 'hidden', // 隱藏超出按鈕的內容
                 whiteSpace: 'normal', // 允許文字換行
                 display: 'flex',
@@ -66,9 +66,7 @@ export default function App() {
                 filter: selectedMaterial === name ? 'brightness(1)' : 'brightness(0.7)',
                 transition: 'all 0.1s',
               }}
-            >
-              <span style={{ wordBreak: 'break-word' }}>{name.charAt(0).toUpperCase() + name.slice(1)}</span>
-            </Button>
+            />
           ))}
         </Stack>
       )}

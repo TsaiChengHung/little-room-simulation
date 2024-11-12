@@ -63,6 +63,7 @@ const useSelectionStore = create((set) => ({
     set((state) => {
       if (!modelKey) return state;
       const updatedObjects = { ...state.objects };
+      console.log(state)
       if (updatedObjects[modelKey]) {
         delete updatedObjects[modelKey];
       }

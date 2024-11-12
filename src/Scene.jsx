@@ -2,6 +2,7 @@ import { useGLTF, PivotControls } from '@react-three/drei';
 import { useEffect } from 'react';
 import Room from './components/Room';
 import useSelectionStore from './components/Store';
+import { RobinBird } from './items/RobinBird'
 
 export function Scene(props) {
   const { nodes } = useGLTF('/default_deco_0.glb');
@@ -43,6 +44,7 @@ export function Scene(props) {
           </PivotControls>
         ))}
         <Room />
+        <RobinBird position={[3.9,0.7,2]} rotation={[0,-0.4,0]} />
       </group>
     </>
   );
