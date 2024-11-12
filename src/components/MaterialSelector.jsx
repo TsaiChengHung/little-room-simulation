@@ -55,6 +55,9 @@ export default function App() {
             transform: 'translateX(-50%)',
             zIndex: 1000,
             padding: 1,
+            overflowX: 'auto', // 使按鈕在寬度超過螢幕時可以滑動
+            whiteSpace: 'nowrap',
+            maxWidth: '100%',
           }}
         >
           {Object.entries(materialTextures).map(([name, texture]) => (
