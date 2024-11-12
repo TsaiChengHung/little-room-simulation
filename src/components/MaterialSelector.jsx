@@ -4,22 +4,7 @@ import { makeStyles } from '@mui/styles';
 import { materialTextures, materials } from './Materials';
 import useSelectionStore from './Store';
 
-// 建立自定義樣式
-const useStyles = makeStyles({
-  colorThumbnail: {
-    width: '100px',
-    height: '100px',
-    cursor: 'pointer',
-    margin: '10px',
-    borderRadius: '8px',
-    boxShadow: '0 3px 5px 2px rgba(0, 0, 0, 0.3)',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-  },
-  container: {
-    padding: '20px',
-  },
-});
+
 
 // App 主組件
 export default function App() {
@@ -51,10 +36,12 @@ export default function App() {
             alignItems: 'center',
             position: 'fixed',
             bottom: 0,
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: 0,
+            right: 0,
             zIndex: 1000,
             padding: 1,
+            overflowX: 'auto', // 使按鈕在寬度超過螢幕時可以滑動
+            maxWidth: '100%',
           }}
         >
           {Object.entries(materialTextures).map(([name, texture]) => (
@@ -63,21 +50,23 @@ export default function App() {
               key={name}
               onClick={() => handleMaterialClick(name)}
               style={{
+                fontSize: '9pt',
                 backgroundImage: `url(${texture.baseColor})`,
                 backgroundPosition: 'center',
                 color: 'white',
                 width: selectedMaterial === name ? '140px' : '130px',
                 height: selectedMaterial === name ? '60px' : '50px',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
+                overflow: 'hidden', // 隱藏超出按鈕的內容
+                whiteSpace: 'normal', // 允許文字換行
                 display: 'flex',
-                alignItems: "center",
+                alignItems: 'center',
                 justifyContent: 'center',
+                textAlign: 'center', // 讓文字在按鈕中居中
                 filter: selectedMaterial === name ? 'brightness(1)' : 'brightness(0.7)',
                 transition: 'all 0.1s',
               }}
             >
-              {name.charAt(0).toUpperCase() + name.slice(1)}
+              <span style={{ wordBreak: 'break-word' }}>{name.charAt(0).toUpperCase() + name.slice(1)}</span>
             </Button>
           ))}
         </Stack>

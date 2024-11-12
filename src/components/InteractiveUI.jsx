@@ -1,5 +1,5 @@
 import MaterialSelector from "./MaterialSelector"
-import ModelManager from "./ModelsManager.JSX"
+import ModelManager from "./ModelsManager"
 
 export default function InteractiveUI(){
     return <>

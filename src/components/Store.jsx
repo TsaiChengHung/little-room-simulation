@@ -68,6 +68,18 @@ const useSelectionStore = create((set) => ({
       }
       return { objects: updatedObjects, selectedObject: null, selectedObjectType: null };
     }),
+
+  // 增加模型
+  addModel: (modelKey, modelData) =>
+    set((state) => {
+      if (!modelKey || !modelData) return state;
+      return {
+        objects: {
+          ...state.objects,
+          [modelKey]: modelData,
+        },
+      };
+    }),
 }));
 
 export default useSelectionStore;
