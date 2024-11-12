@@ -1,7 +1,7 @@
 import { useGLTF } from '@react-three/drei';
 
 // 預先載入模型陣列
-const glbUrls = {
+export const glbUrls = {
   cabinet: {
     bookcase: '/items/cabinent/bookcase.glb',
     cabinet: '/items/cabinent/cabinet.glb',
@@ -26,7 +26,7 @@ const glbUrls = {
   },
 };
 
-export default function Item({ category, itemName }) {
+export function GetModel(category, itemName) {
   const url = glbUrls[category]?.[itemName];
   const { nodes, materials } = useGLTF(url);
 
