@@ -4,7 +4,7 @@ import { MeshStandardMaterial, Clock } from "three";
 import useSelectionStore from './Store';
 
 const Room = (props) => {
-  const { nodes } = useGLTF('/little_room_0.glb');
+  const { nodes } = useGLTF('/cozy_home_structure.glb');
   const { setSelectedObject, selectedObject, roomMaterials, initializeRoomMaterials, enableChangingRoomMaterial, selectedObjectType } = useSelectionStore();
   const clock = useMemo(() => new Clock(), []);
 

@@ -24,23 +24,14 @@ const useSelectionStore = create((set) => ({
     set({ roomMaterials: initialMaterials });
   },
 
-  // 初始化場景物件資訊
-  initializeObjects: (nodes) => {
-    const objects = {};
-    Object.keys(nodes).forEach((key) => {
-      const node = nodes[key];
-      if (node.isMesh) {
-        objects[key] = {
-          geometry: node.geometry,
-          material: node.material,
-          position: node.position,
-          rotation: node.rotation,
-          scale: node.scale,
-        };
-      }
-    });
-    set({ objects });
-  },
+  AddToObjects: (key, node) =>
+    set((state) => {
+      const objects = { ...state.objects }; // 獲取當前狀態
+      objects[key] = node; // 新增鍵值對
+      return { objects }; // 返回更新後的狀態
+    }),
+  
+
 
   // 設定並保存材質到 roomMaterials
   setMaterial: (material) =>
