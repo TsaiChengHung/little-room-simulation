@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Stack, Button } from '@mui/material';
-import { makeStyles } from '@mui/styles';
-import { materialTextures, materials } from './Materials';
+import { materialTextures, useMaterials } from './Materials';
 import useSelectionStore from './Store';
 
 
@@ -11,6 +10,7 @@ export default function App() {
   const { selectedObject, selectedObjectType, clearSelectedObject, setMaterial, enableChangingRoomMaterial } = useSelectionStore();
 
   const [selectedMaterial, setSelectedMaterial] = useState(null);
+  const materials = useMaterials()
 
   // 點擊材質時觸發的功能
   const handleMaterialClick = (materialName) => {
@@ -20,6 +20,7 @@ export default function App() {
     } else {
       setSelectedMaterial(materialName);
       setMaterial(materials[materialName]);
+      console.log(materials)
       clearSelectedObject(); // 清除選中的物件以防止同時進行物件選擇和材質更改
       console.log('Selected Material:', materialName);
     }
