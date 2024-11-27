@@ -9,10 +9,10 @@ import {
   Bloom,
   Noise
 } from "@react-three/postprocessing";
-import { Scene } from "./Scene";
-import { DebugMenu } from "./components/DebugMenu";
-import InteractiveUI from "./components/InteractiveUI";
-import useSelectionStore from "./components/Store";
+import { Scene } from "./components/Scenes/Scene";
+import { DebugMenu } from "./components/UI/DebugMenu";
+import InteractiveUI from "./components/UI/InteractiveUI";
+import useSelectionStore from "./components/Store/Store";
 
 export const App = () => {
   const {
