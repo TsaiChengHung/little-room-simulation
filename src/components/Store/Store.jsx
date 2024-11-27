@@ -4,13 +4,15 @@ const useSelectionStore = create((set) => ({
   selectedObject: null, // 儲存選中的物件名稱
   selectedObjectType: null, // 用於標誌選中的物件類型，例如 'room' 或 'customObject'
   roomMaterials: {},
-  enableChangingRoomMaterial: true,
+  operationMode: null,
   objects: {}, // 儲存所有場景物件的資訊
 
   setSelectedObject: (object, type) => set({ selectedObject: object, selectedObjectType: type }),
   clearSelectedObject: () => set({ selectedObject: null, selectedObjectType: null }),
 
   setIsChangingRoomMaterial: (value) => set({ enableChangingRoomMaterial: value }),
+
+  setOperationMode: (mode) => set({ operationMode: mode }), //room or item
 
   // 初始化 roomMaterials
   initializeRoomMaterials: (nodes) => {
@@ -30,7 +32,7 @@ const useSelectionStore = create((set) => ({
       objects[key] = node; // 新增鍵值對
       return { objects }; // 返回更新後的狀態
     }),
-  
+
 
 
   // 設定並保存材質到 roomMaterials

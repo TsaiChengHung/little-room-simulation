@@ -2,10 +2,11 @@ import { useEffect, useCallback, useMemo } from "react";
 import { useGLTF } from "@react-three/drei";
 import { MeshStandardMaterial, Clock } from "three";
 import useSelectionStore from '../Store/Store';
+import { preload } from "react-dom";
 
 const Room = (props) => {
   const { nodes } = useGLTF('/cozy_home_structure.glb');
-  const { setSelectedObject, selectedObject, roomMaterials, initializeRoomMaterials, enableChangingRoomMaterial, selectedObjectType } = useSelectionStore();
+  const { setSelectedObject, selectedObject, roomMaterials, initializeRoomMaterials, operationMode, selectedObjectType } = useSelectionStore();
   const clock = useMemo(() => new Clock(), []);
 
   useEffect(() => {
@@ -42,7 +43,7 @@ const Room = (props) => {
             <mesh
               key={key}
               geometry={node.geometry}
-              material={enableChangingRoomMaterial && selectedObject === key && selectedObjectType === 'room' ? selectedMaterial : (roomMaterials[key] || node.material)}
+              material={operationMode === "room" && selectedObject === key && selectedObjectType === 'room' ? selectedMaterial : (roomMaterials[key] || node.material)}
               onClick={(e) => handleClick(e, key)}
               position={node.position}
               rotation={node.rotation}
@@ -58,3 +59,5 @@ const Room = (props) => {
 };
 
 export default Room;
+
+useGLTF.preload('/cozy_home_structure.glb');
