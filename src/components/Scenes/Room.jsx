@@ -43,7 +43,7 @@ const Room = (props) => {
             <mesh
               key={key}
               geometry={node.geometry}
-              material={operationMode === "room" && selectedObject === key && selectedObjectType === 'room' ? selectedMaterial : (roomMaterials[key] || node.material)}
+              material={operationMode === "paint" && selectedObject === key && selectedObjectType === 'room' ? selectedMaterial : (roomMaterials[key] || node.material)}
               onClick={(e) => handleClick(e, key)}
               position={node.position}
               rotation={node.rotation}

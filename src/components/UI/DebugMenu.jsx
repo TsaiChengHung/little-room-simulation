@@ -4,7 +4,7 @@ import useSelectionStore from '../Store/Store'
 
 export const DebugMenu = () => {
     const [showPerf, setShowPerf] = useState(false)
-    const {operationMode, setIsChangingRoomMaterial, clearSelectedObject} = useSelectionStore()
+    const {operationMode, clearSelectedObject} = useSelectionStore()
 
     const sunControls = useControls('Sun Control', {
       sunPositionX: {
@@ -28,11 +28,11 @@ export const DebugMenu = () => {
         step: 1,
         label: 'Sun Position Z (North to South)',
       },
-    })
+    }, {collapsed: true});
 
     useControls('Performance', () => ({
         active: button(() => setShowPerf(prev => !prev))
-    }))
+    }), {collapsed: true})
 
     // New Environment Control
     const environmentControls = useControls('Environment', {
@@ -41,7 +41,7 @@ export const DebugMenu = () => {
             value: 'dawn', // Default value
             label: 'Environment Preset',
         },
-    });
+    }, {collapsed: true});
 
     return { ...sunControls, showPerf, environmentControls }
 }

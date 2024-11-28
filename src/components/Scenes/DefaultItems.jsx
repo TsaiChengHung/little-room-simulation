@@ -11,6 +11,7 @@ export default function DefaultItems() {
         selectedObjectType,
         AddToObjects,
         objects,
+        operationMode,
     } = useSelectionStore();
 
     useEffect(() => {
@@ -29,7 +30,7 @@ export default function DefaultItems() {
                 return (
                     <CustomPivotControls
                         key={key}
-                        isVisible={selectedObject === key && selectedObjectType === 'customObject'}
+                        isVisible={selectedObject === key && selectedObjectType === 'customObject' && operationMode === 'item'}    
                     >
                         <primitive object={object} onClick={(e) => {
                             e.stopPropagation(); // 阻止事件冒泡

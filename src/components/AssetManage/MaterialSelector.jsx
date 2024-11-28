@@ -7,7 +7,7 @@ import useSelectionStore from '../Store/Store';
 
 // App 主組件
 export default function App() {
-  const { selectedObject, selectedObjectType, clearSelectedObject, setMaterial, enableChangingRoomMaterial } = useSelectionStore();
+  const { selectedObject, selectedObjectType, clearSelectedObject, setMaterial, operationMode } = useSelectionStore();
 
   const [selectedMaterial, setSelectedMaterial] = useState(null);
   const materials = useMaterials()
@@ -29,14 +29,14 @@ export default function App() {
   return (
     <Box sx={{ pb: 8 }}>
       {/* 檢查選中物件的類型是房間，並且允許更改房間材質時顯示材質選擇面板 */}
-      {selectedObject && selectedObjectType === 'room' && enableChangingRoomMaterial && (
+      {selectedObject && selectedObjectType === 'room' && operationMode === 'paint' && (
         <Stack
           direction="row"
           spacing={0.5}
           sx={{
             alignItems: 'center',
             position: 'fixed',
-            bottom: 0,
+            bottom: 50,
             left: 0,
             right: 0,
             zIndex: 1000,

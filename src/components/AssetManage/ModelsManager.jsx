@@ -49,6 +49,7 @@ export default function ModelManagement() {
     removeModel,
     objects,
     addModel,
+    operationMode
   } = useSelectionStore();
   
   const classes = useStyles();
@@ -86,13 +87,14 @@ export default function ModelManagement() {
 
   return (
     <Box sx={{ pb: 8 }}>
+      {selectedObject && selectedObjectType === 'customObject' && operationMode === 'item' && (
       <Stack
         direction="row"
         spacing={0.5}
         sx={{
           alignItems: "center",
           position: "fixed",
-          bottom: 0,
+          bottom: 50,
           left: "50%",
           transform: "translateX(-50%)",
           zIndex: 1000,
@@ -195,6 +197,7 @@ export default function ModelManagement() {
           </Button>
         )}
       </Stack>
+      )}
     </Box>
   );
 }

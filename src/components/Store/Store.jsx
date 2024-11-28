@@ -10,9 +10,7 @@ const useSelectionStore = create((set) => ({
   setSelectedObject: (object, type) => set({ selectedObject: object, selectedObjectType: type }),
   clearSelectedObject: () => set({ selectedObject: null, selectedObjectType: null }),
 
-  setIsChangingRoomMaterial: (value) => set({ enableChangingRoomMaterial: value }),
-
-  setOperationMode: (mode) => set({ operationMode: mode }), //room or item
+  setOperationMode: (mode) => set({ operationMode: mode, selectedObject: null, selectedObjectType: null }), //paint or item
 
   // 初始化 roomMaterials
   initializeRoomMaterials: (nodes) => {
