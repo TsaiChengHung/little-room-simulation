@@ -19,6 +19,15 @@ export default function DefaultItems() {
 
         items.forEach((item) => {
             const key = item.name
+            if (item.type === 'Group') {
+                item.children.forEach((child) => {
+                    child.castShadow = true
+                    child.receiveShadow = true
+                })}
+            if (item.type === 'Mesh') {
+                item.castShadow = true
+                item.receiveShadow = true
+            }
             AddToObjects(key, item);
         });
     }, []);
