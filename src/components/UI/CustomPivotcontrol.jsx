@@ -15,7 +15,7 @@ const CustomPivotControls = ({
       anchor={[0, 0, 0]}
       scale={scale}
       autoTransform
-      disableScaling
+      //disableScaling
       annotations
       depthTest={false}
     >

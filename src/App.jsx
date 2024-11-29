@@ -27,7 +27,6 @@ export const App = () => {
   const handleCanvasClick = () => {
     clearSelectedObject();
   };
-
   return (
     <>
       <Canvas

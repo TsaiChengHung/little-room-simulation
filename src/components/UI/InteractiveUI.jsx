@@ -1,11 +1,11 @@
 import MaterialSelector from "../AssetManage/MaterialSelector";
-import ModelManager from "../AssetManage/ModelsManager";
+import ItemManager from "../AssetManage/ItemManager";
 import ToggleButtons from "./ModeToggleButton";
 import "../../../src/style.css";
 
 export default function InteractiveUI(){
     return <>
-    <ModelManager />
+    <ItemManager />
     <MaterialSelector />
     <ToggleButtons />
     </>
