@@ -1,28 +1,24 @@
 import Room from "./Room";
-import DefaultItems from "./DefaultItems";
 import useSelectionStore from "../Store/Store";
-import { RobinBird } from "../../items/RobinBird";
+import DefaultObjects from "./DefaultObjects";
+import CustomObjects from "./CustomObjects";
 
 export function Scene(props) {
-  const {
-    setSelectedObject,
-    selectedObject,
-    selectedObjectType,
-    AddToObjects,
-    objects,
-  } = useSelectionStore();
+  const { setSelectedObject } = useSelectionStore();
 
   return (
     <>
       <group
         {...props}
         dispose={null}
-        onPointerMissed={() => setSelectedObject(null, null)}
+        onPointerMissed={() => setSelectedObject(null)}
       >
-        <DefaultItems />
+        <CustomObjects />
+        <DefaultObjects />
         <Room />
-        <RobinBird position={[-0.2, 3, 0.2]} rotation={[0, -0.4, 0]} />
       </group>
     </>
   );
 }
+
+export default Scene;

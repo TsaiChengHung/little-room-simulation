@@ -13,8 +13,15 @@ import { Scene } from "./components/Scenes/Scene";
 import { DebugMenu } from "./components/UI/DebugMenu";
 import InteractiveUI from "./components/UI/InteractiveUI";
 import useSelectionStore from "./components/Store/Store";
+import { preloadAllObjects, objectsUrl } from "./components/AssetManage/ObjectsPreload";
+import { useEffect } from "react";
 
 export const App = () => {
+  // Preload objects when app starts
+  useEffect(() => {
+    preloadAllObjects();
+  }, []);
+
   const {
     sunPositionX,
     sunPositionY,

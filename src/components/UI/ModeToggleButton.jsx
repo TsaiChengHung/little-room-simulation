@@ -44,7 +44,7 @@ export default function ToggleButtons() {
                     <ToggleButton value="paint" aria-label="material paint" sx={selectedButtonStyles}>
                         <FormatPaint />
                     </ToggleButton>
-                    <ToggleButton value="item" aria-label="item decoration" sx={selectedButtonStyles}>
+                    <ToggleButton value="object" aria-label="item decoration" sx={selectedButtonStyles}>
                         <Chair />
                     </ToggleButton>
                 </ToggleButtonGroup>
