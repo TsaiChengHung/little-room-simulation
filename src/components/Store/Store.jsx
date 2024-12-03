@@ -5,13 +5,17 @@ const useSelectionStore = create((set, get) => ({
   selectedObjectType: null, // 用於標誌選中的物件類型，例如 'room' 或 'customObject'
   roomMaterials: {},
   operationMode: null,
+  transformMode: "translate",
   defaultObjects: {}, // 儲存所有場景物件的資訊
   objects: {},
 
   setSelectedObject: (object, type) => set({ selectedObject: object, selectedObjectType: type }),
+
   clearSelectedObject: () => set({ selectedObject: null, selectedObjectType: null }),
 
   setOperationMode: (mode) => set({ operationMode: mode, selectedObject: null, selectedObjectType: null }), //paint or object
+
+  setTransformMode: (mode) => set({ transformMode: mode }),
 
   initializeRoomMaterials: (nodes) => {
     const initialMaterials = Object.fromEntries(

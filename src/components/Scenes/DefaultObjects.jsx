@@ -1,5 +1,4 @@
 import { useGLTF } from "@react-three/drei";
-import CustomObjectControl from "../UI/CustomObjectControl";
 import { useEffect } from "react";
 import useSelectionStore from "../Store/Store";
 
@@ -37,15 +36,10 @@ export default function DefaultObjects() {
             {Object.keys(defaultObjects).map((key, index) => {
                 const object = defaultObjects[key]
                 return (
-                    <CustomObjectControl 
-                        key={key}
-                        isVisible={selectedObject === key && selectedObjectType === 'defaultObject' && operationMode === 'object'}    
-                    >
-                        <primitive object={object} onClick={(e) => {
+                        <primitive key={key} object={object} onClick={(e) => {
                             e.stopPropagation(); // 阻止事件冒泡
                             setSelectedObject(key, 'defaultObject'); // 更新選中的物件
                         }} />
-                    </CustomObjectControl>
                 )
             })}
         </>

@@ -1,64 +1,33 @@
-import React from 'react';
-import { PivotControls, Html } from '@react-three/drei';
-import { IconButton } from '@mui/material';
-import { CloseRounded } from '@mui/icons-material';
+import { TransformControls } from '@react-three/drei';
 import useSelectionStore from "../Store/Store";
 
-const CustomObjectControl = ({
-  isVisible,
-  scale = 0.5,
-  children,
-}) => {
-  const { removeObject, removeDefaultObject, selectedObject, selectedObjectType } = useSelectionStore();
-  const object = children.props.object;
-  const key = object.name;
+const getObject = (defaultObjects, objects, selectedObject, selectedObjectType) => {
+  if (selectedObjectType === "customObject") {
+    return objects[selectedObject];
+  } else if (selectedObjectType === "defaultObject") {
+    return defaultObjects[selectedObject];
+  }
+  return null;
+};
 
-  const handleRemove  = (e) => {
-    e.stopPropagation();
-    if (selectedObjectType === "customObject") {
-      removeObject(selectedObject);
-    }
-    else if (selectedObjectType === "defaultObject") {
-      removeDefaultObject(selectedObject);
-    }
-  };
+const CustomObjectControl = () => {
+  const { defaultObjects, objects, selectedObject, selectedObjectType, operationMode, transformMode } = useSelectionStore();
+  const isEnabled = (selectedObjectType === "customObject" || selectedObjectType === "defaultObject") && (operationMode === "object");
+
+  const targetObject = getObject(defaultObjects, objects, selectedObject, selectedObjectType);
+
+  if (!isEnabled || !targetObject) return null;
 
   return (
-    <PivotControls
-      visible={isVisible}
-      enabled={isVisible}
-      anchor={[0, 0, 0]}
-      scale={scale}
-      autoTransform
-      //disableScaling
-      annotations
-      depthTest={false}
-    >
-      {children}
-      {isVisible && (
-        <Html position={object.position}>
-          <IconButton
-            onClick={handleRemove}
-            sx={{
-              backgroundColor: 'red',
-              color: 'white',
-              width: '24px',
-              height: '24px',
-              minWidth: '24px',
-              padding: '2px',
-              '&:hover': {
-                backgroundColor: '#ff3333',
-              },
-              '& .MuiSvgIcon-root': {
-                fontSize: '16px',
-              }
-            }}
-          >
-            <CloseRounded />
-          </IconButton>
-        </Html>
-      )}
-    </PivotControls>
+    <TransformControls
+      object={targetObject}
+      space='local'
+      mode={transformMode}
+      enabled={isEnabled}
+      showX={isEnabled}
+      showY={isEnabled}
+      showZ={isEnabled}
+    />
   );
 };
 

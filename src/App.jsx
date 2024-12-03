@@ -13,8 +13,9 @@ import { Scene } from "./components/Scenes/Scene";
 import { DebugMenu } from "./components/UI/DebugMenu";
 import InteractiveUI from "./components/UI/InteractiveUI";
 import useSelectionStore from "./components/Store/Store";
-import { preloadAllObjects, objectsUrl } from "./components/AssetManage/ObjectsPreload";
+import { preloadAllObjects } from "./components/AssetManage/ObjectsPreload";
 import { useEffect } from "react";
+import CustomObjectControl from "./components/UI/CustomObjectControl";
 
 export const App = () => {
   // Preload objects when app starts
@@ -64,6 +65,7 @@ export const App = () => {
         <Suspense fallback={null}>
           <Scene rotation={[0, Math.PI / 2, 0]} />
         </Suspense>
+        <CustomObjectControl/>
       </Canvas>
       <InteractiveUI />
     </>

@@ -24,6 +24,8 @@
     "@react-three/drei": "^9.115.0",
     "@react-three/fiber": "^8.17.10",
     "@react-three/postprocessing": "^2.16.3",
+    "@react-three/uikit": "^0.8.4",
+    "@react-three/uikit-default": "^0.8.4",
     "@types/three": "^0.169.0",
     "install": "^0.13.0",
     "leva": "^0.9.35",
