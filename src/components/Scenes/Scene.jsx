@@ -3,7 +3,7 @@ import useSelectionStore from "../Store/Store";
 import DefaultObjects from "./DefaultObjects";
 import CustomObjects from "./CustomObjects";
 
-export function Scene(props) {
+export default function Scene(props) {
   const { setSelectedObject } = useSelectionStore();
 
   return (
@@ -20,5 +20,3 @@ export function Scene(props) {
     </>
   );
 }
-
-export default Scene;

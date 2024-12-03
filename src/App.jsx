@@ -9,13 +9,15 @@ import {
   Bloom,
   Noise
 } from "@react-three/postprocessing";
-import { Scene } from "./components/Scenes/Scene";
+import Scene from "./components/Scenes/Scene";
+import RoomDesign from "./components/Scenes/RoomDesign";
 import { DebugMenu } from "./components/UI/DebugMenu";
 import InteractiveUI from "./components/UI/InteractiveUI";
 import useSelectionStore from "./components/Store/Store";
 import { preloadAllObjects } from "./components/AssetManage/ObjectsPreload";
 import { useEffect } from "react";
 import CustomObjectControl from "./components/UI/CustomObjectControl";
+
 
 export const App = () => {
   // Preload objects when app starts
@@ -30,22 +32,23 @@ export const App = () => {
     showPerf,
     environmentControls,
   } = DebugMenu();
-  const { clearSelectedObject, selectedObject } = useSelectionStore();
+  const { clearSelectedObject, setCurrentScene, currentScene } = useSelectionStore();
 
   const handleCanvasClick = () => {
     clearSelectedObject();
   };
+
   return (
     <>
       <Canvas
         shadows
         gl={{ antialias: true }}
-        camera={{ position: [0,1,10], fov: 15, near: 1, far: 100 }}
+        camera={{ position: [0, 1, 10], fov: 15, near: 1, far: 100 }}
         onPointerMissed={handleCanvasClick}
       >
 
         {showPerf && <Perf position="top-left" />}
-        <OrbitControls makeDefault target={[0,1,0]} />
+        <OrbitControls makeDefault target={[0, 1, 0]} />
         <ambientLight intensity={0.5} />
 
         <directionalLight
@@ -62,10 +65,20 @@ export const App = () => {
         />
         <Effects />
 
-        <Suspense fallback={null}>
-          <Scene rotation={[0, Math.PI / 2, 0]} />
-        </Suspense>
-        <CustomObjectControl/>
+        {currentScene === "roomSimulation" && (
+          <>
+            <Scene rotation={[0, Math.PI / 2, 0]} />
+            <CustomObjectControl />
+          </>
+        )}
+
+        {currentScene === "roomDesign" && (
+          <>
+            <RoomDesign />
+            <CustomObjectControl />
+          </>
+        )}
+
       </Canvas>
       <InteractiveUI />
     </>

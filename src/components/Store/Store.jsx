@@ -1,6 +1,10 @@
 import { create } from "zustand";
 
 const useSelectionStore = create((set, get) => ({
+  // general params
+  currentScene: "roomDesign", // roomDesign or roomSimulation
+  
+  // room simulation params
   selectedObject: null, // 儲存選中的物件名稱
   selectedObjectType: null, // 用於標誌選中的物件類型，例如 'room' 或 'customObject'
   roomMaterials: {},
@@ -9,6 +13,13 @@ const useSelectionStore = create((set, get) => ({
   defaultObjects: {}, // 儲存所有場景物件的資訊
   objects: {},
 
+  // room design params
+  
+
+  // general functions
+  setCurrentScene: (scene) => set({ currentScene: scene }),
+  
+  // room simulation functions
   setSelectedObject: (object, type) => set({ selectedObject: object, selectedObjectType: type }),
 
   clearSelectedObject: () => set({ selectedObject: null, selectedObjectType: null }),
@@ -61,6 +72,9 @@ const useSelectionStore = create((set, get) => ({
       }
       return {};
     }),
+
+    // room design functions
+    
 }));
 
 export default useSelectionStore;
