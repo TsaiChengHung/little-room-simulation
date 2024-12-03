@@ -33,6 +33,22 @@ const useSelectionStore = create((set, get) => ({
       return { defaultObjects: updatedObjects, selectedObject: null, selectedObjectType: null };
     }),
 
+  addObject: (objectKey, objectData) =>
+    set((state) => {
+      if (!objectKey || !objectData) return state;
+      return { objects: { ...state.objects, [objectKey]: objectData } };
+    }),
+
+  removeObject: (objectKey) =>
+    set((state) => {
+      if (!objectKey) return state;
+      const updatedObjects = { ...state.objects };
+      if (updatedObjects[objectKey]) {
+        delete updatedObjects[objectKey];
+      }
+      return { objects: updatedObjects, selectedObject: null, selectedObjectType: null };
+    }),                                               
+
   setMaterial: (material) =>
     set((state) => {
       const selectedObjectKey = state.selectedObject;
@@ -40,12 +56,6 @@ const useSelectionStore = create((set, get) => ({
         return { roomMaterials: { ...state.roomMaterials, [selectedObjectKey]: material } };
       }
       return {};
-    }),
-
-  addObject: (objectKey, objectData) =>
-    set((state) => {
-      if (!objectKey || !objectData) return state;
-      return { objects: { ...state.objects, [objectKey]: objectData } };
     }),
 }));
 

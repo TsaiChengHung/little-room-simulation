@@ -16,6 +16,7 @@ export default function ObjectsManager() {
 
     const handleObjectSelect = (key, object) => {
         addObject(key, object);
+        console.log(key, object);
     };
 
     return (
