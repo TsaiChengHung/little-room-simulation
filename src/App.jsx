@@ -18,7 +18,6 @@ import { preloadAllObjects } from "./components/AssetManage/ObjectsPreload";
 import { useEffect } from "react";
 import CustomObjectControl from "./components/UI/CustomObjectControl";
 
-
 export const App = () => {
   // Preload objects when app starts
   useEffect(() => {
@@ -33,7 +32,7 @@ export const App = () => {
     environmentControls,
   } = DebugMenu();
   
-  const { clearSelectedObject, setCurrentScene, currentScene } = useSelectionStore();
+  const { clearSelectedObject, setCurrentScene, designMode } = useSelectionStore();
 
   const handleCanvasClick = () => {
     clearSelectedObject();
@@ -41,7 +40,7 @@ export const App = () => {
 
   return (
     <>
-      {currentScene === "roomSimulation" && (
+      {designMode === "roomSimulation" && (
         <>
           <Canvas
             shadows
@@ -74,7 +73,7 @@ export const App = () => {
         </>
       )}
 
-      {currentScene === "roomDesign" && (
+      {designMode === "roomDesign" && (
         <>
           <RoomDesign />
         </>

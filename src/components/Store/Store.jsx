@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 const useSelectionStore = create((set, get) => ({
   // general params
-  currentScene: "roomDesign", // roomDesign or roomSimulation
+  designMode: 'roomDesign', // 'roomDesign' or 'roomSimulation'
   
   // room simulation params
   selectedObject: null, // 儲存選中的物件名稱
@@ -21,7 +21,7 @@ const useSelectionStore = create((set, get) => ({
   },
 
   // general functions
-  setCurrentScene: (scene) => set({ currentScene: scene }),
+  setDesignMode: (mode) => set({ designMode: mode }),
   
   // room simulation functions
   setSelectedObject: (object, type) => set({ selectedObject: object, selectedObjectType: type }),

@@ -3,20 +3,22 @@ import ObjectsManager from "../AssetManage/ObjectsManager";
 import MaterialSelector from "../AssetManage/MaterialSelector";
 import ToggleButtons from "./ModeToggleButton";
 import "../../../src/style.css";
-
+import DesignModeToggle from './DesignModeToggle';
 import useSelectionStore from "../Store/Store";
 
 export default function InteractiveUI() {
-    const { currentScene } = useSelectionStore();
+    const { designMode } = useSelectionStore();
 
     return (
         <>
-            {currentScene === "roomDesign" && (
+            {designMode === "roomDesign" && (
                 <>
+                    <DesignModeToggle />
                 </>
             )}
-            {currentScene === "roomSimulation" && (
+            {designMode === "roomSimulation" && (
                 <>
+                    <DesignModeToggle />
                     <ObjectsManager />
                     <MaterialSelector />
                     <ToggleButtons />
