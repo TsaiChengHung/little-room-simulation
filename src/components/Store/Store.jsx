@@ -14,7 +14,11 @@ const useSelectionStore = create((set, get) => ({
   objects: {},
 
   // room design params
-  
+  roomDimensions: {
+    width: 1, // meters
+    depth: 2, // meters
+    wallThickness: 0.1, // meters
+  },
 
   // general functions
   setCurrentScene: (scene) => set({ currentScene: scene }),
@@ -73,8 +77,11 @@ const useSelectionStore = create((set, get) => ({
       return {};
     }),
 
-    // room design functions
-    
+  // room design functions
+  setRoomDimensions: (dimensions) =>
+    set((state) => ({
+      roomDimensions: { ...state.roomDimensions, ...dimensions }
+    })),
 }));
 
 export default useSelectionStore;

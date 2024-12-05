@@ -32,6 +32,7 @@ export const App = () => {
     showPerf,
     environmentControls,
   } = DebugMenu();
+  
   const { clearSelectedObject, setCurrentScene, currentScene } = useSelectionStore();
 
   const handleCanvasClick = () => {
@@ -40,46 +41,45 @@ export const App = () => {
 
   return (
     <>
-      <Canvas
-        shadows
-        gl={{ antialias: true }}
-        camera={{ position: [0, 1, 10], fov: 15, near: 1, far: 100 }}
-        onPointerMissed={handleCanvasClick}
-      >
+      {currentScene === "roomSimulation" && (
+        <>
+          <Canvas
+            shadows
+            gl={{ antialias: true }}
+            camera={{ position: [0, 1, 10], fov: 15, near: 1, far: 100 }}
+            onPointerMissed={handleCanvasClick}
+          >
 
-        {showPerf && <Perf position="top-left" />}
-        <OrbitControls makeDefault target={[0, 1, 0]} />
-        <ambientLight intensity={0.5} />
+            {showPerf && <Perf position="top-left" />}
+            <OrbitControls makeDefault target={[0, 1, 0]} />
+            <ambientLight intensity={0.5} />
 
-        <directionalLight
-          castShadow
-          position={[sunPositionX, sunPositionY, sunPositionZ]}
-          intensity={1.2}
-          shadow-mapSize={[2048, 2048]}
-        />
+            <directionalLight
+              castShadow
+              position={[sunPositionX, sunPositionY, sunPositionZ]}
+              intensity={1.2}
+              shadow-mapSize={[2048, 2048]}
+            />
 
-        <Environment
-          preset={environmentControls.preset}
-          background
-          backgroundIntensity={0.5}
-        />
-        <Effects />
-
-        {currentScene === "roomSimulation" && (
-          <>
+            <Environment
+              preset={environmentControls.preset}
+              background
+              backgroundIntensity={0.5}
+            />
+            <Effects />
             <Scene rotation={[0, Math.PI / 2, 0]} />
             <CustomObjectControl />
-          </>
-        )}
 
-        {currentScene === "roomDesign" && (
-          <>
-            <RoomDesign />
-            <CustomObjectControl />
-          </>
-        )}
+          </Canvas>
+        </>
+      )}
 
-      </Canvas>
+      {currentScene === "roomDesign" && (
+        <>
+          <RoomDesign />
+        </>
+      )}
+
       <InteractiveUI />
     </>
   );
