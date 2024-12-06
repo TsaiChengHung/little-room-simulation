@@ -5,7 +5,7 @@ import useSelectionStore from '../Store/Store';
 
 // App 主組件
 export default function MaterialSelector() {
-  const { selectedObject, selectedObjectType, clearSelectedObject, roomMaterials, setMaterialTexture, operationMode } = useSelectionStore();
+  const { selectedObject, selectedObjectType, clearSelectedObject, roomMaterials, setMaterialTexture, operationMode, paintMode } = useSelectionStore();
 
   const [selectedTexture, setSelectedTexture] = useState(null);
   const textureBuffers = useTextureLoader();
@@ -20,7 +20,7 @@ export default function MaterialSelector() {
 
   return (
     <>
-      {selectedObject && selectedObjectType === 'room' && operationMode === 'paint' && (
+      {selectedObject && selectedObjectType === 'room' && operationMode === 'paint' && paintMode === 'texture' && (
         <Box sx={{ pb: 8 }}>
 
           <Stack

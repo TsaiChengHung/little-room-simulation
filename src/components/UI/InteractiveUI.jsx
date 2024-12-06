@@ -5,6 +5,7 @@ import ToggleButtons from "./ModeToggleButton";
 import "../../../src/style.css";
 import DesignModeToggle from './DesignModeToggle';
 import useSelectionStore from "../Store/Store";
+import ColorPicker from "../AssetManage/ColorPicker";
 
 export default function InteractiveUI() {
     const { designMode } = useSelectionStore();
@@ -21,6 +22,7 @@ export default function InteractiveUI() {
                     <DesignModeToggle />
                     <ObjectsManager />
                     <TextureSelector />
+                    <ColorPicker />
                     <ToggleButtons />
                 </>
             )}

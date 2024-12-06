@@ -2,7 +2,7 @@ import * as React from 'react';
 import { FormatPaint, Chair, OpenWith, RotateLeft, OpenInFull } from '@mui/icons-material';
 import { Box, Stack, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import useSelectionStore from '../Store/Store';
-import { CloseRounded, Palette } from '@mui/icons-material';
+import { CloseRounded, Palette, TextureRounded } from '@mui/icons-material';
 
 const selectedButtonStyles = {
     '&.Mui-selected': {
@@ -19,14 +19,14 @@ const subButtonStyles = {
 }
 
 export default function ToggleButtons() {
-    const { removeObject, removeDefaultObject, selectedObject, selectedObjectType, setOperationMode, operationMode, transformMode, setTransformMode } = useSelectionStore();
-
-    const handleColorPalette = () => {
-        // Handle color palette toggle
-    };
+    const { removeObject, removeDefaultObject, selectedObject, selectedObjectType, setOperationMode, operationMode, transformMode, setTransformMode, setPaintMode, paintMode } = useSelectionStore();
 
     const handleMode = (event, newMode) => {
         setOperationMode(newMode);
+    };
+
+    const handlePaintMode = (event, newMode) => {
+            setPaintMode(newMode);
     };
 
     const handleTransform = (event, newMode) => {
@@ -59,21 +59,39 @@ export default function ToggleButtons() {
                 }}
             >
                 {operationMode === "paint" && (
-                <ToggleButton
-                    value="remove"
-                    aria-label="remove"
-                    onClick={handleRemove}
-                    sx={{
-                        ...selectedButtonStyles,
-                        padding: '4px',
-                        minWidth: '32px',
-                        minHeight: '32px'
-                    }}
-                >
-                    <CloseRounded sx={subButtonStyles} color='error' />
-                </ToggleButton>
+                    <ToggleButtonGroup
+                        value={paintMode}
+                        exclusive
+                        onChange={handlePaintMode}
+                        aria-label="paint mode"
+                        size='small'
+                        sx={{
+                            backgroundColor: "rgba(0, 0, 0, 0.1)",
+                            borderRadius: 2,
+                            '& .MuiToggleButton-root': {
+                                padding: '4px',
+                                minWidth: '32px',
+                                minHeight: '32px'
+                            }
+                        }}
+                    >
+                        <ToggleButton
+                            value="color"
+                            aria-label="color palette"
+                            sx={selectedButtonStyles}
+                        >
+                            <Palette sx={subButtonStyles} />
+                        </ToggleButton>
+                        <ToggleButton
+                            value="texture"
+                            aria-label="texture"
+                            sx={selectedButtonStyles}
+                        >
+                            <TextureRounded sx={subButtonStyles} />
+                        </ToggleButton>
+                    </ToggleButtonGroup>
                 )}
-                
+
                 <ToggleButtonGroup
                     value={operationMode}
                     exclusive

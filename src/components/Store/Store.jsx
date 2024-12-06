@@ -10,6 +10,7 @@ const useSelectionStore = create((set, get) => ({
   roomMaterials: {},
   operationMode: null,
   transformMode: "translate",
+  paintMode: "color",
   defaultObjects: {}, // 儲存所有場景物件的資訊
   objects: {},
 
@@ -31,6 +32,8 @@ const useSelectionStore = create((set, get) => ({
   setOperationMode: (mode) => set({ operationMode: mode, selectedObject: null, selectedObjectType: null }), //paint or object
 
   setTransformMode: (mode) => set({ transformMode: mode }),
+
+  setPaintMode: (mode) => set({ paintMode: mode }),
 
   addRoomMaterial: (key, material) => set((state) => ({ roomMaterials: { ...state.roomMaterials, [key]: material } })),
 
@@ -98,6 +101,13 @@ const useSelectionStore = create((set, get) => ({
       }
       return {};
     }),
+
+  setMaterialColor: (material, color) => {
+    const state = get();
+    if (state.roomMaterials[material]) {
+      state.roomMaterials[material].color.set(color);
+    }
+  },
 
   // room design functions
   setRoomDimensions: (dimensions) =>
