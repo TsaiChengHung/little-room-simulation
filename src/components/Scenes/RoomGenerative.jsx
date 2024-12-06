@@ -11,13 +11,25 @@ const materials = {
         metalness: 0.2,
         side: THREE.FrontSide
     }),
-    wallBack: new MeshPhysicalMaterial({
+    wallNorth: new MeshPhysicalMaterial({
         color: 0xffffff,
         roughness: 0.5,
         metalness: 0.1,
         side: THREE.BackSide
     }),
-    wallFront: new MeshPhysicalMaterial({
+    wallSouth: new MeshPhysicalMaterial({
+        color: 0xffffff,
+        roughness: 0.5,
+        metalness: 0.1,
+        side: THREE.BackSide
+    }),
+    wallEast: new MeshPhysicalMaterial({
+        color: 0xffffff,
+        roughness: 0.5,
+        metalness: 0.1,
+        side: THREE.FrontSide
+    }),
+    wallWest: new MeshPhysicalMaterial({
         color: 0xffffff,
         roughness: 0.5,
         metalness: 0.1,
@@ -56,10 +68,10 @@ const RoomGenerative = () => {
 
     useEffect(() => {
         addRoomMaterial('floor', materials.floor);
-        addRoomMaterial('north', materials.wallBack);
-        addRoomMaterial('south', materials.wallBack);
-        addRoomMaterial('east', materials.wallFront);
-        addRoomMaterial('west', materials.wallFront);
+        addRoomMaterial('north', materials.wallNorth);
+        addRoomMaterial('south', materials.wallSouth);
+        addRoomMaterial('east', materials.wallEast);
+        addRoomMaterial('west', materials.wallWest);
     }, [addRoomMaterial]);
 
     const handleClick = useCallback((e, wallId) => {

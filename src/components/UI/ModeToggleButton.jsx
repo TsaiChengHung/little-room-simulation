@@ -2,7 +2,7 @@ import * as React from 'react';
 import { FormatPaint, Chair, OpenWith, RotateLeft, OpenInFull } from '@mui/icons-material';
 import { Box, Stack, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import useSelectionStore from '../Store/Store';
-import { CloseRounded } from '@mui/icons-material';
+import { CloseRounded, Palette } from '@mui/icons-material';
 
 const selectedButtonStyles = {
     '&.Mui-selected': {
@@ -20,6 +20,10 @@ const subButtonStyles = {
 
 export default function ToggleButtons() {
     const { removeObject, removeDefaultObject, selectedObject, selectedObjectType, setOperationMode, operationMode, transformMode, setTransformMode } = useSelectionStore();
+
+    const handleColorPalette = () => {
+        // Handle color palette toggle
+    };
 
     const handleMode = (event, newMode) => {
         setOperationMode(newMode);
@@ -41,25 +45,42 @@ export default function ToggleButtons() {
 
     return (
         <Box sx={{ pb: 8 }}>
+
             <Stack
                 direction="row"
                 spacing={1}
                 sx={{
                     alignItems: "center",
                     position: "fixed",
-                    bottom: 0,
+                    bottom: 5,
                     left: "50%",
                     transform: "translateX(-50%)",
                     zIndex: 1000,
                 }}
             >
+                {operationMode === "paint" && (
+                <ToggleButton
+                    value="remove"
+                    aria-label="remove"
+                    onClick={handleRemove}
+                    sx={{
+                        ...selectedButtonStyles,
+                        padding: '4px',
+                        minWidth: '32px',
+                        minHeight: '32px'
+                    }}
+                >
+                    <CloseRounded sx={subButtonStyles} color='error' />
+                </ToggleButton>
+                )}
+                
                 <ToggleButtonGroup
                     value={operationMode}
                     exclusive
                     onChange={handleMode}
                     aria-label="text alignment"
-                    sx={{ 
-                        backgroundColor: "rgba(0, 0, 0, 0.1)", 
+                    sx={{
+                        backgroundColor: "rgba(0, 0, 0, 0.1)",
                         borderRadius: 2,
                         position: 'relative'
                     }}
