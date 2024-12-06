@@ -50,7 +50,18 @@ export const App = () => {
           >
 
             {showPerf && <Perf position="top-left" />}
-            <OrbitControls makeDefault target={[0, 1, 0]} />
+            <OrbitControls 
+              makeDefault 
+              target={[0, 1, 0]}
+              maxPolarAngle={Math.PI * 0.5} // Maximum ~135 degrees from top
+              enableZoom={true}
+              enablePan={true}
+              rotateSpeed={0.5}
+              zoomSpeed={0.7}
+              panSpeed={0.5}
+              dampingFactor={0.05}
+              enableDamping={true}
+            />
             <ambientLight intensity={0.5} />
 
             <directionalLight

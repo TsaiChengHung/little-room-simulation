@@ -1,29 +1,21 @@
 import React, { useState } from 'react';
 import { Box, Stack, Button } from '@mui/material';
-import { materialTextures, useMaterials } from './Materials';
+import { useTextureLoader } from './Textures';
 import useSelectionStore from '../Store/Store';
-
-
 
 // App 主組件
 export default function MaterialSelector() {
-  const { selectedObject, selectedObjectType, clearSelectedObject, setMaterial, operationMode } = useSelectionStore();
+  const { selectedObject, selectedObjectType, clearSelectedObject, roomMaterials, setMaterialTexture, operationMode } = useSelectionStore();
 
-  const [selectedMaterial, setSelectedMaterial] = useState(null);
-  const materials = useMaterials()
+  const [selectedTexture, setSelectedTexture] = useState(null);
+  const textureBuffers = useTextureLoader();
 
   // 點擊材質時觸發的功能
-  const handleMaterialClick = (materialName) => {
-    if (selectedMaterial === materialName) {
-      setSelectedMaterial(null);
-      setMaterial(null);
-    } else {
-      setSelectedMaterial(materialName);
-      setMaterial(materials[materialName]);
-      console.log(materials)
+  const handleMaterialClick = (textureName) => {
+      setSelectedTexture(textureName);
+      setMaterialTexture(roomMaterials[selectedObject], textureBuffers[textureName]);
       clearSelectedObject(); // 清除選中的物件以防止同時進行物件選擇和材質更改
-      console.log('Selected Material:', materialName);
-    }
+      console.log('Selected Material:', textureName);
   };
 
   return (
@@ -47,14 +39,14 @@ export default function MaterialSelector() {
               maxWidth: '100%',
             }}
           >
-            {Object.entries(materialTextures).map(([name, texture]) => (
+            {Object.keys(textureBuffers).map((textureName) => (
               <Button
                 variant='contained'
-                key={name}
-                onClick={() => handleMaterialClick(name)}
+                key={textureName}
+                onClick={() => handleMaterialClick(textureName)}
                 style={{
                   fontSize: '9pt',
-                  backgroundImage: `url(${texture.baseColor})`,
+                  backgroundImage: `url(${textureBuffers[textureName].baseColor.image.src})`,
                   backgroundPosition: 'center',
                   color: 'white',
                   width: '130px',
@@ -65,10 +57,11 @@ export default function MaterialSelector() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   textAlign: 'center', // 讓文字在按鈕中居中
-                  filter: selectedMaterial === name ? 'brightness(1)' : 'brightness(0.7)',
                   transition: 'all 0.1s',
                 }}
-              />
+              >
+                <span>{textureName}</span>
+              </Button>
             ))}
           </Stack>
 

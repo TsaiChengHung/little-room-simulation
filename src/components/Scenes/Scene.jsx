@@ -15,7 +15,7 @@ export default function Scene(props) {
         onPointerMissed={() => setSelectedObject(null)}
       >
         <CustomObjects />
-        <DefaultObjects />
+
         <RoomGenerative />
       </group>
     </>

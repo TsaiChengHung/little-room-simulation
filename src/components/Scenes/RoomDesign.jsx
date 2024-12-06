@@ -6,16 +6,11 @@ import useSelectionStore from '../Store/Store';
 const RoomDesign = () => {
   const { roomDimensions, setRoomDimensions } = useSelectionStore();
   const [areaSize, setAreaSize] = useState(roomDimensions.width * roomDimensions.depth);
-  const [interiorArea, setInteriorArea] = useState(
-    (roomDimensions.width - 2 * roomDimensions.wallThickness) * 
-    (roomDimensions.depth - 2 * roomDimensions.wallThickness)
-  );
   
   const [stageSize, setStageSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight
   });
-  const [padding] = useState(70);
 
   useEffect(() => {
     const handleResize = () => {
@@ -30,13 +25,9 @@ const RoomDesign = () => {
   }, []);
 
   useEffect(() => {
-    // Update areas whenever dimensions change
+    // Update area whenever dimensions change
     setAreaSize(roomDimensions.width * roomDimensions.depth);
-    setInteriorArea(
-      (roomDimensions.width - 2 * roomDimensions.wallThickness) * 
-      (roomDimensions.depth - 2 * roomDimensions.wallThickness)
-    );
-  }, [roomDimensions.width, roomDimensions.depth, roomDimensions.wallThickness]);
+  }, [roomDimensions.width, roomDimensions.depth]);
 
   const handleDimensionChange = (dimension) => (event) => {
     const value = parseFloat(event.target.value) || 0;
@@ -47,81 +38,21 @@ const RoomDesign = () => {
     // Convert meters to mm for internal calculations
     const widthMm = frameWidth * 1000;
     const depthMm = frameDepth * 1000;
-    const wallThicknessMm = roomDimensions.wallThickness * 1000;
     
     return (
       <Group>
+        {/* Room outline */}
         <Line
-          points={[0, 0, widthMm, 0, widthMm - padding, padding, padding, padding]}
-          fill="white"
-          closed
+          points={[0, 0, widthMm, 0, widthMm, depthMm, 0, depthMm, 0, 0]}
           stroke="black"
-          strokeWidth={1}
-        />
-        <Line
-          points={[0, 0, padding, padding, padding, depthMm - padding, 0, depthMm]}
-          fill="white"
-          closed
-          stroke="black"
-          strokeWidth={1}
-        />
-        <Line
-          points={[0, depthMm, padding, depthMm - padding, widthMm - padding, depthMm - padding, widthMm, depthMm]}
-          fill="white"
-          closed
-          stroke="black"
-          strokeWidth={1}
-        />
-        <Line
-          points={[widthMm, 0, widthMm, depthMm, widthMm - padding, depthMm - padding, widthMm - padding, padding]}
-          fill="white"
-          closed
-          stroke="black"
-          strokeWidth={1}
+          strokeWidth={3}
         />
         {/* Room interior */}
         <Rect
-          x={padding}
-          y={padding}
-          width={widthMm - padding * 2}
-          height={depthMm - padding * 2}
+          width={widthMm}
+          height={depthMm}
           fill="lightgrey"
         />
-        {/* Walls */}
-        <Group>
-          {/* Top wall */}
-          <Rect
-            x={padding}
-            y={padding}
-            width={widthMm - padding * 2}
-            height={wallThicknessMm}
-            fill="#8B8B8B"
-          />
-          {/* Bottom wall */}
-          <Rect
-            x={padding}
-            y={depthMm - padding - wallThicknessMm}
-            width={widthMm - padding * 2}
-            height={wallThicknessMm}
-            fill="#8B8B8B"
-          />
-          {/* Left wall */}
-          <Rect
-            x={padding}
-            y={padding}
-            width={wallThicknessMm}
-            height={depthMm - padding * 2}
-            fill="#8B8B8B"
-          />
-          {/* Right wall */}
-          <Rect
-            x={widthMm - padding - wallThicknessMm}
-            y={padding}
-            width={wallThicknessMm}
-            height={depthMm - padding * 2}
-            fill="#8B8B8B"
-          />
-        </Group>
       </Group>
     );
   };
@@ -203,11 +134,7 @@ const RoomDesign = () => {
         {/* Area labels */}
         <Label x={frameWidth / 2 - 40} y={frameDepth / 2 - 20}>
           <Tag fill="white" stroke="grey" />
-          <Text text={`Total: ${areaSize.toFixed(2)}m²`} padding={2} fill="black" />
-        </Label>
-        <Label x={frameWidth / 2 - 40} y={frameDepth / 2 + 20}>
-          <Tag fill="white" stroke="grey" />
-          <Text text={`Interior: ${interiorArea.toFixed(2)}m²`} padding={2} fill="black" />
+          <Text text={`Area: ${areaSize.toFixed(2)}m²`} padding={2} fill="black" />
         </Label>
       </Group>
     );
@@ -259,23 +186,8 @@ const RoomDesign = () => {
             step: 0.1
           }}
         />
-        <TextField
-          type="number"
-          label="Wall Thickness (m)"
-          value={roomDimensions.wallThickness}
-          onChange={handleDimensionChange('wallThickness')}
-          size="small"
-          inputProps={{ 
-            min: 0,
-            step: 0.01,
-            max: Math.min(roomDimensions.width / 2, roomDimensions.depth / 2)
-          }}
-        />
         <Typography variant="body2" color="text.secondary">
-          Total Area: {areaSize.toFixed(2)}m²
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Interior Area: {interiorArea.toFixed(2)}m²
+          Area: {areaSize.toFixed(2)}m²
         </Typography>
       </Stack>
       

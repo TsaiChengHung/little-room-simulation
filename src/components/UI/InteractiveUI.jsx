@@ -1,6 +1,6 @@
 import React from "react";
 import ObjectsManager from "../AssetManage/ObjectsManager";
-import MaterialSelector from "../AssetManage/MaterialSelector";
+import TextureSelector from "../AssetManage/TextureSelector";
 import ToggleButtons from "./ModeToggleButton";
 import "../../../src/style.css";
 import DesignModeToggle from './DesignModeToggle';
@@ -20,7 +20,7 @@ export default function InteractiveUI() {
                 <>
                     <DesignModeToggle />
                     <ObjectsManager />
-                    <MaterialSelector />
+                    <TextureSelector />
                     <ToggleButtons />
                 </>
             )}

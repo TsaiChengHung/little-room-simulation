@@ -26,6 +26,8 @@ const DesignModeToggle = () => {
         '& .MuiToggleButton-root': {
           padding: '4px 10px',
         },
+        backgroundColor: "rgba(1, 0, 0, 0.2)", 
+        borderRadius: 2,
       }}
     >
       <ToggleButton value="roomDesign" aria-label="room design">

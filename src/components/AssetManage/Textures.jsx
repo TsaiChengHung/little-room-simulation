@@ -15,7 +15,7 @@ export const materialTextures = {
     aoMapIntensity: 1,
     roughness: 1,
     metalness: 0,
-    ratio: [0.6,0.6],
+    ratio: [1,1],
   },
   concrete: {
     baseColor:
@@ -65,8 +65,8 @@ export const materialTextures = {
     aoMap: "/textures/checkerBoardFabric/CarpetJuteChecker001_AO_2K.jpg",
     aoMapIntensity: 1,
     roughness: 1,
-    metalness: 0.1,
-    ratio: [0.3,0.3],
+    metalness: 0.5,
+    ratio: [1,1],
   },
   rock: {
     baseColor: "/textures/rock/Rock030_4K-PNG_Color.png",
@@ -75,7 +75,7 @@ export const materialTextures = {
     aoMapIntensity: 1,
     roughness: 1,
     metalness: 0.2,
-    ratio: [0.5,0.5],
+    ratio: [1,1],
   },
   woodFloor: {
     baseColor: "/textures/woodFloorWonrn/WoodFlooringWorn002_COL_2K.jpg",
@@ -84,7 +84,7 @@ export const materialTextures = {
     aoMapIntensity: 1,
     roughness: 1,
     metalness: 0.2,
-    ratio: [0.3,0.3],
+    ratio: [1,1],
   },
   woodPlanksDark: {
     baseColor:
@@ -94,7 +94,7 @@ export const materialTextures = {
     aoMapIntensity: 1,
     roughness: 1,
     metalness: 0.2,
-    ratio: [0.1,0.1],
+    ratio: [1,1],
   },
 };
 
@@ -109,36 +109,27 @@ const loadTexture = (path, ratio) => {
   return texture;
 };
 
-// Create and configure materials dynamically from materialTextures
-export const useMaterials = () => {
-  const materials = useMemo(() => {
+// Modified texture loading system
+export const useTextureLoader = () => {
+  const textureBuffers = useMemo(() => {
     return Object.fromEntries(
       Object.entries(materialTextures).map(([key, textureData]) => {
         const ratio = textureData.ratio ? textureData.ratio : [0.75, 0.75];
-        const material = new THREE.MeshPhysicalMaterial({
-          map: loadTexture(textureData.baseColor, ratio),
-          normalMap: textureData.normalMap
-            ? loadTexture(textureData.normalMap, ratio)
-            : null,
-          roughnessMap: textureData.roughnessMap
-            ? loadTexture(textureData.roughnessMap, ratio)
-            : null,
-          aoMap: textureData.aoMap
-            ? loadTexture(textureData.aoMap, ratio)
-            : null,
-          bumpMap: textureData.bumpMap
-            ? loadTexture(textureData.bumpMap, ratio)
-            : null,
-          aoMapIntensity: textureData.aoMapIntensity
-            ? textureData.aoMapIntensity
-            : null,
-          roughness: textureData.roughness ? textureData.roughness : null,
-          metalness: textureData.metalness ? textureData.metalness : null,
-        });
-        return [key, material];
+        const textures = {
+          baseColor: loadTexture(textureData.baseColor, ratio),
+          normalMap: textureData.normalMap ? loadTexture(textureData.normalMap, ratio) : null,
+          roughnessMap: textureData.roughnessMap ? loadTexture(textureData.roughnessMap, ratio) : null,
+          aoMap: textureData.aoMap ? loadTexture(textureData.aoMap, ratio) : null,
+          bumpMap: textureData.bumpMap ? loadTexture(textureData.bumpMap, ratio) : null,
+          // Store material properties
+          aoMapIntensity: textureData.aoMapIntensity || null,
+          roughness: textureData.roughness || null,
+          metalness: textureData.metalness || null,
+        };
+        return [key, textures];
       })
     );
   }, []); // Empty dependency array ensures this only runs once
 
-  return materials;
+  return textureBuffers;
 };
