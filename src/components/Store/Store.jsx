@@ -16,10 +16,13 @@ const useSelectionStore = create((set, get) => ({
 
   // room design params
   roomDimensions: {
-    width: 1, // meters
-    depth: 2, // meters
+    width: 4, // meters
+    depth: 3, // meters
     wallThickness: 0.1, // meters
   },
+
+  // sun position params
+  sunPosition: 0.5, // Default to noon
 
   // general functions
   setDesignMode: (mode) => set({ designMode: mode }),
@@ -108,6 +111,8 @@ const useSelectionStore = create((set, get) => ({
       state.roomMaterials[material].color.set(color);
     }
   },
+
+  setSunPosition: (position) => set({ sunPosition: position }),
 
   // room design functions
   setRoomDimensions: (dimensions) =>

@@ -19,15 +19,11 @@ const DesignModeToggle = () => {
       onChange={handleModeChange}
       aria-label="design mode"
       sx={{
-        position: 'fixed',
-        top: '1%',
-        left: '1%',
-        backgroundColor: 'white',
+        backgroundColor: "rgba(1, 0, 0, 0.2)", 
+        borderRadius: 2,
         '& .MuiToggleButton-root': {
           padding: '4px 10px',
         },
-        backgroundColor: "rgba(1, 0, 0, 0.2)", 
-        borderRadius: 2,
       }}
     >
       <ToggleButton value="roomDesign" aria-label="room design">

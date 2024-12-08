@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect, useCallback } from 'react';
 import useSelectionStore from '../Store/Store';
 import * as THREE from 'three';
-import { MeshPhysicalMaterial, Clock } from 'three';
+import { MeshPhysicalMaterial, Clock, MeshStandardMaterial } from 'three';
 
 // Define materials for all meshes
 const materials = {
@@ -34,7 +34,7 @@ const materials = {
         roughness: 0.5,
         metalness: 0.1,
         side: THREE.FrontSide
-    })
+    }),
 };
 
 // UV-scaled plane geometry component
@@ -66,6 +66,18 @@ const RoomGenerative = () => {
     const { setSelectedObject, selectedObject, roomMaterials, addRoomMaterial, operationMode, selectedObjectType } = useSelectionStore();
     const clock = useMemo(() => new Clock(), []);
 
+    // Create hover material
+    const hoverMaterial = useMemo(() => {
+        return new MeshStandardMaterial({ 
+            color: "yellow",
+            emissive: "yellow",
+            emissiveIntensity: 0.5,
+            transparent: true,
+            opacity: 0.8,
+            side: THREE.DoubleSide
+        });
+    }, []);
+
     useEffect(() => {
         addRoomMaterial('floor', materials.floor);
         addRoomMaterial('north', materials.wallNorth);
@@ -83,6 +95,13 @@ const RoomGenerative = () => {
         }
     }, [selectedObject, setSelectedObject, selectedObjectType]);
 
+    const setHoverMaterial = useCallback((e) => {
+        e.stopPropagation(); // 防止事件冒泡到父級 group
+        if (operationMode === 'paint') {
+            e.object.material = hoverMaterial;
+        }
+    }, [operationMode, hoverMaterial]);
+
     return (
         <group>
             {/* Floor */}
@@ -92,8 +111,17 @@ const RoomGenerative = () => {
                 rotation={[-Math.PI / 2, 0, 0]}
                 material={roomMaterials.floor}
                 onClick={(e) => handleClick(e, 'floor')}
+                onPointerOver={(e) => {setHoverMaterial(e)}}
+                onPointerOut={(e) => {
+                    e.stopPropagation();
+                    e.object.material = roomMaterials.floor;
+                }}
             >
                 <UVScaledPlane width={roomDimensions.width} height={roomDimensions.depth} />
+            </mesh>
+            <mesh position={[0, -0.051, 0]}>
+                <boxGeometry args={[roomDimensions.width, 0.1, roomDimensions.depth]} />
+                <meshPhysicalMaterial color="darkgrey" />
             </mesh>
 
             {/* North Wall */}
@@ -105,7 +133,11 @@ const RoomGenerative = () => {
                 rotation={[0, Math.PI, 0]}
                 material={roomMaterials.north}
                 onClick={(e) => handleClick(e, 'north')}
-
+                onPointerOver={(e) => {setHoverMaterial(e)}}
+                onPointerOut={(e) => {
+                    e.stopPropagation();
+                    e.object.material = roomMaterials.north;
+                }}
             >
                 <UVScaledPlane width={roomDimensions.width} height={3} />
             </mesh>
@@ -118,6 +150,11 @@ const RoomGenerative = () => {
                 position={[0, 1.5, roomDimensions.depth / 2]}
                 material={roomMaterials.south}
                 onClick={(e) => handleClick(e, 'south')}
+                onPointerOver={(e) => {setHoverMaterial(e)}}
+                onPointerOut={(e) => {
+                    e.stopPropagation();
+                    e.object.material = roomMaterials.south;
+                }}
             >
                 <UVScaledPlane width={roomDimensions.width} height={3} />
             </mesh>
@@ -130,6 +167,11 @@ const RoomGenerative = () => {
                 rotation={[0, -Math.PI / 2, 0]}
                 material={roomMaterials.east}
                 onClick={(e) => handleClick(e, 'east')}
+                onPointerOver={(e) => {setHoverMaterial(e)}}
+                onPointerOut={(e) => {
+                    e.stopPropagation();
+                    e.object.material = roomMaterials.east;
+                }}
             >
                 <UVScaledPlane width={roomDimensions.depth} height={3} />
             </mesh>
@@ -142,6 +184,11 @@ const RoomGenerative = () => {
                 rotation={[0, Math.PI / 2, 0]}
                 material={roomMaterials.west}
                 onClick={(e) => handleClick(e, 'west')}
+                onPointerOver={(e) => {setHoverMaterial(e)}}
+                onPointerOut={(e) => {
+                    e.stopPropagation();
+                    e.object.material = roomMaterials.west;
+                }}
             >
                 <UVScaledPlane width={roomDimensions.depth} height={3} />
             </mesh>

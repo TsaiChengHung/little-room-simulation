@@ -14,6 +14,7 @@ export default function CustomObjects() {
                             setSelectedObject(key, 'customObject'); // 更新選中的物件
                             console.log(object);
                         }} />
+
                     )
                 })
             }

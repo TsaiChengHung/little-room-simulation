@@ -26,7 +26,7 @@ export default function ToggleButtons() {
     };
 
     const handlePaintMode = (event, newMode) => {
-            setPaintMode(newMode);
+        setPaintMode(newMode);
     };
 
     const handleTransform = (event, newMode) => {
@@ -45,17 +45,14 @@ export default function ToggleButtons() {
 
     return (
         <Box sx={{ pb: 8 }}>
-
             <Stack
                 direction="row"
                 spacing={1}
                 sx={{
                     alignItems: "center",
-                    position: "fixed",
-                    bottom: 5,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    zIndex: 1000,
+                    backgroundColor: "rgba(0, 0, 0, 0.1)",
+                    borderRadius: 2,
+                    p: 1
                 }}
             >
                 {operationMode === "paint" && (
@@ -100,13 +97,25 @@ export default function ToggleButtons() {
                     sx={{
                         backgroundColor: "rgba(0, 0, 0, 0.1)",
                         borderRadius: 2,
-                        position: 'relative'
+                        '& .MuiToggleButton-root': {
+                            padding: '4px',
+                            minWidth: '32px',
+                            minHeight: '32px'
+                        }
                     }}
                 >
-                    <ToggleButton value="paint" aria-label="material paint" sx={selectedButtonStyles}>
+                    <ToggleButton
+                        value="paint"
+                        aria-label="material paint"
+                        sx={selectedButtonStyles}
+                    >
                         <FormatPaint sx={subButtonStyles} />
                     </ToggleButton>
-                    <ToggleButton value="object" aria-label="item decoration" sx={selectedButtonStyles}>
+                    <ToggleButton
+                        value="object"
+                        aria-label="item decoration"
+                        sx={selectedButtonStyles}
+                    >
                         <Chair sx={subButtonStyles} />
                     </ToggleButton>
                 </ToggleButtonGroup>
@@ -115,13 +124,6 @@ export default function ToggleButtons() {
                     <Stack
                         direction="row"
                         spacing={0.5}
-                        sx={{
-                            position: 'absolute',
-                            left: '100%',
-                            marginLeft: '8px',
-                            top: '50%',
-                            transform: 'translateY(-50%)'
-                        }}
                     >
                         <ToggleButtonGroup
                             value={transformMode}

@@ -11,12 +11,12 @@ import {
 } from "@react-three/postprocessing";
 import Scene from "./components/Scenes/Scene";
 import RoomDesign from "./components/Scenes/RoomDesign";
-import { DebugMenu } from "./components/UI/DebugMenu";
 import InteractiveUI from "./components/UI/InteractiveUI";
 import useSelectionStore from "./components/Store/Store";
 import { preloadAllObjects } from "./components/AssetManage/ObjectsPreload";
 import { useEffect } from "react";
 import CustomObjectControl from "./components/UI/CustomObjectControl";
+import SunPosition from "./components/SFX/SunPosition";
 
 export const App = () => {
   // Preload objects when app starts
@@ -24,13 +24,6 @@ export const App = () => {
     preloadAllObjects();
   }, []);
 
-  const {
-    sunPositionX,
-    sunPositionY,
-    sunPositionZ,
-    showPerf,
-    environmentControls,
-  } = DebugMenu();
   
   const { clearSelectedObject, setCurrentScene, designMode } = useSelectionStore();
 
@@ -41,15 +34,19 @@ export const App = () => {
   return (
     <>
       {designMode === "roomSimulation" && (
-        <>
+        <div style={{ position: 'fixed', width: '100%', height: '100%', zIndex: 0 }}>
           <Canvas
             shadows
             gl={{ antialias: true }}
             camera={{ position: [0, 1, 10], fov: 15, near: 1, far: 100 }}
             onPointerMissed={handleCanvasClick}
           >
-
-            {showPerf && <Perf position="top-left" />}
+            <Environment
+              preset={"dawn"}
+              environmentIntensity={0.3}
+            />
+            
+            {/* <Perf position="top-right" /> */}
             <OrbitControls 
               makeDefault 
               target={[0, 1, 0]}
@@ -62,32 +59,19 @@ export const App = () => {
               dampingFactor={0.05}
               enableDamping={true}
             />
-            <ambientLight intensity={0.5} />
 
-            <directionalLight
-              castShadow
-              position={[sunPositionX, sunPositionY, sunPositionZ]}
-              intensity={1.2}
-              shadow-mapSize={[2048, 2048]}
-            />
-
-            <Environment
-              preset={environmentControls.preset}
-              background
-              backgroundIntensity={0.5}
-            />
             <Effects />
             <Scene rotation={[0, Math.PI / 2, 0]} />
             <CustomObjectControl />
-
+            <SunPosition/>
           </Canvas>
-        </>
+        </div>
       )}
 
       {designMode === "roomDesign" && (
-        <>
+        <div style={{ position: 'fixed', width: '100%', height: '100%', zIndex: 0 }}>
           <RoomDesign />
-        </>
+        </div>
       )}
 
       <InteractiveUI />

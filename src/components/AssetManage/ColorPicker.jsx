@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Stack } from '@mui/material';
+import { Stack } from '@mui/material';
 import { HexColorPicker } from 'react-colorful';
 import useSelectionStore from '../Store/Store';
 
@@ -15,24 +15,17 @@ export default function ColorPicker() {
     return (
         <>
             {selectedObject && selectedObjectType === 'room' && operationMode === 'paint' && paintMode === 'color' && (
-                <Box sx={{ pb: 8 }}>
-                    <Stack
-                        spacing={2}
-                        sx={{
-                            position: 'fixed',
-                            bottom: 80,
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            backgroundColor: 'white',
-                            borderRadius: 2,
-                            p: 2,
-                            boxShadow: 3,
-                            zIndex: 1000,
-                        }}
-                    >
-                        <HexColorPicker onChange={handleColorChange} />
-                    </Stack>
-                </Box>
+                <Stack
+                    spacing={2}
+                    sx={{
+                        backgroundColor: "rgba(0, 0, 0, 0.2)",
+                        borderRadius: 2,
+                        p: 2,
+                        boxShadow: 3,
+                    }}
+                >
+                    <HexColorPicker onChange={handleColorChange} />
+                </Stack>
             )}
         </>
     );

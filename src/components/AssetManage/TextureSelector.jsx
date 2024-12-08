@@ -21,51 +21,39 @@ export default function MaterialSelector() {
   return (
     <>
       {selectedObject && selectedObjectType === 'room' && operationMode === 'paint' && paintMode === 'texture' && (
-        <Box sx={{ pb: 8 }}>
-
-          <Stack
-            direction="row"
-            spacing={0.5}
-            sx={{
-              alignItems: 'center',
-              position: 'fixed',
-              bottom: 50,
-              left: 0,
-              right: 0,
-              zIndex: 1000,
-              padding: 1,
-              overflowX: 'auto', // 使按鈕在寬度超過螢幕時可以滑動
-              whiteSpace: 'nowrap',
-              maxWidth: '100%',
-            }}
-          >
-            {Object.keys(textureBuffers).map((textureName) => (
-              <Button
-                variant='contained'
-                key={textureName}
-                onClick={() => handleMaterialClick(textureName)}
-                style={{
-                  fontSize: '9pt',
-                  backgroundImage: `url(${textureBuffers[textureName].baseColor.image.src})`,
-                  backgroundPosition: 'center',
-                  color: 'white',
-                  width: '130px',
-                  height: '50px',
-                  overflow: 'hidden', // 隱藏超出按鈕的內容
-                  whiteSpace: 'normal', // 允許文字換行
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center', // 讓文字在按鈕中居中
-                  transition: 'all 0.1s',
-                }}
-              >
-                <span>{textureName}</span>
-              </Button>
-            ))}
-          </Stack>
-
-        </Box>
+        <Stack
+          direction="row"
+          spacing={0.5}
+          sx={{
+            alignItems: 'center',
+            padding: 1,
+            overflowX: 'auto',
+            whiteSpace: 'nowrap',
+            maxWidth: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            borderRadius: 1
+          }}
+        >
+          {Object.keys(textureBuffers).map((textureName) => (
+            <Button
+              variant='contained'
+              key={textureName}
+              onClick={() => handleMaterialClick(textureName)}
+              style={{
+                fontSize: '9pt',
+                backgroundImage: `url(${textureBuffers[textureName].baseColor.image.src})`,
+                backgroundPosition: 'center',
+                color: 'white',
+                minWidth: '80px',
+                height: '80px',
+                backgroundSize: 'cover',
+                margin: '4px'
+              }}
+            >
+              {textureName}
+            </Button>
+          ))}
+        </Stack>
       )}
     </>
   );

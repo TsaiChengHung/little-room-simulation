@@ -24,10 +24,6 @@ export default function ObjectsManager() {
             {operationMode === 'object' && (
                 <Box
                     sx={{
-                        position: 'fixed',
-                        right: 0,
-                        top: 0,
-                        height: '100vh',
                         width: '15vw',
                         backgroundColor: 'rgba(0, 0, 0, 0.1)',
                         backdropFilter: 'blur(3px)',
@@ -49,8 +45,8 @@ export default function ObjectsManager() {
                     <List>
                         {Object.entries(objects).map(([key, object]) => (
                             <ListItem key={key} disablePadding>
-                                <ListItemButton>
-                                    <ListItemText primary={key} onClick={() => handleObjectSelect(key, object)} />
+                                <ListItemButton onClick={() => handleObjectSelect(key, object)}>
+                                    <ListItemText primary={key} />
                                 </ListItemButton>
                             </ListItem>
                         ))}
