@@ -17,24 +17,25 @@ export default function InteractiveUI() {
     }, [designMode]);
 
     return (
-        <Box sx={{ 
-            position: 'fixed', 
-            width: '100%', 
-            height: '100%', 
+        <Box sx={{
+            position: 'fixed',
+            width: '100%',
+            height: '100%',
             pointerEvents: 'none',
             '& > *': { pointerEvents: 'auto' },
             zIndex: 1000
         }}>
             {/* Top Left - Design Mode Toggle and Sun Position */}
-            <Stack 
-                spacing={2} 
-                sx={{ 
-                    position: 'absolute', 
-                    top: 20, 
-                    left: 20 
+            <Stack
+                spacing={2}
+                sx={{
+                    position: 'absolute',
+                    top: 20,
+                    left: 20
                 }}
             >
                 <DesignModeToggle />
+
                 {designMode === "roomSimulation" && (
                     <SunPositionSlider />
                 )}
@@ -43,10 +44,10 @@ export default function InteractiveUI() {
             {designMode === "roomSimulation" && (
                 <>
                     {/* Right Side - Objects Manager */}
-                    <Box sx={{ 
-                        position: 'absolute', 
-                        right: 20, 
-                        top: '50%', 
+                    <Box sx={{
+                        position: 'absolute',
+                        right: 20,
+                        top: '20%',
                         transform: 'translateY(-50%)',
                         maxHeight: '80vh',
                         overflowY: 'auto'
@@ -55,30 +56,30 @@ export default function InteractiveUI() {
                     </Box>
 
                     {/* Bottom Center - Color Picker and Toggle Buttons */}
-                    <Box sx={{ 
-                        position: 'absolute', 
-                        bottom: 20, 
-                        left: '50%', 
+                    <Box sx={{
+                        position: 'absolute',
+                        bottom: "0px",
+                        left: '50%',
                         transform: 'translateX(-50%)',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        gap: 2
+                        gap: 2,
+
                     }}>
                         {/* Color Picker slightly above Toggle Buttons */}
-                        <Box>
+                        <div>
                             <ColorPicker />
-                        </Box>
-                        
+                        </div>
                         {/* Texture Selector */}
-                        <Box sx={{ mb: 2 }}>
+                        <div>
                             <TextureSelector />
-                        </Box>
-
+                        </div>
                         {/* Toggle Buttons at the bottom */}
-                        <Box>
-                            <ToggleButtons />
-                        </Box>
+                        <div>
+                            <ToggleButtons position="bottom" />
+                        </div>
+
                     </Box>
                 </>
             )}

@@ -23,17 +23,17 @@ function SunPositionSlider() {
   return (
     <Stack 
       direction="row" 
-      spacing={3} 
+      spacing={1} 
       alignItems="center"
       sx={{
         background: 'rgba(0,0,0,0.5)',
-        padding: '10px 20px',
+        padding: '3px 10px',
         borderRadius: '8px',
       }}
     >
       <WbSunnyIcon sx={{ 
         color: '#fff',
-        fontSize: '1.5rem'
+        fontSize: '1.2rem'
       }} />
       <StyledSlider
         value={sunPosition}
