@@ -15,7 +15,6 @@ const CustomObjectControl = () => {
   const isEnabled = (selectedObjectType === "customObject" || selectedObjectType === "defaultObject") && (operationMode === "object");
 
   const targetObject = getObject(defaultObjects, objects, selectedObject, selectedObjectType);
-
   if (!isEnabled || !targetObject) return null;
 
   return (

@@ -2,7 +2,6 @@ import { useEffect, useCallback, useMemo } from "react";
 import { useGLTF } from "@react-three/drei";
 import { MeshStandardMaterial, Clock } from "three";
 import useSelectionStore from '../Store/Store';
-import { preload } from "react-dom";
 
 const Room = (props) => {
   const { nodes } = useGLTF('/cozy_home_structure.glb');
