@@ -24,7 +24,7 @@ export default function ObjectsManager() {
             {operationMode === 'object' && (
                 <Box
                     sx={{
-                        width: '30vw',
+                        minWidth: "15vw",
                         backgroundColor: 'rgba(0, 0, 0, 0.1)',
                         borderRadius: 2,
                         backdropFilter: 'blur(3px)',
