@@ -21,18 +21,18 @@ const DesignModeToggle = () => {
       sx={{
         backgroundColor: "rgba(1, 0, 0, 0.2)", 
         borderRadius: 2,
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
         '& .MuiToggleButton-root': {
-          padding: '4px 10px',
+          padding: '4px 15px',
         },
       }}
     >
       <ToggleButton value="roomDesign" aria-label="room design">
         <Architecture sx={{ mr: 1 }} />
-        Design
       </ToggleButton>
       <ToggleButton value="roomSimulation" aria-label="room simulation">
         <ViewInAr sx={{ mr: 1 }} />
-        Simulation
       </ToggleButton>
     </ToggleButtonGroup>
   );

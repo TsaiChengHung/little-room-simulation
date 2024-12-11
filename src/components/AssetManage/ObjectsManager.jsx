@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { cachedObjects } from "./ObjectsPreload";
-import { Box, List, ListItem, ListItemButton, ListItemText, Typography } from "@mui/material";
+import { Box, List, ListItem, ListItemButton, ListItemText, Typography, Card, CardContent, CardMedia, CardActionArea, Button, Stack } from "@mui/material";
 import useSelectionStore from "../Store/Store";
 
 export default function ObjectsManager() {
@@ -24,33 +24,38 @@ export default function ObjectsManager() {
             {operationMode === 'object' && (
                 <Box
                     sx={{
-                        width: '15vw',
+                        width: '30vw',
                         backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                        borderRadius: 2,
                         backdropFilter: 'blur(3px)',
-                        borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
                         overflowY: 'auto',
+                        maxHeight: '80vh',
+                        padding: 1
                     }}
                 >
-                    <Box
-                        sx={{
-                            p: 2,
-                            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                            backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                        }}
-                    >
-                        <Typography variant="subtitle2" color="text.secondary">
-                            Click an item below to add it to your scene
-                        </Typography>
-                    </Box>
-                    <List>
+                    <Stack direction={'column'}
+                        spacing={1}>
                         {Object.entries(objects).map(([key, object]) => (
-                            <ListItem key={key} disablePadding>
-                                <ListItemButton onClick={() => handleObjectSelect(key, object)}>
-                                    <ListItemText primary={key} />
-                                </ListItemButton>
-                            </ListItem>
+                            <Card key={key} sx={{ maxWidth: 345, backgroundColor: 'rgba(0, 0, 0, 0.1)' }} >
+                                <CardActionArea onClick={() => handleObjectSelect(key, object)}>
+                                    <CardMedia
+                                        component="img"
+                                        image={object.info.thumbnailUrl}
+                                        alt="Item Image"
+                                    />
+                                    <CardContent sx={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
+                                        <Typography sx ={{ color: 'white' }} gutterBottom variant="h6" component="div">
+                                            {object.info.name}
+                                        </Typography>
+                                        <Typography sx={{ color: 'darkgray' }} variant="body2" >
+                                            {object.info.description}
+                                        </Typography>
+                                    </CardContent>
+                                </CardActionArea>
+                            </Card>
+
                         ))}
-                    </List>
+                    </Stack>
                 </Box>
 
             )}
