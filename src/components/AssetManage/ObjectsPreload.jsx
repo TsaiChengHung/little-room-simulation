@@ -8,21 +8,21 @@ const resources = [
         description: 'Description for Arm Chair',
         price: 100,
         modelFileGLB: '/objects/arm_chair_t.glb',
-        thumbnailUrl: '/thumbnails/arm_chair_thumb.png',
+        thumbnailUrl: '/objects/thumbnails/arm_chair_t_thumbnail.png',
     },
     {
         name: 'Bookcase',
         description: 'Description for Bookcase',
         price: 200,
         modelFileGLB: '/objects/bookcase_t.glb',
-        thumbnailUrl: '/thumbnails/bookcase_thumb.png',
+        thumbnailUrl: '/objects/thumbnails/bookcase_t_thumbnail.png',  
     },
     {
         name: 'Coffee Table',
         description: 'Description for Coffee Table',
         price: 150,
         modelFileGLB: '/objects/coffee_table_t.glb',
-        thumbnailUrl: '/thumbnails/coffee_table_thumb.png',
+        thumbnailUrl: '/objects/thumbnails/coffee_table_t_thumbnail.png',
     }, 
 ]
 

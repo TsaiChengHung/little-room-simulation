@@ -9,7 +9,7 @@ export default function CustomObjects() {
                 Object.keys(objects).map((key, index) => {
                     const object = objects[key].object
                     return (
-                        <primitive key={key} object={object} onClick={(e) => {
+                        <primitive key={key} object={object} position={object.position} onClick={(e) => {
                             e.stopPropagation(); // 阻止事件冒泡
                             setSelectedObject(key, 'customObject'); // 更新選中的物件
                             console.log(object);

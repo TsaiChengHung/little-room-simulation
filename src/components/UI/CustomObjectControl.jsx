@@ -19,7 +19,7 @@ const CustomObjectControl = () => {
 
   return (
     <TransformControls
-      object={targetObject}
+      object={targetObject.object}
       space='local'
       mode={transformMode}
       enabled={isEnabled}

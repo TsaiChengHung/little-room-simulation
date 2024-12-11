@@ -155,10 +155,11 @@ const RoomDesign = () => {
         spacing={2} 
         sx={{ 
           position: 'absolute', 
-          top: 16, 
-          right: 16, 
+          top: 20, 
+          right: 20, 
           zIndex: 1,
           backgroundColor: 'white',
+          maxWidth: '40vw',
           padding: 2,
           borderRadius: 1,
           boxShadow: 1
@@ -170,8 +171,8 @@ const RoomDesign = () => {
           value={roomDimensions.width}
           onChange={handleDimensionChange('width')}
           size="small"
-          inputProps={{ 
-            min: 0,
+          inputProps={{   
+            min: 1,
             step: 0.1
           }}
         />
@@ -182,7 +183,7 @@ const RoomDesign = () => {
           onChange={handleDimensionChange('depth')}
           size="small"
           inputProps={{ 
-            min: 0,
+            min: 1,
             step: 0.1
           }}
         />

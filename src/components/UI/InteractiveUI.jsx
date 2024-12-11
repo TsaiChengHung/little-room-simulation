@@ -31,7 +31,8 @@ export default function InteractiveUI() {
                 sx={{
                     position: 'absolute',
                     top: 20,
-                    left: 20
+                    left: 20,
+                    maxWidth: '40vw',
                 }}
             >
                 <DesignModeToggle />
@@ -47,9 +48,9 @@ export default function InteractiveUI() {
                     <Box sx={{
                         position: 'absolute',
                         right: 20,
-                        top: '20%',
-                        transform: 'translateY(-50%)',
+                        top: 20,
                         maxHeight: '80vh',
+                        maxWidth: '30vw',
                         overflowY: 'auto'
                     }}>
                         <ObjectsManager />
