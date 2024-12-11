@@ -2,17 +2,36 @@ import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 
 // Pre-defined object URLs - you can modify this list
-export const objectsUrl = {
-    armChairs: "/objects/arm_chair_t.glb",
-    bookcase: "/objects/bookcase_t.glb",
-    coffeeTable: "/objects/coffee_table_t.glb",   
-}
+const resources = [
+    {
+        name: 'Arm Chair',
+        description: 'Description for Arm Chair',
+        price: 100,
+        modelFileGLB: '/objects/arm_chair_t.glb',
+        thumbnailUrl: '/thumbnails/arm_chair_thumb.png',
+    },
+    {
+        name: 'Bookcase',
+        description: 'Description for Bookcase',
+        price: 200,
+        modelFileGLB: '/objects/bookcase_t.glb',
+        thumbnailUrl: '/thumbnails/bookcase_thumb.png',
+    },
+    {
+        name: 'Coffee Table',
+        description: 'Description for Coffee Table',
+        price: 150,
+        modelFileGLB: '/objects/coffee_table_t.glb',
+        thumbnailUrl: '/thumbnails/coffee_table_thumb.png',
+    }, 
+]
 
+// Cache structure will store both object and info
 export const cachedObjects = {}
 
 const loader = new GLTFLoader();
 const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');  
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
 loader.setDRACOLoader(dracoLoader);
 
 let isPreloading = false;
@@ -20,8 +39,9 @@ let isPreloading = false;
 const loadModel = (url) => {
     return new Promise((resolve, reject) => {
         // If model is already cached, return it
-        if (cachedObjects[url]) {
-            resolve({ scene: cachedObjects[url] });
+        const key = Object.keys(cachedObjects).find(k => cachedObjects[k]?.info?.modelFileGLB === url);
+        if (key && cachedObjects[key]?.object) {
+            resolve({ scene: cachedObjects[key].object });
             return;
         }
 
@@ -44,7 +64,17 @@ function SetupSceneChildren(scene) {
     });
 }
 
-export async function preloadAllObjects(objectList = objectsUrl) {
+// Convert resources array to a map for preloading
+const getObjectsUrlMap = () => {
+    return resources.reduce((acc, resource) => {
+        // Use name as the key, replacing spaces with underscores and converting to lowercase
+        const key = resource.name.replace(/\s+/g, '_').toLowerCase();
+        acc[key] = resource;
+        return acc;
+    }, {});
+};
+
+export async function preloadAllObjects(objectList = getObjectsUrlMap()) {
     // Prevent multiple preloading attempts
     if (isPreloading) {
         console.log("Already preloading objects...");
@@ -57,16 +87,19 @@ export async function preloadAllObjects(objectList = objectsUrl) {
     try {
         // Clear cache for objects not in the new list
         Object.keys(cachedObjects).forEach(key => {
-            if (!Object.values(objectList).includes(key)) {
+            if (!objectList[key]) {
                 delete cachedObjects[key];
             }
         });
 
-        const loadPromises = Object.entries(objectList).map(async ([key, url]) => {
-            if (!cachedObjects[key]) {
-                const object = await loadModel(url);
+        const loadPromises = Object.entries(objectList).map(async ([key, resourceInfo]) => {
+            if (!cachedObjects[key]?.object) {
+                const object = await loadModel(resourceInfo.modelFileGLB);
                 SetupSceneChildren(object.scene);
-                cachedObjects[key] = object.scene;
+                cachedObjects[key] = {
+                    object: object.scene,
+                    info: resourceInfo
+                };
                 console.log(`Loaded object: ${key}`, object);
             }
         });
@@ -80,14 +113,23 @@ export async function preloadAllObjects(objectList = objectsUrl) {
     }
 }
 
-
-
 // Function to check if an object is cached
 export function isObjectCached(key) {
-    return !!cachedObjects[key];
+    return !!cachedObjects[key]?.object;
 }
 
 // Function to get a cached object
 export function getCachedObject(key) {
-    return cachedObjects[key] || null;
+    return cachedObjects[key]?.object || null;
+}
+
+// Function to get object info
+export function getCachedObjectInfo(key) {
+    return cachedObjects[key]?.info || null;
+}
+
+// Helper function to get resource data by name
+export function getResourceByName(name) {
+    const key = name.replace(/\s+/g, '_').toLowerCase();
+    return resources.find(resource => resource.name.replace(/\s+/g, '_').toLowerCase() === key);
 }

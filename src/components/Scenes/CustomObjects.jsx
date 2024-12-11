@@ -7,7 +7,7 @@ export default function CustomObjects() {
         <>
             {
                 Object.keys(objects).map((key, index) => {
-                    const object = objects[key]
+                    const object = objects[key].object
                     return (
                         <primitive key={key} object={object} onClick={(e) => {
                             e.stopPropagation(); // 阻止事件冒泡
