@@ -29,7 +29,7 @@ export default function MaterialSelector() {
             padding: 1,
             overflowX: 'auto',
             whiteSpace: 'nowrap',
-            maxWidth: '100%',
+            maxWidth: '80vw',
             backgroundColor: 'rgba(0, 0, 0, 0.2)',
             borderRadius: 1
           }}
@@ -50,7 +50,7 @@ export default function MaterialSelector() {
                 margin: '4px'
               }}
             >
-              {textureName}
+              
             </Button>
           ))}
         </Stack>
