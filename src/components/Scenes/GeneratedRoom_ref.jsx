@@ -61,7 +61,7 @@ const UVScaledPlane = React.memo(({ width, height, tileScale = 2 }) => {
     );
 });
 
-const RoomGenerative = () => {
+const GeneratedRoom = () => {
     const { roomDimensions } = useSelectionStore();
     const { setSelectedObject, selectedObject, roomMaterials, addRoomMaterial, operationMode, selectedObjectType } = useSelectionStore();
     const clock = useMemo(() => new Clock(), []);
@@ -197,4 +197,4 @@ const RoomGenerative = () => {
     );
 };
 
-export default RoomGenerative;
+export default GeneratedRoom;

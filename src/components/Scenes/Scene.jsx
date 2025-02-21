@@ -1,4 +1,4 @@
-import RoomGenerative from "./RoomGenerative";
+import GeneratedRoom from "./GeneratedRoom";
 import useSelectionStore from "../Store/Store";
 import CustomObjects from "./CustomObjects";
 
@@ -13,7 +13,7 @@ export default function Scene(props) {
         onPointerMissed={() => setSelectedObject(null)}
       >
         <CustomObjects />
-        <RoomGenerative />
+        <GeneratedRoom />
       </group>
     </>
   );

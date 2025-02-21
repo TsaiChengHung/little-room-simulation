@@ -14,11 +14,7 @@ const useSelectionStore = create((set, get) => ({
   objects: {},
 
   // room design params
-  roomDimensions: {
-    width: 4, // meters
-    depth: 3, // meters
-    wallThickness: 0.1, // meters
-  },
+  roomType: 0,
 
   // sun position params
   sunPosition: 0.5, // Default to noon
@@ -101,10 +97,8 @@ const useSelectionStore = create((set, get) => ({
   setSunPosition: (position) => set({ sunPosition: position }),
 
   // room design functions
-  setRoomDimensions: (dimensions) =>
-    set((state) => ({
-      roomDimensions: { ...state.roomDimensions, ...dimensions }
-    })),
+  setRoomType: (index) => set({ roomType: index })
+    
 }));
 
 export default useSelectionStore;
