@@ -11,7 +11,7 @@ import { geometry } from "maath";
 import { extend } from "@react-three/fiber";
 import Room from "./RoomGenerator";
 import RoomPointsTemplate from "./RoomAttributes";
-import useSelectionStore from "../../Store/Store";
+import useSelectionStore from "../Store/Store";
 
 extend(geometry);
 
@@ -29,11 +29,14 @@ function Frame({
   const [hovered, hover] = useState(false);
   useCursor(hovered);
 
-  const {setRoomType} = useSelectionStore()
+  const {setRoomType, setDesignMode} = useSelectionStore()
 
   const onDoubleClickHandle = (e) => {
-    console.log(e)
-    setRoomType(2)
+    name = e.object.name
+    if (name === "01") setRoomType(0)
+    else if (name === "02") setRoomType(1)
+    else if (name === "03") setRoomType(2)
+    setDesignMode("roomSimulation")
   }
 
   return (
@@ -143,7 +146,7 @@ return (
         <Frame
             id="03"
             name={`L-shaped\nroom`}
-            describe="5 x 5 x 3.6 m + 1.25 x 2.5 m"
+            describe="5 x 3.75 x 3.6 + 1.25 x 2.5 m"
             bg="#e4cdac"
             position={[1.15, 0.35, 0]}
             rotation={[0, -0.5, 0]}

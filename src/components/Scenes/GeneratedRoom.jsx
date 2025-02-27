@@ -1,19 +1,21 @@
-import React, { useMemo, useEffect, useCallback } from 'react';
-import useSelectionStore from '../Store/Store';
-import * as THREE from 'three';
-import { MeshPhysicalMaterial, Clock, MeshStandardMaterial } from 'three';
-import RoomPointsTemplate from '../AssetManage/RoomSelector/RoomAttributes';
-import Room from '../AssetManage/RoomSelector/RoomGenerator';
+import useSelectionStore from "../Store/Store";
+import RoomPointsTemplate from "../RoomSelector/RoomAttributes";
+import Room from "../RoomSelector/RoomGenerator";
 
 const GeneratedRoom = () => {
+  const { roomType } = useSelectionStore();
+  const floorPoints = RoomPointsTemplate(roomType);
+  const { roomData } = useSelectionStore();
 
-    const {roomType} = useSelectionStore()
-    const floorPoints = RoomPointsTemplate(roomType)
+  const floorMaterial =  roomData?.floor?.material
 
-    return (
-        <Room floorPoints={floorPoints} />
-    )
-
-}
+  return (
+    <Room
+      floorPoints={floorPoints}
+      wallHeight={3.6}
+      floorMaterial={floorMaterial}
+    />
+  );
+};
 
 export default GeneratedRoom;

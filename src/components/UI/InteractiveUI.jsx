@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import ObjectsManager from "../AssetManage/ObjectsManager";
+import ObjectsManager from "../Objects/ObjectsManager";
 import TextureSelector from "../AssetManage/TextureSelector";
 import ToggleButtons from "./ModeToggleButton";
 import "../../../src/style.css";

@@ -8,14 +8,13 @@ import {
   Noise,
 } from "@react-three/postprocessing";
 import Scene from "./components/Scenes/Scene";
-import RoomSelectorUI from "./components/AssetManage/RoomSelector/RoomSelectorUI";
+import RoomSelectorUI from "./components/RoomSelector/RoomSelectorUI";
 import InteractiveUI from "./components/UI/InteractiveUI";
 import useSelectionStore from "./components/Store/Store";
-import { preloadAllObjects } from "./components/AssetManage/ObjectsPreload";
+import { preloadAllObjects } from "./components/Objects/ObjectsPreload";
 import { useEffect } from "react";
 import CustomObjectControl from "./components/UI/CustomObjectControl";
 import SunPosition from "./components/SFX/SunPosition";
-import { AxesHelper, GridHelper } from "three";
 
 export const App = () => {
   // Preload objects when app starts
@@ -82,9 +81,6 @@ export const App = () => {
             onPointerMissed={handleCanvasClick}
           >
             <RoomSelectorUI />
-
-
-
 
           </Canvas>
         )}

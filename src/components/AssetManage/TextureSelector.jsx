@@ -1,22 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Box, Stack, Button } from '@mui/material';
 import { useTextureLoader } from './Textures';
 import useSelectionStore from '../Store/Store';
 
-// App 主組件
 export default function MaterialSelector() {
-  const { selectedObject, selectedObjectType, clearSelectedObject, roomMaterials, setMaterialTexture, operationMode, paintMode } = useSelectionStore();
+  const {
+    selectedObject,
+    selectedObjectType,
+    clearSelectedObject,
+    roomData,
+    setMaterialTexture,
+    operationMode,
+    paintMode,
+  } = useSelectionStore();
 
-  const [selectedTexture, setSelectedTexture] = useState(null);
   const textureBuffers = useTextureLoader();
 
   // 點擊材質時觸發的功能
   const handleMaterialClick = (textureName) => {
-      setSelectedTexture(textureName);
-      setMaterialTexture(roomMaterials[selectedObject], textureBuffers[textureName]);
-      clearSelectedObject(); // 清除選中的物件以防止同時進行物件選擇和材質更改
-      console.log('Selected Material:', textureName);
+    if (textureBuffers[textureName]) {
+      setMaterialTexture(textureBuffers[textureName]);
+    }
+    clearSelectedObject(); // 清除選中的物件以防止同時進行物件選擇和材質更改
   };
+
+  // 如果 textureBuffers 未載入完成，顯示載入提示
+  if (!textureBuffers || Object.keys(textureBuffers).length === 0) {
+    return <div>Loading textures...</div>;
+  }
+
+  // Memoize the texture buttons
+  const textureButtons = useMemo(() => {
+    if (!textureBuffers) return null;
+
+    return Object.keys(textureBuffers).map((textureName) => {
+      const texture = textureBuffers[textureName];
+      const imageSrc = texture?.map?.image?.src || '/placeholder.png';
+
+      return (
+        <Button
+          variant="contained"
+          key={textureName}
+          onClick={() => handleMaterialClick(textureName)}
+          style={{
+            fontSize: '9pt',
+            backgroundImage: `url(${imageSrc})`,
+            backgroundPosition: 'center',
+            color: 'white',
+            minWidth: '80px',
+            height: '80px',
+            backgroundSize: 'cover',
+            margin: '4px',
+          }}
+        >
+          {/* Optional texture name */}
+          {/* {textureName} */}
+        </Button>
+      );
+    });
+  }, [textureBuffers, handleMaterialClick]); // Only re-render when textures or click handler changes
 
   return (
     <>
@@ -31,28 +73,10 @@ export default function MaterialSelector() {
             whiteSpace: 'nowrap',
             maxWidth: '80vw',
             backgroundColor: 'rgba(0, 0, 0, 0.2)',
-            borderRadius: 1
+            borderRadius: 1,
           }}
         >
-          {Object.keys(textureBuffers).map((textureName) => (
-            <Button
-              variant='contained'
-              key={textureName}
-              onClick={() => handleMaterialClick(textureName)}
-              style={{
-                fontSize: '9pt',
-                backgroundImage: `url(${textureBuffers[textureName].baseColor.image.src})`,
-                backgroundPosition: 'center',
-                color: 'white',
-                minWidth: '80px',
-                height: '80px',
-                backgroundSize: 'cover',
-                margin: '4px'
-              }}
-            >
-              
-            </Button>
-          ))}
+          {textureButtons}
         </Stack>
       )}
     </>

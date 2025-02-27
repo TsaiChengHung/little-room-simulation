@@ -7,9 +7,8 @@ export default function ColorPicker() {
     const { selectedObject, selectedObjectType, operationMode, paintMode, setMaterialColor } = useSelectionStore();
 
     const handleColorChange = (color) => {
-        if (selectedObject && selectedObjectType === 'room') {
-            setMaterialColor(selectedObject, color);
-        }
+        setMaterialColor(color);
+
     };
 
     return (
