@@ -181,7 +181,7 @@ function Room({ floorPoints, wallHeight = 3, useRoomData = false, ...props }) {
     for (let i = 0; i < n; i++) {
       const startPoint = floorPoints[i];
       const endPoint = floorPoints[(i + 1) % n];
-      const [ geometry, area ] = createWallGeometry(
+      const { geometry, area } = createWallGeometry(
         startPoint,
         endPoint,
         wallHeight

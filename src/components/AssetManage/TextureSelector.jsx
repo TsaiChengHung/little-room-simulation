@@ -8,14 +8,12 @@ export default function MaterialSelector() {
     selectedObject,
     selectedObjectType,
     clearSelectedObject,
-    roomData,
     setMaterialTexture,
     operationMode,
     paintMode,
   } = useSelectionStore();
 
   const textureBuffers = useTextureLoader();
-
   // 點擊材質時觸發的功能
   const handleMaterialClick = (textureName) => {
     if (textureBuffers[textureName]) {
@@ -33,10 +31,8 @@ export default function MaterialSelector() {
   const textureButtons = useMemo(() => {
     if (!textureBuffers) return null;
 
-    return Object.keys(textureBuffers).map((textureName) => {
-      const texture = textureBuffers[textureName];
-      const imageSrc = texture?.map?.image?.src || '/placeholder.png';
-
+    return Object.entries(textureBuffers).map(([textureName, textureData]) => {
+      const imageSrc = textureData.textures.map?.image?.src || '/placeholder.png';
       return (
         <Button
           variant="contained"

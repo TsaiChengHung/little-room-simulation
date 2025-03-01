@@ -4,6 +4,7 @@ import { useMemo } from "react";
 // Define material textures
 export const materialTextures = {
   brick: {
+    price: 5,
     map:
       "/textures/brick_wall_tkphcebi_1k/Brick_Wall_tkphcebi_1K_BaseColor.jpg",
     normalMap:
@@ -18,6 +19,7 @@ export const materialTextures = {
     ratio: [1,1],
   },
   concrete: {
+    price: 10,
     map:
       "/textures/concrete_wall_ubvjdgfew_1k/Concrete_Wall_ubvjdgfew_1K_BaseColor.jpg",
     normalMap:
@@ -32,6 +34,7 @@ export const materialTextures = {
     ratio: [0.8,0.8],
   },
   dryWall: {
+    price: 15,
     map:
       "/textures/dry_wall_qjpmzsp0_1k/Dry_Wall_qjpmzsp0_1K_BaseColor.jpg",
     normalMap: "/textures/dry_wall_qjpmzsp0_1k/Dry_Wall_qjpmzsp0_1K_Normal.jpg",
@@ -44,6 +47,7 @@ export const materialTextures = {
     ratio: [0.8,0.8],
   },
   wallpaper: {
+    price: 20,
     map:
       "/textures/old_decorative_wallpaper_umridamn_1k/Old_Decorative_Wallpaper_umridamn_1K_BaseColor.jpg",
     normalMap:
@@ -58,6 +62,7 @@ export const materialTextures = {
     ratio: [0.8,0.8],
   },
   checkerBoardFabric: {
+    price: 25,
     map: "/textures/checkerBoardFabric/CarpetJuteChecker001_COL_2K.jpg",
     normalMap: "/textures/checkerBoardFabric/CarpetJuteChecker001_NRM_2K.jpg",
     roughnessMap:
@@ -66,27 +71,30 @@ export const materialTextures = {
     aoMapIntensity: 1,
     roughness: 1,
     metalness: 0.5,
-    ratio: [1,1],
+    ratio: [0.75,0.75],
   },
   rock: {
+    price: 30,
     map: "/textures/rock/Rock030_4K-PNG_Color.png",
     normalMap: "/textures/rock/Rock030_4K-PNG_NormalGL.png",
     roughnessMap: "/textures/rock/Rock030_4K-PNG_Roughness.png",
     aoMapIntensity: 1,
     roughness: 1,
     metalness: 0.2,
-    ratio: [1,1],
+    ratio: [0.75,0.75],
   },
   woodFloor: {
+    price: 35,
     map: "/textures/woodFloorWonrn/WoodFlooringWorn002_COL_2K.jpg",
     normalMap: "/textures/woodFloorWonrn/WoodFlooringWorn002_NRM_2K.jpg",
     aoMap: "/textures/woodFloorWonrn/WoodFlooringWorn002_AO_2K.jpg",
     aoMapIntensity: 1,
     roughness: 1,
     metalness: 0.2,
-    ratio: [1,1],
+    ratio: [0.75,0.75],
   },
   woodPlanksDark: {
+    price: 40,
     map:
       "/textures/woodPlanksDark/WoodButcherBlockHickoryPlanksDark001_COL_2K.jpg",
     normalMap:
@@ -94,7 +102,7 @@ export const materialTextures = {
     aoMapIntensity: 1,
     roughness: 1,
     metalness: 0.2,
-    ratio: [1,1],
+    ratio: [0.75,0.75],
   },
 };
 
@@ -114,6 +122,8 @@ export const useTextureLoader = () => {
   const textureBuffers = useMemo(() => {
     return Object.fromEntries(
       Object.entries(materialTextures).map(([key, textureData]) => {
+        const name = textureData.name ? textureData.name : key;
+        const price = textureData.price ? textureData.price : 0;
         const ratio = textureData.ratio ? textureData.ratio : [0.75, 0.75];
         const textures = {
           map: loadTexture(textureData.map, ratio),
@@ -127,7 +137,7 @@ export const useTextureLoader = () => {
           metalness: textureData.metalness || null,
           ratio: textureData.ratio || [1, 1],
         };
-        return [key, textures];
+        return [key, {name, price, textures}];
       })
     );
   }, []); // Empty dependency array ensures this only runs once
