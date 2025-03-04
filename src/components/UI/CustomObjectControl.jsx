@@ -1,20 +1,19 @@
 import { TransformControls } from '@react-three/drei';
 import useSelectionStore from "../Store/Store";
 
-const getObject = (defaultObjects, objects, selectedObject, selectedObjectType) => {
-  if (selectedObjectType === "customObject") {
-    return objects[selectedObject];
-  } else if (selectedObjectType === "defaultObject") {
-    return defaultObjects[selectedObject];
+const getObject = (objects, selectedObject) => {
+  if (selectedObject && selectedObject.type === "customObject") {
+    const objectArray = objects[selectedObject.object];
+    return objectArray ? objectArray[objectArray.length - 1] : null;
   }
   return null;
 };
 
 const CustomObjectControl = () => {
-  const { defaultObjects, objects, selectedObject, selectedObjectType, operationMode, transformMode } = useSelectionStore();
-  const isEnabled = (selectedObjectType === "customObject" || selectedObjectType === "defaultObject") && (operationMode === "object");
+  const { objects, selectedObject, operationMode, transformMode } = useSelectionStore();
+  const isEnabled = (selectedObject && selectedObject.type === "customObject") && (operationMode === "object");
 
-  const targetObject = getObject(defaultObjects, objects, selectedObject, selectedObjectType);
+  const targetObject = getObject(objects, selectedObject);
   if (!isEnabled || !targetObject) return null;
 
   return (

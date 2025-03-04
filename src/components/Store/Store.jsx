@@ -1,9 +1,9 @@
+import { v4 as uuidv4 } from 'uuid';
 import { create } from "zustand";
 
 const useSelectionStore = create((set, get) => ({
   designMode: "roomDesign", // 'roomDesign' or 'roomSimulation'
-  selectedObject: null, // 用於標誌選中的物件類型，例如 'room' 或 'customObject'
-  selectedObjectType: null,
+  selectedObject: { object: null, objectId: null, type: null }, // type用於標誌選中的物件類型，例如 'room' 或 'customObject'
   operationMode: null,
   transformMode: "translate",
   paintMode: "color",
@@ -18,8 +18,8 @@ const useSelectionStore = create((set, get) => ({
   setDesignMode: (mode) => set({ designMode: mode }),
 
   // 原有的 room simulation functions
-  setSelectedObject: (object, type) =>
-    set({ selectedObject: object, selectedObjectType: type }),
+  setSelectedObject: (object, objectId, type) =>
+    set({ selectedObject: {object, objectId, type}}),
 
   clearSelectedObject: () =>
     set({ selectedObject: null, selectedObjectType: null }),
@@ -38,10 +38,28 @@ const useSelectionStore = create((set, get) => ({
   addObject: (objectKey, objectData) =>
     set((state) => {
       if (!objectKey || !objectData) return state;
-      return { objects: { ...state.objects, [objectKey]: objectData } };
+  
+      if (!state.objects[objectKey]) {
+        state.objects[objectKey] = [];
+      }
+  
+      const newObject = {
+        id: uuidv4(),
+        object: objectData?.object ?? null,
+        objectName: objectData?.name ?? null,
+        description: objectData?.description ?? null,
+        price: objectData?.price ?? null,
+        glbFile: objectData?.glbFile ?? null,
+        thumbnailUrl: objectData?.thumbnailUrl ?? null,
+        transform: objectData?.transform ?? null
+      };
+  
+      state.objects[objectKey].push(newObject);
+  
+      return { objects: { ...state.objects } };
     }),
 
-  removeObject: (objectKey) =>
+  removeObject: (objectKey) => // 要改
     set((state) => {
       if (!objectKey) return state;
       const updatedObjects = { ...state.objects };

@@ -19,15 +19,15 @@ function Room({ floorPoints, wallHeight = 3, useRoomData = false, ...props }) {
   const handleClick = useCallback(
     (e, targetId) => {
       e.stopPropagation();
-      if (selectedObject === targetId && selectedObjectType === "room") {
+      if (selectedObject?.id === targetId && selectedObject?.type === "room") {
         setSelectedObject(null, null);
       } else {
-        setSelectedObject(targetId, "room");
+        setSelectedObject({ id: targetId, type: "room" });
       }
       console.log("room clicked", targetId, roomData);
       console.log(roomData);
     },
-    [selectedObject, setSelectedObject, selectedObjectType]
+    [selectedObject, setSelectedObject]
   );
 
   const [floorShapeGeo, floorArea] = useMemo(() => {

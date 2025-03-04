@@ -193,10 +193,17 @@ export async function preloadAllObjects(objectList = getObjectsUrlMap()) {
         const loadPromises = Object.entries(objectList).map(async ([key, resourceInfo]) => {
             if (!cachedObjects[key]?.object) {
                 const object = await loadModel(resourceInfo.modelFileGLB);
+                const { name, description, price, modelFileGLB, thumbnailUrl } = resourceInfo;
                 SetupSceneChildren(object.scene);
                 cachedObjects[key] = {
+                    id: key,
                     object: object.scene,
-                    info: resourceInfo
+                    objectName: name,
+                    description: description,
+                    price: price,
+                    glbFile: modelFileGLB,
+                    thumbnailUrl : thumbnailUrl,
+                    transform: {translate: [0,0,0], rotation:[0,0,0], scale:[1,1,1]},
                 };
                 console.log(`Loaded object: ${key}`, object);
             }

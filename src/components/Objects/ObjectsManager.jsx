@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { cachedObjects } from "./ObjectsPreload";
-import { Box, List, ListItem, ListItemButton, ListItemText, Typography, Card, CardContent, CardMedia, CardActionArea, Button, Stack } from "@mui/material";
+import { Box, Typography, Card, CardContent, CardMedia, CardActionArea, Button, Stack } from "@mui/material";
 import useSelectionStore from "../Store/Store";
 
 export default function ObjectsManager() {
@@ -40,15 +40,15 @@ export default function ObjectsManager() {
                                 <CardActionArea onClick={() => handleObjectSelect(key, object)}>
                                     <CardMedia
                                         component="img"
-                                        image={object.info.thumbnailUrl}
+                                        image={object.thumbnailUrl}
                                         alt="Item Image"
                                     />
                                     <CardContent sx={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
                                         <Typography sx ={{ color: 'white' }} gutterBottom variant="h6" component="div">
-                                            {object.info.name}
+                                            {object.name}
                                         </Typography>
                                         <Typography sx={{ color: 'darkgray' }} variant="body2" >
-                                            {object.info.description}
+                                            {object.description}
                                         </Typography>
                                     </CardContent>
                                 </CardActionArea>
