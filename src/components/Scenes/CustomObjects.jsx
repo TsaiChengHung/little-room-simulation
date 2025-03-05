@@ -1,24 +1,34 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import useSelectionStore from '../Store/Store';
 
 export default function CustomObjects() {
-    const { objects, setSelectedObject, selectedObject } = useSelectionStore();
+    const { objects, setSelectedObject } = useSelectionStore();
+
+    const renderObject = (item, key) => {
+        const position = item.transform?.translate || [0, 0, 0];
+        const rotation = item.transform?.rotate || [0, 0, 0];
+        const scale = item.transform?.scale || [1, 1, 1];
+
+        return (
+            <primitive
+                key={item.id}
+                object={item.object}
+                position={position}
+                rotation={rotation}
+                scale={scale}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedObject(key, item.id, 'customObject');
+                }}
+            />
+        );
+    };
 
     return (
         <>
-            {Object.keys(objects).map((key) => {
-                return objects[key].map((item, index) => (
-                    <primitive
-                        key={`${key}-${index}`} // 使用 key 和 index 组合生成唯一的 key
-                        object={item.object} // 获取对象
-                        position={item.transform?.translate} // 使用 transform 中的位移
-                        onClick={(e) => {
-                            e.stopPropagation(); // 阻止事件冒泡
-                            setSelectedObject(key, item.id, 'customObject'); // 更新选中的物件
-                        }}
-                    />
-                ));
-            })}
+            {Object.keys(objects).flatMap((key) =>
+                objects[key].map((item) => renderObject(item, key))
+            )}
         </>
     );
 }

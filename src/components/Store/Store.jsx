@@ -43,15 +43,27 @@ const useSelectionStore = create((set, get) => ({
         state.objects[objectKey] = [];
       }
   
+      // Clone the 3D object to create an independent instance
+      const clonedObject = objectData.object.clone();
+      clonedObject.traverse((child) => {
+        if (child.isMesh) {
+          child.material = child.material.clone();
+        }
+      });
+  
       const newObject = {
         id: uuidv4(),
-        object: objectData?.object ?? null,
+        object: clonedObject, // Use the cloned object instead of the original
         objectName: objectData?.name ?? null,
         description: objectData?.description ?? null,
         price: objectData?.price ?? null,
         glbFile: objectData?.glbFile ?? null,
         thumbnailUrl: objectData?.thumbnailUrl ?? null,
-        transform: objectData?.transform ?? null
+        transform: objectData?.transform ?? {
+          translate: [0, 0, 0],
+          rotate: [0, 0, 0],
+          scale: [1, 1, 1]
+        }
       };
   
       state.objects[objectKey].push(newObject);
@@ -195,6 +207,27 @@ const useSelectionStore = create((set, get) => ({
       ...walls.filter((wall) => wall.isModified),
     ].filter(Boolean);
   },
+
+  updateObjectTransform: (objectId, newTransform) =>
+    set((state) => {
+      const updatedObjects = { ...state.objects };
+      
+      // Find and update the object with matching ID
+      Object.keys(updatedObjects).forEach(key => {
+        const objectIndex = updatedObjects[key].findIndex(item => item.id === objectId);
+        if (objectIndex !== -1) {
+          updatedObjects[key][objectIndex] = {
+            ...updatedObjects[key][objectIndex],
+            transform: {
+              ...updatedObjects[key][objectIndex].transform,
+              ...newTransform
+            }
+          };
+        }
+      });
+
+      return { objects: updatedObjects };
+    }),
 }));
 
 export default useSelectionStore;
