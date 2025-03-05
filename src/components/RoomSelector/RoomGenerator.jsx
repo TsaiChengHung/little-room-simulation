@@ -11,7 +11,6 @@ function Room({ floorPoints, wallHeight = 3, useRoomData = false, ...props }) {
     roomData,
     selectedObject,
     setSelectedObject,
-    selectedObjectType,
   } = useSelectionStore();
   const groupRef = useRef();
 

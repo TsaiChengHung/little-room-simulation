@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { TransformControls } from '@react-three/drei';
 import useSelectionStore from "../Store/Store";
 

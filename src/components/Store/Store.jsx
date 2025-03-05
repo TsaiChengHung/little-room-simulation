@@ -71,17 +71,27 @@ const useSelectionStore = create((set, get) => ({
       return { objects: { ...state.objects } };
     }),
 
-  removeObject: (objectKey) => // 要改
+  removeObject: (objectId) =>
     set((state) => {
-      if (!objectKey) return state;
+      if (!objectId) return state;
+      
       const updatedObjects = { ...state.objects };
-      if (updatedObjects[objectKey]) {
-        delete updatedObjects[objectKey];
-      }
+      
+      // Search through all object categories to find and remove the object with matching ID
+      Object.keys(updatedObjects).forEach(key => {
+        updatedObjects[key] = updatedObjects[key].filter(item => item.id !== objectId);
+        
+        // Remove the category if it's empty
+        if (updatedObjects[key].length === 0) {
+          delete updatedObjects[key];
+        }
+      });
+
       return {
         objects: updatedObjects,
-        selectedObject: null,
-        selectedObjectType: null,
+        selectedObject: state.selectedObject?.objectId === objectId ? 
+          { object: null, objectId: null, type: null } : 
+          state.selectedObject
       };
     }),
 

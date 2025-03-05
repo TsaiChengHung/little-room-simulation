@@ -36,7 +36,7 @@ export default function ToggleButtons() {
     const handleRemove = (e) => {
         e.stopPropagation();
         if (selectedObject.type === "customObject") {
-            removeObject(selectedObject);
+            removeObject(selectedObject.objectId);
         }
     };
 
