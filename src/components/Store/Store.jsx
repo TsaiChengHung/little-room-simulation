@@ -7,9 +7,11 @@ const useSelectionStore = create((set, get) => ({
   operationMode: null,
   transformMode: "translate",
   paintMode: "color",
-  objects: {},
   roomType: 0,
   sunPosition: 0.5,
+
+  // 統一管理所有家具物件
+  objects: {},
 
   // 統一管理的天地壁資料，初始為空，由組件設置
   roomData: null, // 初始為 null，等待組件初始化

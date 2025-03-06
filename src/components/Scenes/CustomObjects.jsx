@@ -1,9 +1,15 @@
+import { useMemo, useCallback } from 'react';
 import useSelectionStore from '../Store/Store';
 
 export default function CustomObjects() {
     const { objects, setSelectedObject } = useSelectionStore();
 
-    const renderObject = (item, key) => {
+    const handleClick = useCallback((key, id) => (e) => {
+        e.stopPropagation();
+        setSelectedObject(key, id, 'customObject');
+    }, [setSelectedObject]);
+
+    const renderObject = useCallback((item, key) => {
         const position = item.transform?.translate || [0, 0, 0];
         const rotation = item.transform?.rotate || [0, 0, 0];
         const scale = item.transform?.scale || [1, 1, 1];
@@ -15,19 +21,16 @@ export default function CustomObjects() {
                 position={position}
                 rotation={rotation}
                 scale={scale}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedObject(key, item.id, 'customObject');
-                }}
+                onClick={handleClick(key, item.id)}
             />
         );
-    };
+    }, [handleClick]);
 
-    return (
-        <>
-            {Object.keys(objects).flatMap((key) =>
-                objects[key].map((item) => renderObject(item, key))
-            )}
-        </>
-    );
+    const renderedObjects = useMemo(() => (
+        Object.keys(objects).flatMap((key) =>
+            objects[key].map((item) => renderObject(item, key))
+        )
+    ), [objects, renderObject]);
+
+    return <>{renderedObjects}</>;
 }

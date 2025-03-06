@@ -5,9 +5,7 @@ import Room from "../RoomSelector/RoomGenerator";
 const GeneratedRoom = () => {
   const { roomType, roomData } = useSelectionStore();
   const floorPoints = RoomPointsTemplate(roomType);
-
-  console.log(roomData)
-
+  
   return (
     <Room
       floorPoints={floorPoints}
