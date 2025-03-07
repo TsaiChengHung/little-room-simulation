@@ -25,13 +25,12 @@ const useSelectionStore = create((set, get) => ({
     set({ selectedObject: { object, objectId, type } }),
 
   clearSelectedObject: () =>
-    set({ selectedObject: null, selectedObjectType: null }),
+    set({ selectedObject: null }),
 
   setOperationMode: (mode) =>
     set({
       operationMode: mode,
-      selectedObject: null,
-      selectedObjectType: null,
+      selectedObject: {object: null, objectId: null, type: null},
     }),
 
   setTransformMode: (mode) => set({ transformMode: mode }),

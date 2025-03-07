@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { useRef, useMemo, useEffect, useCallback } from "react";
+import { useRef, useMemo, useEffect, useCallback, useState } from "react";
 import useSelectionStore from "../Store/Store";
 import { createShapeFromPoints, createShapeGeometryWithUV, createWallGeometry } from "./RoomGenerateUtils";
 
@@ -11,8 +11,12 @@ function Room({ floorPoints, wallHeight = 3, useRoomData = false, ...props }) {
     roomData,
     selectedObject,
     setSelectedObject,
+    operationMode,
   } = useSelectionStore();
   const groupRef = useRef();
+  
+  // Track hover state for each component
+  const [hoveredComponent, setHoveredComponent] = useState(null);
 
   // 點擊觸發的事件
   const handleClick = useCallback(
@@ -20,15 +24,40 @@ function Room({ floorPoints, wallHeight = 3, useRoomData = false, ...props }) {
       e.stopPropagation();
       if (selectedObject?.object === targetId && selectedObject?.type === "room") {
         setSelectedObject(null);
-
       } else {
         setSelectedObject(targetId, null, "room");
       }
-      console.log("room clicked", targetId, roomData);
-      console.log(roomData);
     },
     [selectedObject, setSelectedObject]
   );
+
+  // Mouse enter handler - increase brightness only in paint mode
+  const handleMouseEnter = useCallback((e, targetId) => {
+    e.stopPropagation();
+    setHoveredComponent(targetId);
+    
+    // Only increase brightness if in paint mode
+    if (operationMode === "paint") {
+      const material = e.object.material;
+      if (material) {
+        material._originalColor = material.color.clone();
+        material.color.multiplyScalar(1.2); // Increase brightness by 20%
+        material.needsUpdate = true;
+      }
+    }
+  }, [operationMode]);
+
+  // Mouse leave handler - restore original brightness
+  const handleMouseLeave = useCallback((e) => {
+    setHoveredComponent(null);
+    
+    // Only restore if we previously modified the color
+    const material = e.object.material;
+    if (operationMode === "paint" && material && material._originalColor) {
+      material.color.copy(material._originalColor);
+      material.needsUpdate = true;
+    }
+  }, [operationMode]);
 
   const [floorShapeGeo, floorArea] = useMemo(() => {
     return createShapeGeometryWithUV(floorPoints);
@@ -81,6 +110,8 @@ function Room({ floorPoints, wallHeight = 3, useRoomData = false, ...props }) {
         rotation={[Math.PI / 2, 0, 0]}
         userData={{ type: "floor", area: floorArea, id: "floor" }}
         onClick={(e) => handleClick(e, e.object.userData.id)}
+        onPointerEnter={(e) => handleMouseEnter(e, e.object.userData.id)}
+        onPointerLeave={handleMouseLeave}
       >
         <primitive attach="geometry" object={floorShapeGeo} />
         {useRoomData && roomData && roomData["floor"] ? (
@@ -112,6 +143,8 @@ function Room({ floorPoints, wallHeight = 3, useRoomData = false, ...props }) {
         rotation={[Math.PI / 2, 0, 0]}
         userData={{ type: "ceiling", area: ceilingArea, id: "ceiling" }}
         onClick={(e) => handleClick(e, e.object.userData.id)}
+        onPointerEnter={(e) => handleMouseEnter(e, e.object.userData.id)}
+        onPointerLeave={handleMouseLeave}
       >
         <primitive attach="geometry" object={ceilingShapeGeo} />
         {useRoomData && roomData && roomData["ceiling"] ? (
@@ -131,6 +164,8 @@ function Room({ floorPoints, wallHeight = 3, useRoomData = false, ...props }) {
           geometry={wall.geometry}
           userData={{ type: "wall", area: wall.area, id: wall.id }}
           onClick={(e) => handleClick(e, e.object.userData.id)}
+          onPointerEnter={(e) => handleMouseEnter(e, e.object.userData.id)}
+          onPointerLeave={handleMouseLeave}
         >
           {useRoomData && roomData && roomData[wall.id] ? (
             <meshStandardMaterial
