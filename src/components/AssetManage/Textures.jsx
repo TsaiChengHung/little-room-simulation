@@ -111,9 +111,12 @@ const textureLoader = new THREE.TextureLoader();
 
 // Load textures
 const loadTexture = (path, ratio) => {
+  if (!path) return null;
   const texture = textureLoader.load(path);
+  texture.encoding = THREE.sRGBEncoding;
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set(ratio[0], ratio[1]);
+  texture.needsUpdate = true;
   return texture;
 };
 

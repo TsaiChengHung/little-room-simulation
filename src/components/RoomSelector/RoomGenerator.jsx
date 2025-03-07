@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { useRef, useMemo, useEffect, useCallback } from "react";
 import useSelectionStore from "../Store/Store";
-import {createShapeFromPoints, createShapeGeometryWithUV, createWallGeometry } from "./RoomGenerateUtils";
+import { createShapeFromPoints, createShapeGeometryWithUV, createWallGeometry } from "./RoomGenerateUtils";
 
 function Room({ floorPoints, wallHeight = 3, useRoomData = false, ...props }) {
   const {
@@ -18,10 +18,11 @@ function Room({ floorPoints, wallHeight = 3, useRoomData = false, ...props }) {
   const handleClick = useCallback(
     (e, targetId) => {
       e.stopPropagation();
-      if (selectedObject?.id === targetId && selectedObject?.type === "room") {
-        setSelectedObject(null, null);
+      if (selectedObject?.object === targetId && selectedObject?.type === "room") {
+        setSelectedObject(null);
+
       } else {
-        setSelectedObject({ id: targetId, type: "room" });
+        setSelectedObject(targetId, null, "room");
       }
       console.log("room clicked", targetId, roomData);
       console.log(roomData);
@@ -51,7 +52,7 @@ function Room({ floorPoints, wallHeight = 3, useRoomData = false, ...props }) {
     for (let i = 0; i < n; i++) {
       const startPoint = floorPoints[i];
       const endPoint = floorPoints[(i + 1) % n];
-      const [ geometry, area ] = createWallGeometry(
+      const [geometry, area] = createWallGeometry(
         startPoint,
         endPoint,
         wallHeight
@@ -81,8 +82,8 @@ function Room({ floorPoints, wallHeight = 3, useRoomData = false, ...props }) {
         userData={{ type: "floor", area: floorArea, id: "floor" }}
         onClick={(e) => handleClick(e, e.object.userData.id)}
       >
-       <primitive attach="geometry" object={floorShapeGeo} />
-        {useRoomData ? (
+        <primitive attach="geometry" object={floorShapeGeo} />
+        {useRoomData && roomData && roomData["floor"] ? (
           <meshStandardMaterial
             {...roomData["floor"].textures}
             side={THREE.DoubleSide}
@@ -113,7 +114,7 @@ function Room({ floorPoints, wallHeight = 3, useRoomData = false, ...props }) {
         onClick={(e) => handleClick(e, e.object.userData.id)}
       >
         <primitive attach="geometry" object={ceilingShapeGeo} />
-        {useRoomData ? (
+        {useRoomData && roomData && roomData["ceiling"] ? (
           <meshStandardMaterial
             {...roomData["ceiling"].textures}
             side={THREE.FrontSide}
@@ -124,20 +125,20 @@ function Room({ floorPoints, wallHeight = 3, useRoomData = false, ...props }) {
       </mesh>
 
       {/* 牆壁 */}
-      {walls.map((wall) => (
+      {walls.map((wall, index) => (
         <mesh
           key={wall.id}
+          geometry={wall.geometry}
           userData={{ type: "wall", area: wall.area, id: wall.id }}
           onClick={(e) => handleClick(e, e.object.userData.id)}
         >
-          <bufferGeometry attach="geometry" {...wall.geometry} />
-          {useRoomData ? (
+          {useRoomData && roomData && roomData[wall.id] ? (
             <meshStandardMaterial
               {...roomData[wall.id].textures}
               side={THREE.FrontSide}
             />
           ) : (
-            <meshStandardMaterial color="darkgray" side={THREE.FrontSide} />
+            <meshStandardMaterial color="white" side={THREE.FrontSide} />
           )}
         </mesh>
       ))}

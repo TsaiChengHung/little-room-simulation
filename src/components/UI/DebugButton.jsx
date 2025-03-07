@@ -2,16 +2,25 @@ import React from 'react';
 import useSelectionStore from '../Store/Store';
 
 const DebugButton = () => {
-    const { objects } = useSelectionStore();
+    const { objects, roomData } = useSelectionStore();
 
-    const handleClick = () => {
+    const handleObjectsClick = () => {
         console.log('Current objects in store:', objects);
     };
 
+    const handleRoomDataClick = () => {
+        console.log('Current roomData:', roomData);
+    };
+
     return (
-        <button onClick={handleClick}>
-            Print Objects
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+            <button onClick={handleObjectsClick}>
+                Print Objects
+            </button>
+            <button onClick={handleRoomDataClick}>
+                Print RoomData
+            </button>
+        </div>
     );
 };
 

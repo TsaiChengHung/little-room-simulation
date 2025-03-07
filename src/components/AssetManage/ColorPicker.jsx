@@ -4,7 +4,7 @@ import { HexColorPicker } from 'react-colorful';
 import useSelectionStore from '../Store/Store';
 
 export default function ColorPicker() {
-    const { selectedObject, selectedObjectType, operationMode, paintMode, setMaterialColor } = useSelectionStore();
+    const { selectedObject, operationMode, paintMode, setMaterialColor } = useSelectionStore();
 
     const handleColorChange = (color) => {
         setMaterialColor(color);
@@ -13,7 +13,7 @@ export default function ColorPicker() {
 
     return (
         <>
-            {selectedObject && selectedObjectType === 'room' && operationMode === 'paint' && paintMode === 'color' && (
+            {selectedObject && selectedObject.type === 'room' && operationMode === 'paint' && paintMode === 'color' && (
                 <Stack
                     spacing={2}
                     sx={{

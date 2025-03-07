@@ -6,7 +6,6 @@ import useSelectionStore from '../Store/Store';
 export default function MaterialSelector() {
   const {
     selectedObject,
-    selectedObjectType,
     clearSelectedObject,
     setMaterialTexture,
     operationMode,
@@ -58,7 +57,7 @@ export default function MaterialSelector() {
 
   return (
     <>
-      {selectedObject && selectedObjectType === 'room' && operationMode === 'paint' && paintMode === 'texture' && (
+      {selectedObject && selectedObject.type === 'room' && operationMode === 'paint' && paintMode === 'texture' && (
         <Stack
           direction="row"
           spacing={0.5}

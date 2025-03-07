@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { create } from "zustand";
+import * as THREE from 'three';
 
 const useSelectionStore = create((set, get) => ({
   designMode: "roomDesign", // 'roomDesign' or 'roomSimulation'
@@ -21,7 +22,7 @@ const useSelectionStore = create((set, get) => ({
 
   // 原有的 room simulation functions
   setSelectedObject: (object, objectId, type) =>
-    set({ selectedObject: {object, objectId, type}}),
+    set({ selectedObject: { object, objectId, type } }),
 
   clearSelectedObject: () =>
     set({ selectedObject: null, selectedObjectType: null }),
@@ -40,11 +41,11 @@ const useSelectionStore = create((set, get) => ({
   addObject: (objectKey, objectData) =>
     set((state) => {
       if (!objectKey || !objectData) return state;
-  
+
       if (!state.objects[objectKey]) {
         state.objects[objectKey] = [];
       }
-  
+
       // Clone the 3D object to create an independent instance
       const clonedObject = objectData.object.clone();
       clonedObject.traverse((child) => {
@@ -52,7 +53,7 @@ const useSelectionStore = create((set, get) => ({
           child.material = child.material.clone();
         }
       });
-  
+
       const newObject = {
         id: uuidv4(),
         object: clonedObject, // Use the cloned object instead of the original
@@ -67,22 +68,22 @@ const useSelectionStore = create((set, get) => ({
           scale: [1, 1, 1]
         }
       };
-  
+
       state.objects[objectKey].push(newObject);
-  
+
       return { objects: { ...state.objects } };
     }),
 
   removeObject: (objectId) =>
     set((state) => {
       if (!objectId) return state;
-      
+
       const updatedObjects = { ...state.objects };
-      
+
       // Search through all object categories to find and remove the object with matching ID
       Object.keys(updatedObjects).forEach(key => {
         updatedObjects[key] = updatedObjects[key].filter(item => item.id !== objectId);
-        
+
         // Remove the category if it's empty
         if (updatedObjects[key].length === 0) {
           delete updatedObjects[key];
@@ -91,8 +92,8 @@ const useSelectionStore = create((set, get) => ({
 
       return {
         objects: updatedObjects,
-        selectedObject: state.selectedObject?.objectId === objectId ? 
-          { object: null, objectId: null, type: null } : 
+        selectedObject: state.selectedObject?.objectId === objectId ?
+          { object: null, objectId: null, type: null } :
           state.selectedObject
       };
     }),
@@ -112,6 +113,7 @@ const useSelectionStore = create((set, get) => ({
           roughnessMap: objectData?.textures?.roughnessMapPath ?? null,
           aoMap: objectData?.textures?.aoMapPath ?? null,
           bumpMap: objectData?.textures?.bumpMapPath ?? null,
+          color: objectData?.textures?.color ?? null,
           // value
           aoMapIntensity: objectData?.textures?.aoMapIntensity ?? 1,
           roughness: objectData?.textures?.roughness ?? 1,
@@ -131,14 +133,9 @@ const useSelectionStore = create((set, get) => ({
   // 更新材質貼圖（統一管理於 roomData）
   setMaterialTexture: (textureObject) =>
     set((state) => {
-      const selectedObject = state.selectedObject;
-      if (
-        !state.roomData ||
-        !selectedObject ||
-        state.selectedObjectType !== "room"
-      )
+      const selectedObject = state.selectedObject.object;
+      if (!state.roomData || !selectedObject || state.selectedObject.type !== "room")
         return state;
-      console.log("setMaterialTexture", textureObject, selectedObject);
 
       const textures = textureObject.textures;
       const updatedRoomData = {
@@ -154,7 +151,9 @@ const useSelectionStore = create((set, get) => ({
             roughnessMap: textures.roughnessMap || null,
             aoMap: textures.aoMap || null,
             bumpMap: textures.bumpMap || null,
-            ratio: textures.ratio || [1, 1],
+            color:
+              textures.color ??
+              state.roomData[selectedObject].textures.color,
             aoMapIntensity:
               textures.aoMapIntensity ??
               state.roomData[selectedObject].textures.aoMapIntensity,
@@ -177,13 +176,16 @@ const useSelectionStore = create((set, get) => ({
   // 更新材質顏色（統一管理於 roomData）
   setMaterialColor: (color) =>
     set((state) => {
-      const selectedObject = state.selectedObject;
-      if (
-        !state.roomData ||
-        !selectedObject ||
-        state.selectedObjectType !== "room"
-      )
+      const selectedObject = state.selectedObject.object;
+      if (!state.roomData || !selectedObject || state.selectedObject.type !== "room")
         return state;
+
+      // 直接更新 Three.js 材質
+      const mesh = selectedObject;
+      if (mesh && mesh.material) {
+        mesh.material.color = new THREE.Color(color);
+        mesh.material.needsUpdate = true;
+      }
 
       const updatedRoomData = {
         ...state.roomData,
@@ -192,7 +194,6 @@ const useSelectionStore = create((set, get) => ({
           textures: {
             ...state.roomData[selectedObject].textures,
             color: color,
-            needsUpdate: true,
           },
           isModified: true,
         },
@@ -208,7 +209,7 @@ const useSelectionStore = create((set, get) => ({
   // 原有的 room design functions
   setRoomType: (index) => set({ roomType: index }),
 
-  resetRoomData: () => set({ roomData: null }),
+  resetRoomData: () => set({ roomData: {} }),
 
   getModifiedItems: () => {
     if (!get().roomData) return [];
@@ -223,7 +224,7 @@ const useSelectionStore = create((set, get) => ({
   updateObjectTransform: (objectId, newTransform) =>
     set((state) => {
       const updatedObjects = { ...state.objects };
-      
+
       // Find and update the object with matching ID
       Object.keys(updatedObjects).forEach(key => {
         const objectIndex = updatedObjects[key].findIndex(item => item.id === objectId);
