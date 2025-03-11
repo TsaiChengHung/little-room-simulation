@@ -330,24 +330,48 @@ const handleSuggestCommand = async (command) => {
   // 從 AIService 導入相關函數
   const { 
     generateMaterialSuggestions, 
-    generateFurnitureSuggestions 
+    generateFurnitureSuggestions,
+    findAndApplyTextures
   } = await import('./AIService');
   
   switch (target) {
     case TARGET_TYPES.MATERIAL:
-      try {
-        const materialSuggestions = await generateMaterialSuggestions(params.prompt);
-        return {
-          success: materialSuggestions.success,
-          data: materialSuggestions.success ? materialSuggestions.suggestions : null,
-          error: !materialSuggestions.success ? materialSuggestions.message : null,
-          rawResponse: materialSuggestions.rawResponse
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error: `生成材質建議時出錯: ${error.message}`
-        };
+      // 檢查是否需要智能選擇並應用材質
+      if (params.autoApply) {
+        try {
+          const targetType = params.targetType || 'all';
+          const result = await findAndApplyTextures(params.prompt, targetType);
+          return {
+            success: result.success,
+            data: result.success ? {
+              appliedTextures: result.selectedTextures,
+              explanation: result.explanation
+            } : null,
+            message: result.message,
+            error: !result.success ? result.message : null
+          };
+        } catch (error) {
+          return {
+            success: false,
+            error: `智能選擇材質時出錯: ${error.message}`
+          };
+        }
+      } else {
+        // 原有的材質建議功能
+        try {
+          const materialSuggestions = await generateMaterialSuggestions(params.prompt);
+          return {
+            success: materialSuggestions.success,
+            data: materialSuggestions.success ? materialSuggestions.suggestions : null,
+            error: !materialSuggestions.success ? materialSuggestions.message : null,
+            rawResponse: materialSuggestions.rawResponse
+          };
+        } catch (error) {
+          return {
+            success: false,
+            error: `生成材質建議時出錯: ${error.message}`
+          };
+        }
       }
       
     case TARGET_TYPES.FURNITURE:

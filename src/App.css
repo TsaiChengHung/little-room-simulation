@@ -65,19 +65,19 @@
 
 /* MCP 接口相關樣式 */
 .mcp-toggle-button {
-  background-color: #2ecc71;
+  background-color: #4a6da7;
   color: white;
   border: none;
-  padding: 8px 16px;
   border-radius: 4px;
-  cursor: pointer;
+  padding: 8px 12px;
   margin-left: 8px;
+  cursor: pointer;
   font-size: 14px;
-  transition: background-color 0.2s;
+  transition: background-color 0.3s;
 }
 
 .mcp-toggle-button:hover {
-  background-color: #27ae60;
+  background-color: #3a5d97;
 }
 
 .mcp-interface-container {
@@ -85,9 +85,11 @@
   top: 60px;
   right: 20px;
   width: 400px;
-  height: 600px;
-  z-index: 1000;
+  max-height: 80vh;
+  background-color: rgba(0, 0, 0, 0.7);
   border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  overflow: auto;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 } 

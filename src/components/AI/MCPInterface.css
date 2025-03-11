@@ -199,4 +199,69 @@
 .mcp-input button:disabled {
   background-color: #95a5a6;
   cursor: not-allowed;
+}
+
+/* 添加智能材質選擇相關的樣式 */
+.material-button {
+  background-color: #4a6da7;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-left: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.material-button:hover {
+  background-color: #3a5d97;
+}
+
+.material-button:disabled {
+  background-color: #6c7a8c;
+  cursor: not-allowed;
+}
+
+.material-prompt-input {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.material-prompt-input input {
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  margin-bottom: 8px;
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.material-target-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.material-target-buttons button {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  background-color: #4a6da7;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.material-target-buttons button:hover {
+  background-color: #3a5d97;
+}
+
+.material-target-buttons button:disabled {
+  background-color: #6c7a8c;
+  cursor: not-allowed;
 } 

@@ -11,7 +11,9 @@ const MCPInterface = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const { isResourcesLoaded } = useSelectionStore();
+  const [materialPrompt, setMaterialPrompt] = useState('');
+  const [showMaterialPromptInput, setShowMaterialPromptInput] = useState(false);
+  const { isResourcesLoaded, roomData } = useSelectionStore();
   
   // 在組件加載時檢查資源狀態
   useEffect(() => {
@@ -136,6 +138,18 @@ const MCPInterface = () => {
                   target: 'floor'
                 }
               }, null, 2)
+            },
+            {
+              description: 'AI 智能選擇材質',
+              command: JSON.stringify({ 
+                type: 'suggest', 
+                target: 'material',
+                params: {
+                  prompt: "我想要一個溫暖的客廳",
+                  autoApply: true,
+                  targetType: 'all'
+                }
+              }, null, 2)
             }
           ]
         }
@@ -203,6 +217,78 @@ const MCPInterface = () => {
     }
   };
   
+  // 顯示材質提示輸入框
+  const toggleMaterialPromptInput = () => {
+    setShowMaterialPromptInput(!showMaterialPromptInput);
+  };
+  
+  // 處理智能材質選擇
+  const handleSmartMaterialSelection = async (targetType = 'all') => {
+    if (!materialPrompt.trim()) {
+      setMessages(prev => [
+        ...prev, 
+        { 
+          type: 'error', 
+          content: {
+            success: false,
+            error: "請輸入材質需求描述"
+          }
+        }
+      ]);
+      return;
+    }
+    
+    setIsProcessing(true);
+    
+    try {
+      // 創建命令
+      const command = {
+        type: 'suggest',
+        target: 'material',
+        params: {
+          prompt: materialPrompt,
+          autoApply: true,
+          targetType
+        }
+      };
+      
+      // 添加命令到消息列表
+      setMessages(prev => [
+        ...prev, 
+        { type: 'command', content: JSON.stringify(command, null, 2) }
+      ]);
+      
+      // 處理命令
+      const result = await processMCPCommand(command);
+      
+      // 添加結果到消息列表
+      setMessages(prev => [
+        ...prev, 
+        { type: result.success ? 'result' : 'error', content: result }
+      ]);
+      
+      // 如果成功，隱藏輸入框
+      if (result.success) {
+        setShowMaterialPromptInput(false);
+        setMaterialPrompt('');
+      }
+    } catch (error) {
+      // 處理錯誤
+      setMessages(prev => [
+        ...prev, 
+        { 
+          type: 'error', 
+          content: {
+            success: false,
+            error: `智能選擇材質時出錯: ${error.message}`
+          }
+        }
+      ]);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+  
   // 格式化 JSON 結果
   const formatJsonResult = (content) => {
     return <pre>{JSON.stringify(content, null, 2)}</pre>;
@@ -215,8 +301,53 @@ const MCPInterface = () => {
         <div className="header-buttons">
           <button className="resource-button" onClick={showAvailableResources}>查看資源</button>
           <button className="help-button" onClick={showHelp}>幫助</button>
+          <button 
+            className="material-button" 
+            onClick={toggleMaterialPromptInput}
+            disabled={!roomData}
+          >
+            AI 選擇材質
+          </button>
         </div>
       </div>
+      
+      {showMaterialPromptInput && (
+        <div className="material-prompt-input">
+          <input
+            type="text"
+            value={materialPrompt}
+            onChange={(e) => setMaterialPrompt(e.target.value)}
+            placeholder="描述您想要的材質風格..."
+            disabled={isProcessing}
+          />
+          <div className="material-target-buttons">
+            <button 
+              onClick={() => handleSmartMaterialSelection('all')}
+              disabled={isProcessing || !materialPrompt.trim()}
+            >
+              全部
+            </button>
+            <button 
+              onClick={() => handleSmartMaterialSelection('floor')}
+              disabled={isProcessing || !materialPrompt.trim()}
+            >
+              地板
+            </button>
+            <button 
+              onClick={() => handleSmartMaterialSelection('wall')}
+              disabled={isProcessing || !materialPrompt.trim()}
+            >
+              牆壁
+            </button>
+            <button 
+              onClick={() => handleSmartMaterialSelection('ceiling')}
+              disabled={isProcessing || !materialPrompt.trim()}
+            >
+              天花板
+            </button>
+          </div>
+        </div>
+      )}
       
       <div className="mcp-messages">
         {messages.map((message, index) => (

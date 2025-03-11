@@ -7,6 +7,7 @@ function Room({ floorPoints, wallHeight = 3, useRoomData = false, ...props }) {
   const {
     designMode,
     resetRoomData,
+    setWallHeight,
     addRoomDataObject,
     roomData,
     selectedObject,
@@ -97,7 +98,7 @@ function Room({ floorPoints, wallHeight = 3, useRoomData = false, ...props }) {
     if (roomData && designMode === "roomDesign") return;
     resetRoomData();
     console.log("roomData init");
-
+    setWallHeight(wallHeight);
     addRoomDataObject("ceiling", ceilingArea);
     addRoomDataObject("floor", floorArea);
     walls.forEach((wall) => addRoomDataObject(wall.id, wall.area));

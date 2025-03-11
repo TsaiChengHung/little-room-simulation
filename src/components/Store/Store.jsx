@@ -8,13 +8,15 @@ const useSelectionStore = create((set, get) => ({
   operationMode: null,
   transformMode: "translate",
   paintMode: "color",
-  currentFloorPoints: [],
+  
   sunPosition: 0.5,
 
   // 統一管理所有家具物件
   objects: {},
 
   // 統一管理的天地壁資料，初始為空，由組件設置
+  currentFloorPoints: [],
+  wallHeight: 3,
   roomData: null, // 初始為 null，等待組件初始化
 
   // 預載資源相關狀態
@@ -106,6 +108,8 @@ const useSelectionStore = create((set, get) => ({
           state.selectedObject
       };
     }),
+
+  setWallHeight: (height) => set({ wallHeight: height }),
 
   addRoomDataObject: (objectKey, objectArea, objectData) =>
     set((state) => {
@@ -426,6 +430,37 @@ const useSelectionStore = create((set, get) => ({
     });
     
     set({ roomData: updatedRoomData });
+
+    // 使用 addRoomDataObject 方法更新每個修改過的部分
+    if (appliedChanges.includes(`地板: ${selectedTextures.floor}`)) {
+      store.addRoomDataObject('floor', updatedRoomData.floor.area, {
+        materialName: updatedRoomData.floor.materialName,
+        isModified: true,
+        textures: updatedRoomData.floor.textures
+      });
+    }
+
+    if (appliedChanges.includes(`天花板: ${selectedTextures.ceiling}`)) {
+      store.addRoomDataObject('ceiling', updatedRoomData.ceiling.area, {
+        materialName: updatedRoomData.ceiling.materialName,
+        isModified: true,
+        textures: updatedRoomData.ceiling.textures
+      });
+    }
+
+    if (appliedChanges.includes(`牆壁: ${selectedTextures.wall}`)) {
+      // 更新所有牆壁
+      Object.keys(updatedRoomData).forEach(key => {
+        if (key.startsWith('wall-')) {
+          store.addRoomDataObject(key, updatedRoomData[key].area, {
+            materialName: updatedRoomData[key].materialName,
+            isModified: true,
+            textures: updatedRoomData[key].textures
+          });
+        }
+      });
+    }
+
     return true;
   },
 }));

@@ -18,10 +18,12 @@ import CustomObjectControl from "./components/UI/CustomObjectControl";
 import SunPosition from "./components/SFX/SunPosition";
 import AIAssistant from './components/AI/AIAssistant';
 import Room from './components/RoomSelector/RoomGenerator';
+import MCPInterface from './components/AI/MCPInterface';
 import './App.css';
 
 export function App() {
   const [showAI, setShowAI] = useState(false);
+  const [showMCP, setShowMCP] = useState(false);
   const [resourcesLoaded, setResourcesLoaded] = useState(false);
   const { clearSelectedObject, setCurrentScene, designMode, isAIGenerating, setResourcesLoaded: storeSetResourcesLoaded } = useSelectionStore();
 
@@ -140,12 +142,24 @@ export function App() {
           >
             {showAI ? '隱藏 AI 助手' : '顯示 AI 助手'}
           </button>
+          <button 
+            className="mcp-toggle-button"
+            onClick={() => setShowMCP(!showMCP)}
+          >
+            {showMCP ? '隱藏 MCP 界面' : '顯示 MCP 界面'}
+          </button>
           {/* 其他控制面板 */}
         </div>
         
         {showAI && (
           <div className="ai-assistant-container">
             <AIAssistant />
+          </div>
+        )}
+        
+        {showMCP && (
+          <div className="mcp-interface-container">
+            <MCPInterface />
           </div>
         )}
       </div>

@@ -54,6 +54,8 @@ export default function MaterialSelector() {
     });
   }, [preloadedTextures, handleMaterialClick]); // Only re-render when textures or click handler changes
 
+  const scene = document.querySelector('canvas')?.['__r3f']?.scene;
+
   return (
     <>
       {selectedObject && selectedObject.type === 'room' && operationMode === 'paint' && paintMode === 'texture' && (

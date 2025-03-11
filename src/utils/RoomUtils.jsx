@@ -81,6 +81,74 @@ export const determineRoomShape = (points) => {
 };
 
 /**
+ * 計算房間體積
+ * @param {Number} floorArea 地板面積
+ * @param {Number} wallHeight 牆壁高度
+ * @returns {Number} 體積
+ */
+export const calculateRoomVolume = (floorArea, wallHeight) => {
+  if (!floorArea || !wallHeight) return 0;
+  return floorArea * wallHeight;
+};
+
+/**
+ * 計算房間總表面積 (地板 + 天花板 + 所有牆壁)
+ * @param {Object} roomData 房間數據
+ * @returns {Number} 總表面積
+ */
+export const calculateTotalSurfaceArea = (roomData) => {
+  if (!roomData) return 0;
+  
+  let totalArea = 0;
+  
+  // 添加地板面積
+  if (roomData.floor && roomData.floor.area) {
+    totalArea += roomData.floor.area;
+  }
+  
+  // 添加天花板面積
+  if (roomData.ceiling && roomData.ceiling.area) {
+    totalArea += roomData.ceiling.area;
+  }
+  
+  // 添加所有牆壁面積
+  Object.keys(roomData).forEach(key => {
+    if (key.startsWith('wall-') && roomData[key].area) {
+      totalArea += roomData[key].area;
+    }
+  });
+  
+  return totalArea;
+};
+
+/**
+ * 計算房間的尺寸 (長、寬、高)
+ * @param {Array} points 多邊形頂點數組
+ * @param {Number} wallHeight 牆壁高度
+ * @returns {Object} 房間尺寸
+ */
+export const calculateRoomDimensions = (points, wallHeight) => {
+  if (!points || points.length < 3) return { width: 0, length: 0, height: 0 };
+  
+  // 計算邊界框
+  let minX = Infinity, maxX = -Infinity;
+  let minZ = Infinity, maxZ = -Infinity;
+  
+  points.forEach(point => {
+    minX = Math.min(minX, point.x);
+    maxX = Math.max(maxX, point.x);
+    minZ = Math.min(minZ, point.z);
+    maxZ = Math.max(maxZ, point.z);
+  });
+  
+  return {
+    width: maxX - minX,
+    length: maxZ - minZ,
+    height: wallHeight || 0
+  };
+};
+
+/**
  * 分析房間的函數
  * @returns {Object} 房間分析結果
  */
@@ -101,23 +169,35 @@ export const analyzeRoom = () => {
     roomInfo: {
       geometry: {},
       materials: {},
-      objects: {}
+      objects: {},
+      dimensions: {},
+      volume: 0,
+      totalSurfaceArea: 0
     }
   };
+  
+  // 獲取牆壁高度
+  const wallHeight = useSelectionStore.getState().wallHeight || 2.4; // 默認高度為 2.4 米
   
   // 分析幾何形狀 (如果有 currentFloorPoints)
   if (currentFloorPoints && currentFloorPoints.length > 0) {
     const area = calculatePolygonArea(currentFloorPoints);
     const perimeter = calculatePolygonPerimeter(currentFloorPoints);
     const shape = determineRoomShape(currentFloorPoints);
+    const dimensions = calculateRoomDimensions(currentFloorPoints, wallHeight);
     
     analysis.roomInfo.geometry = {
       points: currentFloorPoints,
       verticesCount: currentFloorPoints.length,
-      area: area.toFixed(2),
-      perimeter: perimeter.toFixed(2),
+      area: parseFloat(area.toFixed(2)),
+      perimeter: parseFloat(perimeter.toFixed(2)),
       shape: shape
     };
+    
+    analysis.roomInfo.dimensions = dimensions;
+    
+    // 計算體積
+    analysis.roomInfo.volume = calculateRoomVolume(area, wallHeight);
   }
   
   // 分析材質 (如果有 roomData)
@@ -136,6 +216,11 @@ export const analyzeRoom = () => {
           roughness: roomData.floor.textures?.roughness || 0
         }
       };
+      
+      // 如果沒有從 currentFloorPoints 計算面積，使用 roomData 中的面積
+      if (!analysis.roomInfo.geometry.area && roomData.floor.area) {
+        analysis.roomInfo.geometry.area = roomData.floor.area;
+      }
     }
     
     // 處理天花板材質
@@ -174,25 +259,46 @@ export const analyzeRoom = () => {
     }
     
     analysis.roomInfo.materials = materials;
+    
+    // 計算總表面積
+    analysis.roomInfo.totalSurfaceArea = calculateTotalSurfaceArea(roomData);
+    
+    // 如果沒有從 currentFloorPoints 計算體積，使用 roomData 中的面積
+    if (!analysis.roomInfo.volume && roomData.floor && roomData.floor.area) {
+      analysis.roomInfo.volume = calculateRoomVolume(roomData.floor.area, wallHeight);
+    }
   }
   
   // 分析物件 (如果有 objects)
   if (objects && Object.keys(objects).length > 0) {
     const objectsInfo = {};
+    let totalFurnitureCount = 0;
     
     Object.keys(objects).forEach(category => {
       if (Array.isArray(objects[category])) {
         objectsInfo[category] = objects[category].map(obj => ({
-          name: obj.name || "未命名物件",
+          id: obj.id || "",
+          name: obj.objectName || "未命名物件",
           price: obj.price || 0,
           position: obj.transform?.translate || [0, 0, 0],
           rotation: obj.transform?.rotate || [0, 0, 0],
           scale: obj.transform?.scale || [1, 1, 1]
         }));
+        
+        totalFurnitureCount += objects[category].length;
       }
     });
     
-    analysis.roomInfo.objects = objectsInfo;
+    analysis.roomInfo.objects = {
+      categories: Object.keys(objects).length,
+      totalCount: totalFurnitureCount,
+      items: objectsInfo
+    };
+    
+    // 計算家具密度 (每平方米的家具數量)
+    if (analysis.roomInfo.geometry.area && totalFurnitureCount > 0) {
+      analysis.roomInfo.objects.density = parseFloat((totalFurnitureCount / analysis.roomInfo.geometry.area).toFixed(2));
+    }
   }
   
   return analysis;
@@ -210,6 +316,9 @@ export const simplifyRoomDataForAI = (roomAnalysis) => {
   
   const simplifiedRoomInfo = {
     geometry: roomAnalysis.roomInfo.geometry || {},
+    dimensions: roomAnalysis.roomInfo.dimensions || {},
+    volume: roomAnalysis.roomInfo.volume || 0,
+    totalSurfaceArea: roomAnalysis.roomInfo.totalSurfaceArea || 0,
     materials: {}
   };
   
@@ -218,14 +327,16 @@ export const simplifyRoomDataForAI = (roomAnalysis) => {
     if (roomAnalysis.roomInfo.materials.floor) {
       simplifiedRoomInfo.materials.floor = {
         material: roomAnalysis.roomInfo.materials.floor.materialName,
-        area: roomAnalysis.roomInfo.materials.floor.area
+        area: roomAnalysis.roomInfo.materials.floor.area,
+        color: roomAnalysis.roomInfo.materials.floor.textures?.color || null
       };
     }
     
     if (roomAnalysis.roomInfo.materials.ceiling) {
       simplifiedRoomInfo.materials.ceiling = {
         material: roomAnalysis.roomInfo.materials.ceiling.materialName,
-        area: roomAnalysis.roomInfo.materials.ceiling.area
+        area: roomAnalysis.roomInfo.materials.ceiling.area,
+        color: roomAnalysis.roomInfo.materials.ceiling.textures?.color || null
       };
     }
     
@@ -233,17 +344,23 @@ export const simplifyRoomDataForAI = (roomAnalysis) => {
       simplifiedRoomInfo.materials.walls = Object.keys(roomAnalysis.roomInfo.materials.walls).map(key => ({
         id: key,
         material: roomAnalysis.roomInfo.materials.walls[key].materialName,
-        area: roomAnalysis.roomInfo.materials.walls[key].area
+        area: roomAnalysis.roomInfo.materials.walls[key].area,
+        color: roomAnalysis.roomInfo.materials.walls[key].textures?.color || null
       }));
     }
   }
   
   // 簡化物件信息
-  if (roomAnalysis.roomInfo.objects && Object.keys(roomAnalysis.roomInfo.objects).length > 0) {
-    simplifiedRoomInfo.objects = {};
+  if (roomAnalysis.roomInfo.objects && roomAnalysis.roomInfo.objects.items) {
+    simplifiedRoomInfo.objects = {
+      categories: roomAnalysis.roomInfo.objects.categories || 0,
+      totalCount: roomAnalysis.roomInfo.objects.totalCount || 0,
+      density: roomAnalysis.roomInfo.objects.density || 0,
+      categoryBreakdown: {}
+    };
     
-    Object.keys(roomAnalysis.roomInfo.objects).forEach(category => {
-      simplifiedRoomInfo.objects[category] = roomAnalysis.roomInfo.objects[category].length;
+    Object.keys(roomAnalysis.roomInfo.objects.items).forEach(category => {
+      simplifiedRoomInfo.objects.categoryBreakdown[category] = roomAnalysis.roomInfo.objects.items[category].length;
     });
   }
   
@@ -263,28 +380,48 @@ export const generateRoomDescription = (roomInfo) => {
   // 添加幾何信息
   if (roomInfo.geometry) {
     if (roomInfo.geometry.shape) description += `- 形狀: ${roomInfo.geometry.shape}\n`;
-    if (roomInfo.geometry.area) description += `- 面積: ${roomInfo.geometry.area} 平方單位\n`;
-    if (roomInfo.geometry.perimeter) description += `- 周長: ${roomInfo.geometry.perimeter} 單位\n`;
+    if (roomInfo.geometry.area) description += `- 面積: ${roomInfo.geometry.area} 平方米\n`;
+    if (roomInfo.geometry.perimeter) description += `- 周長: ${roomInfo.geometry.perimeter} 米\n`;
   }
+  
+  // 添加尺寸信息
+  if (roomInfo.dimensions) {
+    const { width, length, height } = roomInfo.dimensions;
+    if (width && length) description += `- 尺寸: ${width.toFixed(2)}m × ${length.toFixed(2)}m`;
+    if (height) description += ` × ${height.toFixed(2)}m (高)\n`;
+    else description += '\n';
+  }
+  
+  // 添加體積和總表面積
+  if (roomInfo.volume) description += `- 體積: ${roomInfo.volume.toFixed(2)} 立方米\n`;
+  if (roomInfo.totalSurfaceArea) description += `- 總表面積: ${roomInfo.totalSurfaceArea.toFixed(2)} 平方米\n`;
   
   // 添加材質信息
   if (roomInfo.materials) {
     description += '\n材質信息:\n';
     
     if (roomInfo.materials.floor) {
-      description += `- 地板: ${roomInfo.materials.floor.material} (面積: ${roomInfo.materials.floor.area})\n`;
+      const floorColor = roomInfo.materials.floor.color ? 
+        `，顏色: ${roomInfo.materials.floor.color}` : '';
+      description += `- 地板: ${roomInfo.materials.floor.material} (面積: ${roomInfo.materials.floor.area} 平方米${floorColor})\n`;
     } else {
       description += '- 地板: 未設置\n';
     }
     
     if (roomInfo.materials.ceiling) {
-      description += `- 天花板: ${roomInfo.materials.ceiling.material} (面積: ${roomInfo.materials.ceiling.area})\n`;
+      const ceilingColor = roomInfo.materials.ceiling.color ? 
+        `，顏色: ${roomInfo.materials.ceiling.color}` : '';
+      description += `- 天花板: ${roomInfo.materials.ceiling.material} (面積: ${roomInfo.materials.ceiling.area} 平方米${ceilingColor})\n`;
     } else {
       description += '- 天花板: 未設置\n';
     }
     
     if (roomInfo.materials.walls && roomInfo.materials.walls.length > 0) {
-      description += `- 牆壁: ${roomInfo.materials.walls.map(w => `${w.id}: ${w.material}`).join(', ')}\n`;
+      description += '- 牆壁:\n';
+      roomInfo.materials.walls.forEach(wall => {
+        const wallColor = wall.color ? `，顏色: ${wall.color}` : '';
+        description += `  * ${wall.id}: ${wall.material} (面積: ${wall.area} 平方米${wallColor})\n`;
+      });
     } else {
       description += '- 牆壁: 未設置\n';
     }
@@ -292,15 +429,47 @@ export const generateRoomDescription = (roomInfo) => {
   
   // 添加物件信息
   if (roomInfo.objects) {
-    description += '\n物件信息: ';
-    description += Object.entries(roomInfo.objects)
-      .map(([category, count]) => `${category}: ${count}個`)
-      .join(', ');
+    description += '\n物件信息:\n';
+    
+    if (roomInfo.objects.totalCount) {
+      description += `- 總數: ${roomInfo.objects.totalCount} 個物件\n`;
+    }
+    
+    if (roomInfo.objects.density) {
+      description += `- 家具密度: ${roomInfo.objects.density} 個/平方米\n`;
+    }
+    
+    if (roomInfo.objects.categoryBreakdown) {
+      description += '- 類別明細: ';
+      description += Object.entries(roomInfo.objects.categoryBreakdown)
+        .map(([category, count]) => `${category}: ${count}個`)
+        .join(', ');
+      description += '\n';
+    }
   } else {
-    description += '\n物件信息: 無物件';
+    description += '\n物件信息: 無物件\n';
   }
   
   return description;
+};
+
+/**
+ * 分析房間空間利用率
+ * @param {Number} floorArea 地板面積
+ * @param {Number} furnitureCount 家具數量
+ * @returns {String} 空間利用率評估
+ */
+export const analyzeSpaceUtilization = (floorArea, furnitureCount) => {
+  if (!floorArea || floorArea <= 0) return "無法評估空間利用率：缺少地板面積資訊";
+  if (!furnitureCount) return "空間利用率：空房間，無家具";
+  
+  const density = furnitureCount / floorArea;
+  
+  if (density < 0.1) return "空間利用率：非常低，房間顯得空曠";
+  if (density < 0.2) return "空間利用率：較低，有充足的活動空間";
+  if (density < 0.3) return "空間利用率：適中，平衡了家具與活動空間";
+  if (density < 0.4) return "空間利用率：較高，家具佈置較為緊湊";
+  return "空間利用率：非常高，空間可能顯得擁擠";
 };
 
 /**
@@ -319,6 +488,15 @@ export const generateAIPrompt = (userPrompt, task = 'general') => {
   const simplifiedRoomInfo = simplifyRoomDataForAI(roomAnalysis);
   const roomDescription = generateRoomDescription(simplifiedRoomInfo);
   
+  // 獲取空間利用率評估
+  let spaceUtilization = "";
+  if (simplifiedRoomInfo.geometry.area && simplifiedRoomInfo.objects && simplifiedRoomInfo.objects.totalCount) {
+    spaceUtilization = analyzeSpaceUtilization(
+      simplifiedRoomInfo.geometry.area, 
+      simplifiedRoomInfo.objects.totalCount
+    );
+  }
+  
   let enhancedPrompt = '';
   
   switch (task) {
@@ -328,14 +506,17 @@ export const generateAIPrompt = (userPrompt, task = 'general') => {
 
 ${roomDescription}
 
+${spaceUtilization ? spaceUtilization + "\n" : ""}
+
 用戶需求:
 ${userPrompt}
 
-請提供以下內容：
+請考慮房間的形狀、尺寸、體積和現有材質，提供以下內容：
 1. 為地板推薦的材質，包括名稱、顏色和質感描述
 2. 為牆壁推薦的材質，包括名稱、顏色和質感描述
 3. 為天花板推薦的材質，包括名稱、顏色和質感描述
 4. 這些材質如何搭配，以及整體效果描述
+5. 考慮到房間高度的特殊建議（如高牆壁適合垂直設計元素）
 
 請以JSON格式回答，格式如下：
 {
@@ -354,7 +535,8 @@ ${userPrompt}
     "color": "顏色代碼或描述",
     "description": "質感和外觀描述"
   },
-  "overall": "整體效果描述"
+  "overall": "整體效果描述",
+  "heightConsiderations": "考慮房間高度的特殊建議"
 }
 `;
       break;
@@ -365,13 +547,16 @@ ${userPrompt}
 
 ${roomDescription}
 
+${spaceUtilization ? spaceUtilization + "\n" : ""}
+
 用戶需求:
 ${userPrompt}
 
-請提供以下內容：
+請考慮房間的形狀、尺寸、體積和現有家具，提供以下內容：
 1. 推薦的家具列表，包括名稱、尺寸和位置
 2. 家具擺放的整體布局描述
 3. 考慮到房間形狀和大小的特殊建議
+4. 考慮到房間高度的垂直空間利用建議
 
 請以JSON格式回答，格式如下：
 {
@@ -393,7 +578,50 @@ ${userPrompt}
     }
   ],
   "layout": "整體布局描述",
-  "specialNotes": "特殊建議"
+  "specialNotes": "特殊建議",
+  "verticalSpaceUtilization": "垂直空間利用建議"
+}
+`;
+      break;
+    
+    case 'lighting':
+      enhancedPrompt = `
+你是一位專業的室內設計師 AI 助手。請根據以下房間信息和用戶需求，提供詳細的照明設計建議：
+
+${roomDescription}
+
+${spaceUtilization ? spaceUtilization + "\n" : ""}
+
+用戶需求:
+${userPrompt}
+
+請考慮房間的形狀、尺寸、體積和現有材質，提供以下內容：
+1. 推薦的照明方案，包括主照明和輔助照明
+2. 燈具的類型、數量和位置
+3. 光源的色溫和亮度建議
+4. 考慮到房間高度的特殊照明建議
+5. 照明與材質的互動效果
+
+請以JSON格式回答，格式如下：
+{
+  "mainLighting": {
+    "type": "照明類型",
+    "quantity": 數量,
+    "position": "位置描述",
+    "colorTemperature": "色溫描述",
+    "brightness": "亮度描述"
+  },
+  "auxiliaryLighting": [
+    {
+      "type": "照明類型",
+      "quantity": 數量,
+      "position": "位置描述",
+      "purpose": "用途描述"
+    }
+  ],
+  "heightConsiderations": "考慮房間高度的特殊照明建議",
+  "materialInteraction": "照明與材質的互動效果",
+  "overallEffect": "整體照明效果描述"
 }
 `;
       break;
@@ -402,9 +630,18 @@ ${userPrompt}
       enhancedPrompt = `
 ${roomDescription}
 
+${spaceUtilization ? spaceUtilization + "\n" : ""}
+
 用戶問題: ${userPrompt}
 
-請根據以上房間信息回答用戶問題。如果是關於房間設計、家具擺放或材質選擇的問題，請考慮房間的形狀、大小和現有材質。
+請根據以上房間信息回答用戶問題。在回答時，請考慮以下因素：
+1. 房間的形狀、尺寸、體積和總表面積
+2. 房間的材質和顏色
+3. 現有的家具佈置和密度
+4. 房間的空間利用率
+5. 房間高度對設計的影響
+
+如果是關於房間設計、家具擺放或材質選擇的問題，請提供具體、可行的建議，並解釋這些建議如何適合房間的特性。
 `;
   }
   
