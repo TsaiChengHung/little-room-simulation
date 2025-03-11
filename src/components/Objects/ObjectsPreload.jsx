@@ -1,5 +1,6 @@
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
+import useSelectionStore from "../Store/Store";
 
 // Pre-defined object URLs - you can modify this list
 const resources = [
@@ -126,6 +127,7 @@ const resources = [
 
 // Cache structure will store both object and info
 export const cachedObjects = {}
+const { setPreloadedModels } = useSelectionStore.getState();
 
 const loader = new GLTFLoader();
 const dracoLoader = new DRACOLoader();
@@ -173,68 +175,55 @@ const getObjectsUrlMap = () => {
 };
 
 export async function preloadAllObjects(objectList = getObjectsUrlMap()) {
-    // Prevent multiple preloading attempts
     if (isPreloading) {
-        console.log("Already preloading objects...");
-        return;
+        console.log("Already preloading objects, please wait...");
+        return cachedObjects;
     }
 
     isPreloading = true;
-    console.log("Starting to preload objects");
+    console.log("Starting to preload all objects...");
 
     try {
-        // Clear cache for objects not in the new list
-        Object.keys(cachedObjects).forEach(key => {
-            if (!objectList[key]) {
-                delete cachedObjects[key];
+        // Load each object
+        for (const [key, info] of Object.entries(objectList)) {
+            if (!cachedObjects[key] || !cachedObjects[key].object) {
+                console.log(`Loading object: ${key}`);
+                try {
+                    const gltf = await loadModel(info.modelFileGLB);
+                    const object = gltf.scene;
+                    
+                    // Setup the object
+                    SetupSceneChildren(object);
+                    
+                    // Cache the object
+                    cachedObjects[key] = {
+                        object,
+                        info
+                    };
+                    
+                    console.log(`Loaded object: ${key}`);
+                } catch (error) {
+                    console.error(`Failed to load object ${key}:`, error);
+                }
             }
-        });
-
-        const loadPromises = Object.entries(objectList).map(async ([key, resourceInfo]) => {
-            if (!cachedObjects[key]?.object) {
-                const object = await loadModel(resourceInfo.modelFileGLB);
-                const { name, description, price, modelFileGLB, thumbnailUrl } = resourceInfo;
-                SetupSceneChildren(object.scene);
-                cachedObjects[key] = {
-                    id: key,
-                    object: object.scene,
-                    objectName: name,
-                    description: description,
-                    price: price,
-                    glbFile: modelFileGLB,
-                    thumbnailUrl : thumbnailUrl,
-                    transform: {translate: [0,0,0], rotation:[0,0,0], scale:[1,1,1]},
-                };
-                console.log(`Loaded object: ${key}`, object);
-            }
-        });
-
-        await Promise.all(loadPromises);
-        console.log("All objects preloaded successfully:", cachedObjects);
-    } catch (error) {
-        console.error("Error during preloading:", error);
-    } finally {
+        }
+        
+        console.log("All objects preloaded successfully");
+        
+        // 更新 Store 中的預載模型
+        const { setPreloadedModels } = useSelectionStore.getState();
+        setPreloadedModels(cachedObjects);
+        
         isPreloading = false;
+        return cachedObjects;
+    } catch (error) {
+        console.error("Error during preloading objects:", error);
+        isPreloading = false;
+        
+        // 即使出錯，也更新已加載的模型到 Store
+        const { setPreloadedModels } = useSelectionStore.getState();
+        setPreloadedModels(cachedObjects);
+        
+        return cachedObjects;
     }
-}
-
-// Function to check if an object is cached
-export function isObjectCached(key) {
-    return !!cachedObjects[key]?.object;
-}
-
-// Function to get a cached object
-export function getCachedObject(key) {
-    return cachedObjects[key]?.object || null;
-}
-
-// Function to get object info
-export function getCachedObjectInfo(key) {
-    return cachedObjects[key]?.info || null;
-}
-
-// Helper function to get resource data by name
-export function getResourceByName(name) {
-    const key = name.replace(/\s+/g, '_').toLowerCase();
-    return resources.find(resource => resource.name.replace(/\s+/g, '_').toLowerCase() === key);
 }

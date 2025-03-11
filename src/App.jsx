@@ -1,5 +1,6 @@
+import React, { useState, useEffect } from 'react';
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Environment } from "@react-three/drei";
+import { OrbitControls, Environment, Html } from "@react-three/drei";
 import {
   EffectComposer,
   TiltShift2,
@@ -12,28 +13,54 @@ import RoomSelectorUI from "./components/RoomSelector/RoomSelectorUI";
 import InteractiveUI from "./components/UI/InteractiveUI";
 import useSelectionStore from "./components/Store/Store";
 import { preloadAllObjects } from "./components/Objects/ObjectsPreload";
-import { useEffect } from "react";
+import { initializeTextures } from "./components/AssetManage/Textures";
 import CustomObjectControl from "./components/UI/CustomObjectControl";
 import SunPosition from "./components/SFX/SunPosition";
+import AIAssistant from './components/AI/AIAssistant';
+import Room from './components/RoomSelector/RoomGenerator';
+import './App.css';
 
-export const App = () => {
-  // Preload objects when app starts
+export function App() {
+  const [showAI, setShowAI] = useState(false);
+  const [resourcesLoaded, setResourcesLoaded] = useState(false);
+  const { clearSelectedObject, setCurrentScene, designMode, isAIGenerating, setResourcesLoaded: storeSetResourcesLoaded } = useSelectionStore();
+
+  // Preload objects and textures when app starts
   useEffect(() => {
-    preloadAllObjects();
-  }, []);
-
-  const { clearSelectedObject, setCurrentScene, designMode } =
-    useSelectionStore();
+    const initializeResources = async () => {
+      try {
+        console.log("開始初始化資源...");
+        
+        // 加載模型
+        const models = await preloadAllObjects();
+        console.log("模型加載完成:", Object.keys(models).length);
+        
+        // 加載貼圖
+        const textures = initializeTextures();
+        console.log("貼圖加載完成:", Object.keys(textures).length);
+        
+        // 標記資源加載完成
+        setResourcesLoaded(true);
+        storeSetResourcesLoaded(true);
+        
+        console.log("所有資源初始化完成");
+      } catch (error) {
+        console.error("初始化資源時出錯:", error);
+      }
+    };
+    
+    initializeResources();
+  }, [storeSetResourcesLoaded]);
 
   const handleCanvasClick = () => {
     clearSelectedObject();
   };
-  0;
 
   return (
     <>
       <div
         style={{ position: "fixed", width: "100%", height: "100%", zIndex: 0 }}
+        className="app-container"
       >
         {designMode === "roomSimulation" && (
           <Canvas
@@ -41,6 +68,7 @@ export const App = () => {
             gl={{ antialias: true }}
             camera={{ position: [0, 1, 10], fov: 15, near: 1, far: 100 }}
             onPointerMissed={handleCanvasClick}
+            className="canvas-container"
           >
             <Environment
               preset={"studio"}
@@ -70,6 +98,15 @@ export const App = () => {
 
             <Scene rotation={[0, Math.PI / 2, 0]} />
 
+            {/* AI 生成中的加載指示器 */}
+            {isAIGenerating && (
+              <Html center>
+                <div className="loading-indicator">
+                  <div className="spinner"></div>
+                  <p>AI 正在生成設計...</p>
+                </div>
+              </Html>
+            )}
           </Canvas>
         )}
 
@@ -79,17 +116,44 @@ export const App = () => {
             gl={{ antialias: true }}
             camera={{ position: [0, 1, 10], fov: 15, near: 1, far: 100 }}
             onPointerMissed={handleCanvasClick}
+            className="canvas-container"
           >
             <RoomSelectorUI />
-
+            <OrbitControls />
+            
+            {/* AI 生成中的加載指示器 */}
+            {isAIGenerating && (
+              <Html center>
+                <div className="loading-indicator">
+                  <div className="spinner"></div>
+                  <p>AI 正在生成設計...</p>
+                </div>
+              </Html>
+            )}
           </Canvas>
+        )}
+        
+        <div className="controls-container">
+          <button 
+            className="ai-toggle-button"
+            onClick={() => setShowAI(!showAI)}
+          >
+            {showAI ? '隱藏 AI 助手' : '顯示 AI 助手'}
+          </button>
+          {/* 其他控制面板 */}
+        </div>
+        
+        {showAI && (
+          <div className="ai-assistant-container">
+            <AIAssistant />
+          </div>
         )}
       </div>
 
       <InteractiveUI />
     </>
   );
-};
+}
 
 function Effects() {
   return (
@@ -106,3 +170,5 @@ function Effects() {
     </EffectComposer>
   );
 }
+
+export default App;

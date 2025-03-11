@@ -1,5 +1,10 @@
 import * as THREE from "three";
 import { useMemo } from "react";
+import React from "react";
+import useSelectionStore from "../Store/Store";
+
+// 全局 textureBuffers 對象
+export const textureBuffers = {};
 
 // Define material textures
 export const materialTextures = {
@@ -145,5 +150,56 @@ export const useTextureLoader = () => {
     );
   }, []); // Empty dependency array ensures this only runs once
 
+  React.useEffect(() => {
+    // 更新 Store 中的預載貼圖
+    const { setPreloadedTextures } = useSelectionStore.getState();
+    setPreloadedTextures(textureBuffers);
+  }, []); // Empty dependency array ensures this only runs once
+
+  return textureBuffers;
+};
+
+// 添加函數以獲取所有貼圖緩存
+export const getTextureBuffers = () => {
+  // 返回 textureBuffers 或其副本
+  return { ...textureBuffers };
+};
+
+// 添加函數以初始化並獲取所有貼圖
+export const initializeTextures = () => {
+  // 如果 textureBuffers 已經有數據，直接返回
+  if (Object.keys(textureBuffers).length > 0) {
+    return textureBuffers;
+  }
+  
+  // 否則，加載所有貼圖
+  const textureLoader = new THREE.TextureLoader();
+  
+  // 遍歷 textureData 加載所有貼圖
+  Object.entries(materialTextures).forEach(([key, data]) => {
+    const name = data.name || key;
+    const price = data.price || 0;
+    const ratio = data.ratio || [0.75, 0.75];
+    
+    const textures = {
+      map: loadTexture(data.map, ratio),
+      normalMap: data.normalMap ? loadTexture(data.normalMap, ratio) : null,
+      roughnessMap: data.roughnessMap ? loadTexture(data.roughnessMap, ratio) : null,
+      aoMap: data.aoMap ? loadTexture(data.aoMap, ratio) : null,
+      bumpMap: data.bumpMap ? loadTexture(data.bumpMap, ratio) : null,
+      // Store material properties
+      aoMapIntensity: data.aoMapIntensity || null,
+      roughness: data.roughness || null,
+      metalness: data.metalness || null,
+      ratio: data.ratio || [1, 1],
+    };
+    
+    textureBuffers[key] = { name, price, textures };
+  });
+  
+  // 更新 Store 中的預載貼圖
+  const { setPreloadedTextures } = useSelectionStore.getState();
+  setPreloadedTextures(textureBuffers);
+  
   return textureBuffers;
 };

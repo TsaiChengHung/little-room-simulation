@@ -1,14 +1,12 @@
 import useSelectionStore from "../Store/Store";
-import RoomPointsTemplate from "../RoomSelector/RoomAttributes";
 import Room from "../RoomSelector/RoomGenerator";
 
 const GeneratedRoom = () => {
-  const { roomType, roomData } = useSelectionStore();
-  const floorPoints = RoomPointsTemplate(roomType);
+  const { currentFloorPoints } = useSelectionStore();
   
   return (
     <Room
-      floorPoints={floorPoints}
+      floorPoints={currentFloorPoints}
       wallHeight={3.6}
       useRoomData={true}
     />

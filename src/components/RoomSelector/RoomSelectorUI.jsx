@@ -29,13 +29,13 @@ function Frame({
   const [hovered, hover] = useState(false);
   useCursor(hovered);
 
-  const {setRoomType, setDesignMode} = useSelectionStore()
+  const { setCurrentFloorPoints, setDesignMode} = useSelectionStore()
 
   const onDoubleClickHandle = (e) => {
     name = e.object.name
-    if (name === "01") setRoomType(0)
-    else if (name === "02") setRoomType(1)
-    else if (name === "03") setRoomType(2)
+    if (name === "01") setCurrentFloorPoints(RoomPointsTemplate(0))
+    else if (name === "02") setCurrentFloorPoints(RoomPointsTemplate(1))
+    else if (name === "03") setCurrentFloorPoints(RoomPointsTemplate(2))
     setDesignMode("roomSimulation")
   }
 

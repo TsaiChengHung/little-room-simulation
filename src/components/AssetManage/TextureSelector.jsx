@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { Box, Stack, Button } from '@mui/material';
-import { useTextureLoader } from './Textures';
 import useSelectionStore from '../Store/Store';
 
 export default function MaterialSelector() {
@@ -10,27 +9,27 @@ export default function MaterialSelector() {
     setMaterialTexture,
     operationMode,
     paintMode,
+    preloadedTextures,
   } = useSelectionStore();
 
-  const textureBuffers = useTextureLoader();
   // 點擊材質時觸發的功能
   const handleMaterialClick = (textureName) => {
-    if (textureBuffers[textureName]) {
-      setMaterialTexture(textureBuffers[textureName]);
+    if (preloadedTextures[textureName]) {
+      setMaterialTexture(preloadedTextures[textureName]);
     }
     clearSelectedObject(); // 清除選中的物件以防止同時進行物件選擇和材質更改
   };
 
-  // 如果 textureBuffers 未載入完成，顯示載入提示
-  if (!textureBuffers || Object.keys(textureBuffers).length === 0) {
+  // 如果 preloadedTextures 未載入完成，顯示載入提示
+  if (!preloadedTextures || Object.keys(preloadedTextures).length === 0) {
     return <div>Loading textures...</div>;
   }
 
   // Memoize the texture buttons
   const textureButtons = useMemo(() => {
-    if (!textureBuffers) return null;
+    if (!preloadedTextures) return null;
 
-    return Object.entries(textureBuffers).map(([textureName, textureData]) => {
+    return Object.entries(preloadedTextures).map(([textureName, textureData]) => {
       const imageSrc = textureData.textures.map?.image?.src || '/placeholder.png';
       return (
         <Button
@@ -53,7 +52,7 @@ export default function MaterialSelector() {
         </Button>
       );
     });
-  }, [textureBuffers, handleMaterialClick]); // Only re-render when textures or click handler changes
+  }, [preloadedTextures, handleMaterialClick]); // Only re-render when textures or click handler changes
 
   return (
     <>
