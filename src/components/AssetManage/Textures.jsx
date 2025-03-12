@@ -10,6 +10,8 @@ export const textureBuffers = {};
 export const materialTextures = {
   brick: {
     price: 5,
+    description: "Traditional red brick wall with mortar joints, rough and rustic appearance",
+    tags: ["wall", "brick", "wall texture"],
     map:
       "/textures/brick_wall_tkphcebi_1k/Brick_Wall_tkphcebi_1K_BaseColor.jpg",
     normalMap:
@@ -25,6 +27,8 @@ export const materialTextures = {
   },
   concrete: {
     price: 10,
+    description: "Smooth gray concrete surface with subtle imperfections and fine grain texture",
+    tags: ["wall", "concrete", "industrial"],
     map:
       "/textures/concrete_wall_ubvjdgfew_1k/Concrete_Wall_ubvjdgfew_1K_BaseColor.jpg",
     normalMap:
@@ -40,6 +44,8 @@ export const materialTextures = {
   },
   dryWall: {
     price: 15,
+    description: "Clean, flat white interior wall surface with minimal texture and slight variations",
+    tags: ["wall", "interior", "smooth"],
     map:
       "/textures/dry_wall_qjpmzsp0_1k/Dry_Wall_qjpmzsp0_1K_BaseColor.jpg",
     normalMap: "/textures/dry_wall_qjpmzsp0_1k/Dry_Wall_qjpmzsp0_1K_Normal.jpg",
@@ -53,6 +59,8 @@ export const materialTextures = {
   },
   wallpaper: {
     price: 20,
+    description: "Vintage ornate wallpaper with repeating floral or geometric patterns in muted colors",
+    tags: ["wall", "interior", "decorative", "pattern"],
     map:
       "/textures/old_decorative_wallpaper_umridamn_1k/Old_Decorative_Wallpaper_umridamn_1K_BaseColor.jpg",
     normalMap:
@@ -68,6 +76,8 @@ export const materialTextures = {
   },
   checkerBoardFabric: {
     price: 25,
+    description: "Woven jute carpet with alternating light and dark squares in a classic checkerboard pattern",
+    tags: ["fabric", "pattern", "floor", "carpet"],
     map: "/textures/checkerBoardFabric/CarpetJuteChecker001_COL_2K.jpg",
     normalMap: "/textures/checkerBoardFabric/CarpetJuteChecker001_NRM_2K.jpg",
     roughnessMap:
@@ -80,6 +90,8 @@ export const materialTextures = {
   },
   rock: {
     price: 30,
+    description: "Rugged natural stone surface with varied coloration and craggy, uneven texture",
+    tags: ["stone", "natural", "rough", "exterior"],
     map: "/textures/rock/Rock030_4K-PNG_Color.png",
     normalMap: "/textures/rock/Rock030_4K-PNG_NormalGL.png",
     roughnessMap: "/textures/rock/Rock030_4K-PNG_Roughness.png",
@@ -90,6 +102,8 @@ export const materialTextures = {
   },
   woodFloor: {
     price: 35,
+    description: "Aged wooden floor planks with visible grain, wear marks, and natural color variations",
+    tags: ["wood", "floor", "worn", "natural"],
     map: "/textures/woodFloorWonrn/WoodFlooringWorn002_COL_2K.jpg",
     normalMap: "/textures/woodFloorWonrn/WoodFlooringWorn002_NRM_2K.jpg",
     aoMap: "/textures/woodFloorWonrn/WoodFlooringWorn002_AO_2K.jpg",
@@ -100,6 +114,8 @@ export const materialTextures = {
   },
   woodPlanksDark: {
     price: 40,
+    description: "Rich, dark-stained hickory wood planks with pronounced grain and butcher block pattern",
+    tags: ["wood", "dark", "planks", "furniture"],
     map:
       "/textures/woodPlanksDark/WoodButcherBlockHickoryPlanksDark001_COL_2K.jpg",
     normalMap:

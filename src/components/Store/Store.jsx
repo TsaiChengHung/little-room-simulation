@@ -117,6 +117,8 @@ const useSelectionStore = create((set, get) => ({
         id: objectKey,
         area: objectArea,
         price: 0,
+        description: objectData?.description ?? null,
+        tags
         materialName: objectData?.materialName ?? null,
         isModified: objectData?.isModified ?? false,
         textures: {
@@ -222,6 +224,9 @@ const useSelectionStore = create((set, get) => ({
   setCurrentFloorPoints: (points) => set({ currentFloorPoints: points }),
 
   resetRoomData: () => set({ roomData: {} }),
+
+  // 直接設置roomData
+  setRoomData: (newRoomData) => set({ roomData: newRoomData }),
 
   getModifiedItems: () => {
     if (!get().roomData) return [];

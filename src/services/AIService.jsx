@@ -246,7 +246,6 @@ ${JSON.stringify(availableTextures, null, 2)}
       if (floorTexture && store.roomData.floor) {
         console.log(`應用地板材質: ${floorTextureName}`, floorTexture);
         
-        // 使用 setMaterialTexture 方法應用材質
         // 首先選擇地板
         store.setSelectedObject({
           type: "room",
@@ -334,8 +333,15 @@ ${JSON.stringify(availableTextures, null, 2)}
       }
     }
     
+    // 確保所有材質更改都已經被保存到roomData中
+    // 獲取最新的roomData
+    const updatedRoomData = { ...store.roomData };
+    
     // 清除選擇
     store.clearSelectedObject();
+    
+    // 手動更新roomData以確保所有更改都被保存
+    store.setRoomData(updatedRoomData);
     
     // 返回結果
     if (appliedChanges.length > 0) {
