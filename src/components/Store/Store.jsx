@@ -24,11 +24,6 @@ const useSelectionStore = create((set, get) => ({
   preloadedTextures: {}, // 存儲預載的貼圖
   isResourcesLoaded: false, // 資源是否已加載完成
 
-  // AI 相關狀態
-  aiPrompt: '',
-  isAIGenerating: false,
-  aiGeneratedSuggestions: null,
-
   // 原有的 general functions
   setDesignMode: (mode) => set({ designMode: mode }),
 
@@ -118,7 +113,7 @@ const useSelectionStore = create((set, get) => ({
         area: objectArea,
         price: 0,
         description: objectData?.description ?? null,
-        tags
+        tags: objectData?.tags ?? null,
         materialName: objectData?.materialName ?? null,
         isModified: objectData?.isModified ?? false,
         textures: {
@@ -146,21 +141,23 @@ const useSelectionStore = create((set, get) => ({
     }),
 
   // 更新材質貼圖（統一管理於 roomData）
-  setMaterialTexture: (textureObject) =>
+  setMaterialTexture: (targetRoomObject, newTextureName) =>
     set((state) => {
-      const selectedObject = state.selectedObject.object;
-      if (!state.roomData || !selectedObject || state.selectedObject.type !== "room")
+      const textureObject = state.preloadedTextures[newTextureName];
+      if (!state.roomData || !targetRoomObject)
         return state;
 
       const textures = textureObject.textures;
       const updatedRoomData = {
         ...state.roomData,
-        [selectedObject]: {
-          ...state.roomData[selectedObject],
-          materialName: textureObject.name,
+        [targetRoomObject]: {
+          ...state.roomData[targetRoomObject],
+           materialName: textureObject.name,
           price: textureObject.price,
+          description: textureObject.description,
+          tags: textureObject.tags,
           textures: {
-            ...state.roomData[selectedObject].textures,
+            ...state.roomData[targetRoomObject].textures,
             map: textures.map || null,
             normalMap: textures.normalMap || null,
             roughnessMap: textures.roughnessMap || null,
@@ -168,16 +165,16 @@ const useSelectionStore = create((set, get) => ({
             bumpMap: textures.bumpMap || null,
             color:
               textures.color ??
-              state.roomData[selectedObject].textures.color,
+              state.roomData[targetRoomObject].textures.color,
             aoMapIntensity:
               textures.aoMapIntensity ??
-              state.roomData[selectedObject].textures.aoMapIntensity,
+              state.roomData[targetRoomObject].textures.aoMapIntensity,
             roughness:
               textures.roughness ??
-              state.roomData[selectedObject].textures.roughness,
+              state.roomData[targetRoomObject].textures.roughness,
             metalness:
               textures.metalness ??
-              state.roomData[selectedObject].textures.metalness,
+              state.roomData[targetRoomObject].textures.metalness,
             needsUpdate: true,
           },
           isModified: true,
@@ -192,16 +189,10 @@ const useSelectionStore = create((set, get) => ({
   setMaterialColor: (color) =>
     set((state) => {
       const selectedObject = state.selectedObject.object;
-      if (!state.roomData || !selectedObject || state.selectedObject.type !== "room")
+      console.log(selectedObject);
+      if (!state.roomData || !selectedObject)
         return state;
-
-      // 直接更新 Three.js 材質
-      const mesh = selectedObject;
-      if (mesh && mesh.material) {
-        mesh.material.color = new THREE.Color(color);
-        mesh.material.needsUpdate = true;
-      }
-
+      
       const updatedRoomData = {
         ...state.roomData,
         [selectedObject]: {
@@ -303,170 +294,6 @@ const useSelectionStore = create((set, get) => ({
       console.error("初始化資源時出錯:", error);
       return false;
     }
-  },
-
-  // 設置 AI 提示詞
-  setAIPrompt: (prompt) => set({ aiPrompt: prompt }),
-  
-  // 觸發 AI 生成設計
-  generateAIDesign: async (prompt) => {
-    const { roomData } = get();
-    if (!roomData) return false;
-    
-    set({ isAIGenerating: true });
-    
-    try {
-      // 準備房間數據供 AI 使用
-      const roomDimensions = {
-        // 從 roomData 中提取房間尺寸信息
-        floor: {
-          id: 'floor',
-          area: roomData.floor?.area || 0
-        },
-        walls: Object.keys(roomData)
-          .filter(key => key.startsWith('wall-'))
-          .map(key => ({
-            id: key,
-            area: roomData[key].area
-          })),
-        ceiling: {
-          id: 'ceiling',
-          area: roomData.ceiling?.area || 0
-        }
-      };
-      
-      // 調用 AI 服務
-      const response = await fetch('YOUR_AI_SERVICE_ENDPOINT', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          roomDimensions,
-          prompt,
-          type: 'fullDesign'
-        })
-      });
-      
-      if (!response.ok) throw new Error('AI service request failed');
-      
-      const aiSuggestions = await response.json();
-      
-      set({ 
-        aiGeneratedSuggestions: aiSuggestions,
-        isAIGenerating: false 
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('AI generation failed:', error);
-      set({ isAIGenerating: false });
-      return false;
-    }
-  },
-  
-  // 應用 AI 生成的材質設計 (修訂版，適配您的材質結構)
-  applyAIMaterials: () => {
-    const { aiGeneratedSuggestions, roomData } = get();
-    if (!aiGeneratedSuggestions?.materials || !roomData) return false;
-    
-    const updatedRoomData = { ...roomData };
-    
-    // 應用 AI 建議的材質到各個表面
-    Object.keys(aiGeneratedSuggestions.materials).forEach(surfaceId => {
-      if (updatedRoomData[surfaceId]) {
-        const materialSuggestion = aiGeneratedSuggestions.materials[surfaceId];
-        
-        // 創建或更新材質
-        updatedRoomData[surfaceId] = {
-          ...updatedRoomData[surfaceId],
-          materialName: materialSuggestion.name || 'AI Generated',
-          isModified: true,
-          price: materialSuggestion.price || 0,
-          textures: {
-            // 保留現有的 textures 屬性
-            ...updatedRoomData[surfaceId].textures,
-            
-            // 更新 AI 建議的材質屬性
-            // 注意：對於貼圖，我們需要先加載貼圖，然後設置 uuid
-            color: materialSuggestion.color || null,
-            metalness: materialSuggestion.metalness !== undefined ? materialSuggestion.metalness : updatedRoomData[surfaceId].textures.metalness,
-            roughness: materialSuggestion.roughness !== undefined ? materialSuggestion.roughness : updatedRoomData[surfaceId].textures.roughness,
-            aoMapIntensity: materialSuggestion.aoMapIntensity !== undefined ? materialSuggestion.aoMapIntensity : updatedRoomData[surfaceId].textures.aoMapIntensity,
-            ratio: materialSuggestion.ratio || updatedRoomData[surfaceId].textures.ratio,
-            needsUpdate: true
-          }
-        };
-        
-        // 如果 AI 建議包含貼圖路徑，我們需要加載這些貼圖
-        if (materialSuggestion.mapPath) {
-          loadTexture(materialSuggestion.mapPath).then(texture => {
-            updatedRoomData[surfaceId].textures.map = texture;
-            set({ roomData: { ...updatedRoomData } });
-          });
-        }
-        
-        if (materialSuggestion.normalMapPath) {
-          loadTexture(materialSuggestion.normalMapPath).then(texture => {
-            updatedRoomData[surfaceId].textures.normalMap = texture;
-            set({ roomData: { ...updatedRoomData } });
-          });
-        }
-        
-        if (materialSuggestion.roughnessMapPath) {
-          loadTexture(materialSuggestion.roughnessMapPath).then(texture => {
-            updatedRoomData[surfaceId].textures.roughnessMap = texture;
-            set({ roomData: { ...updatedRoomData } });
-          });
-        }
-        
-        if (materialSuggestion.aoMapPath) {
-          loadTexture(materialSuggestion.aoMapPath).then(texture => {
-            updatedRoomData[surfaceId].textures.aoMap = texture;
-            set({ roomData: { ...updatedRoomData } });
-          });
-        }
-        
-        if (materialSuggestion.bumpMapPath) {
-          loadTexture(materialSuggestion.bumpMapPath).then(texture => {
-            updatedRoomData[surfaceId].textures.bumpMap = texture;
-            set({ roomData: { ...updatedRoomData } });
-          });
-        }
-      }
-    });
-    
-    set({ roomData: updatedRoomData });
-
-    // 使用 addRoomDataObject 方法更新每個修改過的部分
-    if (appliedChanges.includes(`地板: ${selectedTextures.floor}`)) {
-      store.addRoomDataObject('floor', updatedRoomData.floor.area, {
-        materialName: updatedRoomData.floor.materialName,
-        isModified: true,
-        textures: updatedRoomData.floor.textures
-      });
-    }
-
-    if (appliedChanges.includes(`天花板: ${selectedTextures.ceiling}`)) {
-      store.addRoomDataObject('ceiling', updatedRoomData.ceiling.area, {
-        materialName: updatedRoomData.ceiling.materialName,
-        isModified: true,
-        textures: updatedRoomData.ceiling.textures
-      });
-    }
-
-    if (appliedChanges.includes(`牆壁: ${selectedTextures.wall}`)) {
-      // 更新所有牆壁
-      Object.keys(updatedRoomData).forEach(key => {
-        if (key.startsWith('wall-')) {
-          store.addRoomDataObject(key, updatedRoomData[key].area, {
-            materialName: updatedRoomData[key].materialName,
-            isModified: true,
-            textures: updatedRoomData[key].textures
-          });
-        }
-      });
-    }
-
-    return true;
   },
 }));
 

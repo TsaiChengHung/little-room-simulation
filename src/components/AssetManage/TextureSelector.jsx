@@ -14,8 +14,8 @@ export default function MaterialSelector() {
 
   // 點擊材質時觸發的功能
   const handleMaterialClick = (textureName) => {
-    if (preloadedTextures[textureName]) {
-      setMaterialTexture(preloadedTextures[textureName]);
+    if (preloadedTextures[textureName] && selectedObject && selectedObject.object) {
+      setMaterialTexture(selectedObject.object, textureName);
     }
     clearSelectedObject(); // 清除選中的物件以防止同時進行物件選擇和材質更改
   };

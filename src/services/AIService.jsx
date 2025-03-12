@@ -247,18 +247,10 @@ ${JSON.stringify(availableTextures, null, 2)}
         console.log(`應用地板材質: ${floorTextureName}`, floorTexture);
         
         // 首先選擇地板
-        store.setSelectedObject({
-          type: "room",
-          name: "floor",
-          object: "floor"
-        });
+        store.setSelectedObject("floor", null, "room");
         
         // 然後應用材質
-        store.setMaterialTexture({
-          name: floorTextureName,
-          price: floorTexture.price || 0,
-          textures: floorTexture.textures
-        });
+        store.setMaterialTexture("floor", floorTextureName);
         
         appliedChanges.push(`地板: ${floorTextureName}`);
       } else {
@@ -281,18 +273,10 @@ ${JSON.stringify(availableTextures, null, 2)}
         let wallsApplied = 0;
         for (const wallKey of wallKeys) {
           // 選擇牆壁
-          store.setSelectedObject({
-            type: "room",
-            name: wallKey,
-            object: wallKey
-          });
+          store.setSelectedObject(wallKey, null, "room");
           
           // 應用材質
-          store.setMaterialTexture({
-            name: wallTextureName,
-            price: wallTexture.price || 0,
-            textures: wallTexture.textures
-          });
+          store.setMaterialTexture(wallKey, wallTextureName);
           
           wallsApplied++;
         }
@@ -314,18 +298,10 @@ ${JSON.stringify(availableTextures, null, 2)}
         console.log(`應用天花板材質: ${ceilingTextureName}`, ceilingTexture);
         
         // 選擇天花板
-        store.setSelectedObject({
-          type: "room",
-          name: "ceiling",
-          object: "ceiling"
-        });
+        store.setSelectedObject("ceiling", null, "room");
         
         // 應用材質
-        store.setMaterialTexture({
-          name: ceilingTextureName,
-          price: ceilingTexture.price || 0,
-          textures: ceilingTexture.textures
-        });
+        store.setMaterialTexture("ceiling", ceilingTextureName);
         
         appliedChanges.push(`天花板: ${ceilingTextureName}`);
       } else {

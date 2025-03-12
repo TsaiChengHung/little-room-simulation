@@ -148,6 +148,8 @@ export const useTextureLoader = () => {
       Object.entries(materialTextures).map(([key, textureData]) => {
         const name = textureData.name ? textureData.name : key;
         const price = textureData.price ? textureData.price : 0;
+        const description = textureData.description ? textureData.description : null;
+        const tags = textureData.tags ? textureData.tags : null;
         const ratio = textureData.ratio ? textureData.ratio : [0.75, 0.75];
         const textures = {
           map: loadTexture(textureData.map, ratio),
@@ -161,7 +163,7 @@ export const useTextureLoader = () => {
           metalness: textureData.metalness || null,
           ratio: textureData.ratio || [1, 1],
         };
-        return [key, {name, price, textures}];
+        return [key, {name, price, description, tags, textures}];
       })
     );
   }, []); // Empty dependency array ensures this only runs once
@@ -195,6 +197,8 @@ export const initializeTextures = () => {
   Object.entries(materialTextures).forEach(([key, data]) => {
     const name = data.name || key;
     const price = data.price || 0;
+    const description = data.description || null;
+    const tags = data.tags || null;
     const ratio = data.ratio || [0.75, 0.75];
     
     const textures = {
@@ -207,10 +211,9 @@ export const initializeTextures = () => {
       aoMapIntensity: data.aoMapIntensity || null,
       roughness: data.roughness || null,
       metalness: data.metalness || null,
-      ratio: data.ratio || [1, 1],
     };
     
-    textureBuffers[key] = { name, price, textures };
+    textureBuffers[key] = { name, price, description, tags, textures };
   });
   
   // 更新 Store 中的預載貼圖
