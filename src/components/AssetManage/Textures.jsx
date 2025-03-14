@@ -74,20 +74,6 @@ export const materialTextures = {
     metalness: 0.5,
     ratio: [0.8,0.8],
   },
-  checkerBoardFabric: {
-    price: 35,
-    description: "Woven jute carpet with alternating light and dark squares in a classic checkerboard pattern",
-    tags: ["fabric", "pattern", "floor", "carpet"],
-    map: "/textures/checkerBoardFabric/CarpetJuteChecker001_COL_2K.jpg",
-    normalMap: "/textures/checkerBoardFabric/CarpetJuteChecker001_NRM_2K.jpg",
-    roughnessMap:
-      "/textures/checkerBoardFabric/CarpetJuteChecker001_BUMP_2K.jpg",
-    aoMap: "/textures/checkerBoardFabric/CarpetJuteChecker001_AO_2K.jpg",
-    aoMapIntensity: 1,
-    roughness: 1,
-    metalness: 0.5,
-    ratio: [0.75,0.75],
-  },
   rock: {
     price: 30,
     description: "Rugged natural stone surface with varied coloration and craggy, uneven texture",

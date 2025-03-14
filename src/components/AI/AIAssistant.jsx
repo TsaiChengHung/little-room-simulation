@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { chatWithGemini, testGeminiConnection } from '../../services/AIService';
-import { executeAITextureCommand, getAvailableTextures } from '../../utils/AIModelContextProtocol';
+import { executeAITextureCommand, getAvailableTextures, applyColdRoomStyle } from '../../utils/AIModelContextProtocol';
 import './AIAssistant.css';
 
 const AIAssistant = () => {
@@ -43,33 +43,87 @@ const AIAssistant = () => {
   }, [messages]);
 
   // Function to process texture commands
-  const processTextureCommand = async (userMessage) => {
+  const processTextureCommand = useCallback(async (userMessage) => {
     setIsLoading(true);
     
     try {
-      // First try to process the user message as a texture command
-      const result = await executeAITextureCommand(userMessage);
+      console.log("Processing texture command:", userMessage);
+      
+      // Check for cold room command specifically
+      const coldRoomKeywords = ['冷調', '冷色調', '冷色', '寒冷', '冷房', '讓房間更冷', '冷的房間'];
+      const isColdRoomCommand = coldRoomKeywords.some(keyword => 
+        userMessage.toLowerCase().includes(keyword.toLowerCase())
+      );
+      
+      let result;
+      
+      if (isColdRoomCommand) {
+        // Apply cold room style directly
+        result = await applyColdRoomStyle();
+      } else {
+        // First try to process the user message as a texture command
+        result = await executeAITextureCommand(userMessage);
+      }
       
       if (result.success) {
         // If successfully parsed and executed texture command
         const successCount = result.details.filter(d => d.success).length;
+        const failCount = result.details.length - successCount;
+        
+        console.log("Command execution result:", result);
+        
+        // Construct detailed feedback message
+        let feedbackMessage = `我已經`;
+        
+        if (result.style) {
+          feedbackMessage += `套用了${result.style}風格，`;
+        }
+        
+        feedbackMessage += `成功更改了${successCount}個材質`;
+        
+        if (failCount > 0) {
+          feedbackMessage += `，但有${failCount}個材質變更失敗`;
+        }
+        
+        // Add style description if available
+        if (result.description) {
+          feedbackMessage += `。\n\n${result.description}`;
+        }
+        
+        // Add details about successful changes
+        const successDetails = result.details
+          .filter(d => d.success)
+          .map(d => {
+            const targetName = d.target === 'floor' ? '地板' : 
+                            d.target === 'ceiling' ? '天花板' : 
+                            d.target.startsWith('wall') ? '牆壁' : d.target;
+            
+            // Include description if available
+            if (d.description) {
+              return `${targetName}變更為${d.textureName}（${d.description}）`;
+            } else {
+              return `${targetName}變更為${d.textureName}`;
+            }
+          })
+          .join('，\n');
+        
+        if (successDetails) {
+          feedbackMessage += `。\n\n具體變更：\n${successDetails}`;
+        }
         
         // Add AI response to conversation
         setMessages(prev => [
           ...prev, 
           { 
             role: 'assistant', 
-            content: `I've successfully applied ${successCount} material changes. ${
-              result.details.map(d => d.success ? 
-                `Changed ${d.target === 'floor' ? 'floor' : d.target === 'ceiling' ? 'ceiling' : 'wall'} to ${d.textureName}` : 
-                '').filter(Boolean).join(', ')
-            }`
+            content: feedbackMessage
           }
         ]);
         
         return true; // Command handled
       }
       
+      console.log("Command not handled as texture command, result:", result);
       return false; // Not a valid texture command, pass to general AI handling
     } catch (error) {
       console.error("Error processing texture command:", error);
@@ -77,14 +131,14 @@ const AIAssistant = () => {
         ...prev, 
         { 
           role: 'assistant', 
-          content: `Error processing texture command: ${error.message}` 
+          content: `處理材質命令時發生錯誤：${error.message}。請再試一次或使用不同的表達方式。` 
         }
       ]);
       return true; // Error occurred, but we handled it
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // Modified send message function
   const sendMessage = async () => {

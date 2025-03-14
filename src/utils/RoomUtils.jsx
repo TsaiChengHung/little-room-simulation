@@ -240,7 +240,7 @@ export const analyzeRoom = () => {
     // 處理牆壁材質
     const walls = {};
     Object.keys(roomData).forEach(key => {
-      if (key.startsWith('wall-')) {
+      if (key.startsWith('wall')) {
         walls[key] = {
           materialName: roomData[key].materialName || "未命名",
           price: roomData[key].price || 0,
