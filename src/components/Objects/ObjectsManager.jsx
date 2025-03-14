@@ -19,6 +19,7 @@ export default function ObjectsManager() {
                     name: modelData.info?.name || key,
                     description: modelData.info?.description || '',
                     thumbnailUrl: modelData.info?.thumbnailUrl || '/placeholder.png',
+                    price: modelData.info?.price || 'N/A',
                     object: modelData.object,
                     info: modelData.info
                 };
@@ -34,6 +35,9 @@ export default function ObjectsManager() {
         addObject('furniture', {
             name: objectData.name,
             object: objectData.object,
+            glbFile: objectData.glbFile,
+            price: objectData.price,
+            thumbnailUrl: objectData.thumbnailUrl,
             description: objectData.description || '',
             transform: {
                 translate: [0, 0, 0],
@@ -84,12 +88,12 @@ export default function ObjectsManager() {
                     }}
                 >
                     <Typography sx={{ color: 'white', padding: 1, marginBottom: 1 }} variant="h6">
-                        可用物件 ({Object.keys(objectsList).length})
+                        Furnitures: ({Object.keys(objectsList).length})
                     </Typography>
                     
                     {Object.keys(objectsList).length === 0 ? (
                         <Typography sx={{ color: 'white', padding: 1 }}>
-                            沒有可用的物件
+                            No Furnitures
                         </Typography>
                     ) : (
                         <Stack direction={'column'} spacing={1}>
@@ -107,7 +111,20 @@ export default function ObjectsManager() {
                                             <Typography sx={{ color: 'white' }} gutterBottom variant="h6" component="div">
                                                 {objectData.name}
                                             </Typography>
-                                            <Typography sx={{ color: 'darkgray' }} variant="body2" >
+                                            <Typography sx={{ color: 'white', fontWeight: 'bold' }} variant="body2">
+                                                Price: {objectData.price}
+                                            </Typography>
+                                            <Typography 
+                                                sx={{ 
+                                                    color: 'darkgray', 
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    display: '-webkit-box',
+                                                    WebkitLineClamp: 2,
+                                                    WebkitBoxOrient: 'vertical'
+                                                }} 
+                                                variant="body2"
+                                            >
                                                 {objectData.description}
                                             </Typography>
                                         </CardContent>

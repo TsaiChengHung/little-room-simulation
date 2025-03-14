@@ -8,6 +8,7 @@ import useSelectionStore from "../Store/Store";
 import ColorPicker from "../AssetManage/ColorPicker";
 import SunPositionSlider from "./SunPositionSlider";
 import { Box, Stack } from '@mui/material';
+import QuotationPanel from "../QuotationPanel/QuotationPanel";
 import DebugButton from "./DebugButton";
 
 export default function InteractiveUI() {
@@ -86,6 +87,7 @@ export default function InteractiveUI() {
                 </>
             )}
             <DebugButton/>
+            <QuotationPanel/>
         </Box>
         
     );

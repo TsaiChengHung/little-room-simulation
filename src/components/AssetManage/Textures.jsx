@@ -9,7 +9,7 @@ export const textureBuffers = {};
 // Define material textures
 export const materialTextures = {
   brick: {
-    price: 5,
+    price: 45,
     description: "Traditional red brick wall with mortar joints, rough and rustic appearance",
     tags: ["wall", "brick", "wall texture"],
     map:
@@ -26,7 +26,7 @@ export const materialTextures = {
     ratio: [1,1],
   },
   concrete: {
-    price: 10,
+    price: 35,
     description: "Smooth gray concrete surface with subtle imperfections and fine grain texture",
     tags: ["wall", "concrete", "industrial"],
     map:
@@ -43,7 +43,7 @@ export const materialTextures = {
     ratio: [0.8,0.8],
   },
   dryWall: {
-    price: 15,
+    price: 25,
     description: "Clean, flat white interior wall surface with minimal texture and slight variations",
     tags: ["wall", "interior", "smooth"],
     map:
@@ -58,7 +58,7 @@ export const materialTextures = {
     ratio: [0.8,0.8],
   },
   wallpaper: {
-    price: 20,
+    price: 40,
     description: "Vintage ornate wallpaper with repeating floral or geometric patterns in muted colors",
     tags: ["wall", "interior", "decorative", "pattern"],
     map:
@@ -75,7 +75,7 @@ export const materialTextures = {
     ratio: [0.8,0.8],
   },
   checkerBoardFabric: {
-    price: 25,
+    price: 35,
     description: "Woven jute carpet with alternating light and dark squares in a classic checkerboard pattern",
     tags: ["fabric", "pattern", "floor", "carpet"],
     map: "/textures/checkerBoardFabric/CarpetJuteChecker001_COL_2K.jpg",
@@ -149,19 +149,6 @@ export const materialTextures = {
     metalness: 0.5,
     ratio: [0.75,0.75],
   },
-  caravaggioPaint: {
-    price: 55,
-    description: "Caravaggio Paint, a rich and vibrant tone, creates a dramatic and authentic atmosphere. Suitable for various styles, it creates a warm and inviting spatial feel.",
-    tags: ["paint", "caravaggio", "interior"],
-    map: "/textures/Caravaggio paint/Caravaggio paint_basecolor.png",
-    normalMap: "/textures/Caravaggio paint/Caravaggio paint_normal.png",
-    roughnessMap: "/textures/Caravaggio paint/Caravaggio paint_roughness.png",
-    aoMap: "/textures/Caravaggio paint/Caravaggio paint_ao.png",
-    aoMapIntensity: 1,
-    roughness: 0.7,
-    metalness: 0.5,
-    ratio: [0.75,0.75],
-  },
   dinoBeigeGlossyFloorAndWallTiles: {
     price: 60,
     description: "Dino Beige Glossy Floor and Wall Tiles, a warm and luxurious tone, creates a sophisticated and elegant atmosphere. Suitable for various styles, it creates a warm and inviting spatial feel.",
@@ -182,19 +169,6 @@ export const materialTextures = {
     map: "/textures/Luminous Water White Gray Paint/Luminous Water White Gray Paint_1k_basecolor.png",
     normalMap: "/textures/Luminous Water White Gray Paint/Luminous Water White Gray Paint_1k_normal.png",
     roughnessMap: "/textures/Luminous Water White Gray Paint/Luminous Water White Gray Paint_1k_roughness.png",
-    roughness: 0.7,
-    metalness: 0.5,
-    ratio: [0.75,0.75],
-  },
-  marmoPaint: {
-    price: 70,
-    description: "Marmo Paint, a warm and luxurious tone, creates a sophisticated and elegant atmosphere. Suitable for various styles, it creates a warm and inviting spatial feel.",
-    tags: ["paint", "marmo", "interior"],
-    map: "/textures/Marmo paint/Marmo paint_basecolor.png",
-    normalMap: "/textures/Marmo paint/Marmo paint_normal.png",
-    roughnessMap: "/textures/Marmo paint/Marmo paint_roughness.png",
-    aoMap: "/textures/Marmo paint/Marmo paint_ao.png",
-    aoMapIntensity: 1,
     roughness: 0.7,
     metalness: 0.5,
     ratio: [0.75,0.75],
@@ -258,32 +232,6 @@ export const materialTextures = {
     map: "/textures/Rock Cave Concrete Paint/Rock Cave Concrete Paint_1k_basecolor.png",
     normalMap: "/textures/Rock Cave Concrete Paint/Rock Cave Concrete Paint_1k_normal.png",
     roughnessMap: "/textures/Rock Cave Concrete Paint/Rock Cave Concrete Paint_1k_roughness.png",
-    roughness: 0.7,
-    metalness: 0.5,
-    ratio: [0.75,0.75],
-  },
-  ruststylePaint: {
-    price: 100,
-    description: "Rust Style Paint, a warm and luxurious tone, creates a sophisticated and elegant atmosphere. Suitable for various styles, it creates a warm and inviting spatial feel.",
-    tags: ["paint", "rust", "interior"],
-    map: "/textures/ruststyle paint_basecolor.png/ruststyle paint_basecolor.png",
-    normalMap: "/textures/ruststyle paint_basecolor.png/ruststyle paint_normal.png",
-    roughnessMap: "/textures/ruststyle paint_basecolor.png/ruststyle paint_roughness.png",
-    aoMap: "/textures/ruststyle paint_basecolor.png/ruststyle paint_ao.png",
-    aoMapIntensity: 1,
-    roughness: 0.7,
-    metalness: 0.5,
-    ratio: [0.75,0.75],
-  },
-  scotlandYellowGreenPaint: {
-    price: 105,
-    description: "Scotland Yellow Green Paint, a warm and luxurious tone, creates a sophisticated and elegant atmosphere. Suitable for various styles, it creates a warm and inviting spatial feel.",
-    tags: ["paint", "scotland", "yellow", "green", "interior"],
-    map: "/textures/Scotland Yellow Green Paint/Scotland yellow green paint_basecolor.png",
-    normalMap: "/textures/Scotland Yellow Green Paint/Scotland yellow green paint_normal.png",
-    roughnessMap: "/textures/Scotland Yellow Green Paint/Scotland yellow green paint_roughness.png",
-    aoMap: "/textures/Scotland Yellow Green Paint/Scotland yellow green paint_ao.png",
-    aoMapIntensity: 1,
     roughness: 0.7,
     metalness: 0.5,
     ratio: [0.75,0.75],

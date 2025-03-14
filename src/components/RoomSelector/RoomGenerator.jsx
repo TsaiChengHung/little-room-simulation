@@ -87,7 +87,7 @@ function Room({ floorPoints, wallHeight = 3, useRoomData = false, ...props }) {
         endPoint,
         wallHeight
       );
-      wallData.push({ geometry, area, id: `wall-${i}` });
+      wallData.push({ geometry, area, id: `wall${i}` });
     }
     return wallData;
   }, [floorPoints, wallHeight]);

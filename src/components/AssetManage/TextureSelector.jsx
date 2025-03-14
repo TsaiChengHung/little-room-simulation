@@ -45,10 +45,21 @@ export default function MaterialSelector() {
             height: '80px',
             backgroundSize: 'cover',
             margin: '4px',
+            position: 'relative',
           }}
         >
-          {/* Optional texture name */}
-          {/* {textureName} */}
+          <div style={{
+            position: 'absolute',
+            bottom: '3px',
+            right: '3px',
+            backgroundColor: 'rgba(0,0,0,0.3)',
+            padding: '1px 3px',
+            borderRadius: '2px',
+            fontSize: '8pt',
+            color: 'rgba(255,255,255,0.7)',
+          }}>
+            {textureData.price || '$0.00'}
+          </div>
         </Button>
       );
     });
