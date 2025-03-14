@@ -7,7 +7,7 @@ export default function ColorPicker() {
     const { selectedObject, operationMode, paintMode, setMaterialColor } = useSelectionStore();
 
     const handleColorChange = (color) => {
-        setMaterialColor(color);
+        setMaterialColor(selectedObject.object, color);
 
     };
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { chatWithGemini, testGeminiConnection } from '../../services/AIService';
+import { executeAITextureCommand, getAvailableTextures } from '../../utils/AIModelContextProtocol';
 import './AIAssistant.css';
 
 const AIAssistant = () => {
@@ -41,7 +42,51 @@ const AIAssistant = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // 發送消息給 Gemini
+  // 增加處理材質指令的功能
+  const processTextureCommand = async (userMessage) => {
+    setIsLoading(true);
+    
+    try {
+      // 首先嘗試將用戶消息作為材質指令處理
+      const result = await executeAITextureCommand(userMessage);
+      
+      if (result.success) {
+        // 如果成功解析並執行了材質指令
+        const successCount = result.details.filter(d => d.success).length;
+        
+        // 添加AI回覆到對話
+        setMessages(prev => [
+          ...prev, 
+          { 
+            role: 'assistant', 
+            content: `我已成功應用了${successCount}個材質變更。${
+              result.details.map(d => d.success ? 
+                `將${d.target === 'floor' ? '地板' : d.target === 'ceiling' ? '天花板' : '牆壁'}改為${d.textureName}` : 
+                '').filter(Boolean).join('，')
+            }`
+          }
+        ]);
+        
+        return true; // 指令已處理
+      }
+      
+      return false; // 不是有效的材質指令，交給通用AI處理
+    } catch (error) {
+      console.error("處理材質指令時出錯:", error);
+      setMessages(prev => [
+        ...prev, 
+        { 
+          role: 'assistant', 
+          content: `處理材質指令時出錯: ${error.message}` 
+        }
+      ]);
+      return true; // 出錯了，但我們已經處理了
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 修改發送消息的函數
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
     
@@ -55,11 +100,31 @@ const AIAssistant = () => {
     setIsLoading(true);
     
     try {
-      // 發送請求到 Gemini
-      const response = await chatWithGemini(userMessage);
+      // 首先嘗試作為材質指令處理
+      const commandProcessed = await processTextureCommand(userMessage);
       
-      // 添加 AI 回覆到對話
-      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+      // 如果不是材質指令，交給通用AI處理
+      if (!commandProcessed) {
+        // 獲取可用材質列表，以便AI參考
+        const availableTextures = getAvailableTextures();
+        
+        // 構建上下文
+        const contextPrompt = `
+用戶正在使用一個3D室內設計應用程序，以下是可用的材質列表：
+${JSON.stringify(availableTextures, null, 2)}
+
+如果用戶想要更改房間的材質，你應該指導他們使用如下格式的指令：
+"將地板改為木地板" 或 "將牆壁改為白色磚塊" 等。
+
+用戶的問題或請求是：${userMessage}
+        `;
+        
+        // 發送請求到 Gemini
+        const response = await chatWithGemini(contextPrompt);
+        
+        // 添加 AI 回覆到對話
+        setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+      }
     } catch (error) {
       // 處理錯誤
       setMessages(prev => [

@@ -153,6 +153,7 @@ export const findAndApplyTextures = async (prompt, targetType = 'all') => {
   try {
     // 獲取 store 實例
     const store = useSelectionStore.getState();
+
     
     // 檢查是否有預加載的紋理
     if (!store.preloadedTextures || Object.keys(store.preloadedTextures).length === 0) {
@@ -173,7 +174,8 @@ export const findAndApplyTextures = async (prompt, targetType = 'all') => {
     // 準備材質列表供 AI 選擇
     const availableTextures = Object.entries(store.preloadedTextures).map(([name, data]) => ({
       name,
-      description: data.name || name,
+      description: data.description || null,
+      tags: data.tags || null,
       price: data.price || 0,
       properties: {
         roughness: data.textures?.roughness || 0.5,

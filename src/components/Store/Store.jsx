@@ -186,19 +186,17 @@ const useSelectionStore = create((set, get) => ({
     }),
 
   // 更新材質顏色（統一管理於 roomData）
-  setMaterialColor: (color) =>
+  setMaterialColor: (targetRoomObject, color) =>
     set((state) => {
-      const selectedObject = state.selectedObject.object;
-      console.log(selectedObject);
-      if (!state.roomData || !selectedObject)
+      if (!state.roomData || !targetRoomObject)
         return state;
       
       const updatedRoomData = {
         ...state.roomData,
-        [selectedObject]: {
-          ...state.roomData[selectedObject],
+        [targetRoomObject]: {
+          ...state.roomData[targetRoomObject],
           textures: {
-            ...state.roomData[selectedObject].textures,
+            ...state.roomData[targetRoomObject].textures,
             color: color,
           },
           isModified: true,
