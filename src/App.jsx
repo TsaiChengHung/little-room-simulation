@@ -29,23 +29,23 @@ export function App() {
   useEffect(() => {
     const initializeResources = async () => {
       try {
-        console.log("開始初始化資源...");
+        console.log("Starting resource initialization...");
         
-        // 加載模型
+        // Load models
         const models = await preloadAllObjects();
-        console.log("模型加載完成:", Object.keys(models).length);
+        console.log("Models loading completed:", Object.keys(models).length);
         
-        // 加載貼圖
+        // Load textures
         const textures = initializeTextures();
-        console.log("貼圖加載完成:", Object.keys(textures).length);
+        console.log("Textures loading completed:", Object.keys(textures).length);
         
-        // 標記資源加載完成
+        // Mark resources as loaded
         setResourcesLoaded(true);
         storeSetResourcesLoaded(true);
         
-        console.log("所有資源初始化完成");
+        console.log("All resources initialized");
       } catch (error) {
-        console.error("初始化資源時出錯:", error);
+        console.error("Error initializing resources:", error);
       }
     };
     
@@ -98,12 +98,12 @@ export function App() {
 
             <Scene rotation={[0, Math.PI / 2, 0]} />
 
-            {/* AI 生成中的加載指示器 */}
+            {/* Loading indicator during AI generation */}
             {isAIGenerating && (
               <Html center>
                 <div className="loading-indicator">
                   <div className="spinner"></div>
-                  <p>AI 正在生成設計...</p>
+                  <p>AI is generating design...</p>
                 </div>
               </Html>
             )}
@@ -121,12 +121,12 @@ export function App() {
             <RoomSelectorUI />
             <OrbitControls />
             
-            {/* AI 生成中的加載指示器 */}
+            {/* Loading indicator during AI generation */}
             {isAIGenerating && (
               <Html center>
                 <div className="loading-indicator">
                   <div className="spinner"></div>
-                  <p>AI 正在生成設計...</p>
+                  <p>AI is generating design...</p>
                 </div>
               </Html>
             )}
@@ -138,9 +138,9 @@ export function App() {
             className="ai-toggle-button"
             onClick={() => setShowAI(!showAI)}
           >
-            {showAI ? '隱藏 AI 助手' : '顯示 AI 助手'}
+            {showAI ? 'Hide AI Assistant' : 'Show AI Assistant'}
           </button>
-          {/* 其他控制面板 */}
+          {/* Other control panels */}
         </div>
         
         {showAI && (

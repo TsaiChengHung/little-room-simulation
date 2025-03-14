@@ -8,11 +8,11 @@ export default function ObjectsManager() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // 當 preloadedModels 更新時，更新本地狀態
+        // When preloadedModels updates, update local state
         if (preloadedModels && Object.keys(preloadedModels).length > 0) {
-            console.log("preloadedModels 已更新:", Object.keys(preloadedModels).length);
+            console.log("preloadedModels updated:", Object.keys(preloadedModels).length);
             
-            // 將 preloadedModels 轉換為 UI 可用的格式
+            // Convert preloadedModels to UI-friendly format
             const formattedObjects = {};
             Object.entries(preloadedModels).forEach(([key, modelData]) => {
                 formattedObjects[key] = {
@@ -31,7 +31,7 @@ export default function ObjectsManager() {
     }, [preloadedModels]);
 
     const handleObjectSelect = (key, objectData) => {
-        // 添加物件到場景
+        // Add object to scene
         addObject('furniture', {
             name: objectData.name,
             object: objectData.object,
@@ -45,7 +45,7 @@ export default function ObjectsManager() {
                 scale: [1, 1, 1]
             }
         });
-        console.log("已添加物件:", key, objectData);
+        console.log("Object added:", key, objectData);
     };
 
     if (isLoading) {
@@ -65,7 +65,7 @@ export default function ObjectsManager() {
                         }}
                     >
                         <Typography sx={{ color: 'white' }}>
-                            正在加載物件...
+                            Loading objects...
                         </Typography>
                     </Box>
                 )}

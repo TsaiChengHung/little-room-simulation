@@ -6,30 +6,30 @@ const QuotationPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { roomData, objects } = useSelectionStore();
 
-  // 計算報價資料
+  // Calculate quotation data
   const quotationData = useMemo(() => {
     if (!roomData) return { materials: [], objects: [], totalAmount: 0 };
 
-    // 處理材質項目
+    // Process material items
     const materials = [];
     let materialsTotal = 0;
 
-    // 直接遍歷所有 roomData 中的物件
+    // Directly iterate through all objects in roomData
     Object.entries(roomData).forEach(([key, item]) => {
       if (item && item.price > 0) {
         const itemTotal = item.price * (item.area || 1);
         
-        // 根據不同類型物件顯示不同的名稱
+        // Display different names based on object type
         let itemName = '';
         if (key === 'floor') {
-          itemName = `地板 (${item.materialName || '未命名材質'})`;
+          itemName = `Floor (${item.materialName || 'Unnamed Material'})`;
         } else if (key === 'ceiling') {
-          itemName = `天花板 (${item.materialName || '未命名材質'})`;
+          itemName = `Ceiling (${item.materialName || 'Unnamed Material'})`;
         } else if (key.includes('wall')) {
           const wallIndex = key.replace('wall', '');
-          itemName = `牆面 ${wallIndex} (${item.materialName || '未命名材質'})`;
+          itemName = `Wall ${wallIndex} (${item.materialName || 'Unnamed Material'})`;
         } else {
-          itemName = `${key} (${item.materialName || '未命名材質'})`;
+          itemName = `${key} (${item.materialName || 'Unnamed Material'})`;
         }
         
         materials.push({
@@ -43,7 +43,7 @@ const QuotationPanel = () => {
       }
     });
 
-    // 處理物件項目
+    // Process object items
     const objectItems = [];
     let objectsTotal = 0;
 
@@ -51,7 +51,7 @@ const QuotationPanel = () => {
       objects[category].forEach(item => {
         if (item.price > 0) {
           objectItems.push({
-            name: item.objectName || '未命名物件',
+            name: item.objectName || 'Unnamed Object',
             price: item.price
           });
           objectsTotal += item.price;
@@ -59,7 +59,7 @@ const QuotationPanel = () => {
       });
     });
 
-    // 計算總價
+    // Calculate total price
     const totalAmount = materialsTotal + objectsTotal;
 
     return {
@@ -80,20 +80,20 @@ const QuotationPanel = () => {
       {isOpen && (
         <div className="quotation-panel">
           <div className="quotation-header">
-            <h2>室內設計報價單</h2>
+            <h2>Interior Design Quotation</h2>
             <button className="close-button" onClick={togglePanel}>×</button>
           </div>
           
           <div className="quotation-content">
-            <h3>材質項目</h3>
+            <h3>Materials</h3>
             {quotationData.materials.length > 0 ? (
               <table className="quotation-table">
                 <thead>
                   <tr>
-                    <th>項目</th>
-                    <th>面積(m²)</th>
-                    <th>單價($/m²)</th>
-                    <th>小計($)</th>
+                    <th>Item</th>
+                    <th>Area(m²)</th>
+                    <th>Unit Price($/m²)</th>
+                    <th>Subtotal($)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -106,22 +106,22 @@ const QuotationPanel = () => {
                     </tr>
                   ))}
                   <tr className="subtotal-row">
-                    <td colSpan="3">材質小計</td>
+                    <td colSpan="3">Materials Subtotal</td>
                     <td>${quotationData.materialsTotal.toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
             ) : (
-              <p>沒有套用任何付費材質</p>
+              <p>No paid materials applied</p>
             )}
 
-            <h3>家具物件</h3>
+            <h3>Furniture & Objects</h3>
             {quotationData.objects.length > 0 ? (
               <table className="quotation-table">
                 <thead>
                   <tr>
-                    <th>項目</th>
-                    <th>價格($)</th>
+                    <th>Item</th>
+                    <th>Price($)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -132,17 +132,17 @@ const QuotationPanel = () => {
                     </tr>
                   ))}
                   <tr className="subtotal-row">
-                    <td>家具小計</td>
+                    <td>Furniture Subtotal</td>
                     <td>${quotationData.objectsTotal.toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
             ) : (
-              <p>未添加任何家具</p>
+              <p>No furniture added</p>
             )}
 
             <div className="total-section">
-              <h3>總計金額: ${quotationData.totalAmount.toFixed(2)}</h3>
+              <h3>Total Amount: ${quotationData.totalAmount.toFixed(2)}</h3>
             </div>
           </div>
         </div>
@@ -151,9 +151,9 @@ const QuotationPanel = () => {
       <button 
         className="quotation-button" 
         onClick={togglePanel}
-        title="查看報價單"
+        title="View Quotation"
       >
-        報價單
+        Quotation
       </button>
     </div>
   );

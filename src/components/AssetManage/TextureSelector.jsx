@@ -17,10 +17,10 @@ export default function MaterialSelector() {
     if (preloadedTextures[textureName] && selectedObject && selectedObject.object) {
       setMaterialTexture(selectedObject.object, textureName);
     }
-    clearSelectedObject(); // 清除選中的物件以防止同時進行物件選擇和材質更改
+    clearSelectedObject(); // Clear selected object to prevent simultaneous object selection and material change
   };
 
-  // 如果 preloadedTextures 未載入完成，顯示載入提示
+  // If preloadedTextures is not fully loaded, display loading prompt
   if (!preloadedTextures || Object.keys(preloadedTextures).length === 0) {
     return <div>Loading textures...</div>;
   }

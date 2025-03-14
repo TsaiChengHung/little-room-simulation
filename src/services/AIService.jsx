@@ -184,156 +184,150 @@ export const findAndApplyTextures = async (prompt, targetType = 'all') => {
       }
     }));
     
-    // 創建 AI 提示詞
+    // Create AI prompt
     const textureSelectionPrompt = `
-你是一位專業的室內設計 AI 助手。請根據用戶的需求，從以下可用的材質中選擇最適合的材質：
+You are a professional interior design AI assistant. Please select the most suitable materials based on the user's requirements from the following available materials:
 
-可用材質列表:
+Available materials list:
 ${JSON.stringify(availableTextures, null, 2)}
 
-用戶需求: ${prompt}
+User requirement: ${prompt}
 
-請根據用戶需求，為${targetType === 'all' ? '地板、牆壁和天花板' : targetType}選擇最適合的材質。
-回答格式必須是有效的 JSON，格式如下:
+Please select the most suitable materials for ${targetType === 'all' ? 'floor, walls, and ceiling' : targetType} according to the user's requirements.
+The response must be in valid JSON format as follows:
 {
-  ${targetType === 'all' || targetType === 'floor' ? '"floor": "材質名稱",' : ''}
-  ${targetType === 'all' || targetType === 'wall' ? '"wall": "材質名稱",' : ''}
-  ${targetType === 'all' || targetType === 'ceiling' ? '"ceiling": "材質名稱",' : ''}
-  "explanation": "選擇理由說明"
+  ${targetType === 'all' || targetType === 'floor' ? '"floor": "material name",' : ''}
+  ${targetType === 'all' || targetType === 'wall' ? '"wall": "material name",' : ''}
+  ${targetType === 'all' || targetType === 'ceiling' ? '"ceiling": "material name",' : ''}
+  "explanation": "explanation of selection reasons"
 }
 
-只返回 JSON 格式，不要有其他文字。
+Only return JSON format, no other text.
 `;
     
-    // 調用 AI 獲取材質建議
+    // Call AI to get material suggestions
     const model = getGeminiModel();
     const result = await model.generateContent(textureSelectionPrompt);
-    const response = await result.response;
+    const response = result.response;
     const responseText = response.text();
     
-    console.log("AI 回應:", responseText);
+    // Parse the JSON response
+    console.log("AI material selection response:", responseText);
     
-    // 解析 AI 回應
-    let selectedTextures;
     try {
-      // 提取 JSON 部分（如果有其他文本）
+      // Extract JSON from response text (in case there's any non-JSON text)
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        selectedTextures = JSON.parse(jsonMatch[0]);
-        console.log("解析後的材質選擇:", selectedTextures);
+      const jsonText = jsonMatch ? jsonMatch[0] : responseText;
+      
+      const selectedTextures = JSON.parse(jsonText);
+      console.log("Parsed material selection:", selectedTextures);
+      
+      // Get store instance
+      const store = useSelectionStore.getState();
+      
+      // Find and apply the selected textures
+      let appliedChanges = [];
+      
+      // First select floor
+      if (selectedTextures.floor && (targetType === 'all' || targetType === 'floor')) {
+        const floorTextureName = selectedTextures.floor;
+        
+        // Find the texture by name
+        const floorTexture = Object.entries(store.preloadedTextures)
+          .find(([id, texture]) => texture.name.toLowerCase() === floorTextureName.toLowerCase());
+        
+        if (floorTexture && store.roomData?.floor) {
+          const [textureId, textureData] = floorTexture;
+          console.log(`Applying floor material: ${floorTextureName}`, floorTexture);
+          
+          // Copy roomData to avoid mutation
+          const newRoomData = { ...store.roomData };
+          
+          // Then apply material
+          store.setMaterialTexture('floor', textureId);
+          appliedChanges.push(`Floor to ${floorTextureName}`);
+        } else {
+          console.warn(`Cannot find floor material: ${floorTextureName} or floor data doesn't exist`);
+        }
+      }
+      
+      // Apply wall material
+      if (selectedTextures.wall && (targetType === 'all' || targetType === 'wall')) {
+        const wallTextureName = selectedTextures.wall;
+        
+        // Find the texture by name
+        const wallTexture = Object.entries(store.preloadedTextures)
+          .find(([id, texture]) => texture.name.toLowerCase() === wallTextureName.toLowerCase());
+        
+        if (wallTexture) {
+          const [textureId, textureData] = wallTexture;
+          console.log(`Applying wall material: ${wallTextureName}`, wallTexture);
+          
+          // Apply to each wall
+          const wallKeys = Object.keys(store.roomData || {}).filter(key => key.includes('wall'));
+          
+          if (wallKeys.length > 0) {
+            // Apply material
+            wallKeys.forEach(wallKey => {
+              store.setMaterialTexture(wallKey, textureId);
+            });
+            
+            appliedChanges.push(`Walls to ${wallTextureName}`);
+          }
+        } else {
+          console.warn(`Cannot find wall material: ${wallTextureName}`);
+        }
+      }
+      
+      // Apply ceiling material
+      if (selectedTextures.ceiling && (targetType === 'all' || targetType === 'ceiling')) {
+        const ceilingTextureName = selectedTextures.ceiling;
+        
+        // Find the texture by name
+        const ceilingTexture = Object.entries(store.preloadedTextures)
+          .find(([id, texture]) => texture.name.toLowerCase() === ceilingTextureName.toLowerCase());
+        
+        if (ceilingTexture && store.roomData?.ceiling) {
+          const [textureId, textureData] = ceilingTexture;
+          console.log(`Applying ceiling material: ${ceilingTextureName}`, ceilingTexture);
+          
+          // Apply material
+          store.setMaterialTexture('ceiling', textureId);
+          appliedChanges.push(`Ceiling to ${ceilingTextureName}`);
+        } else {
+          console.warn(`Cannot find ceiling material: ${ceilingTextureName} or ceiling data doesn't exist`);
+        }
+      }
+      
+      // Ensure all material changes are saved to roomData
+      // Get latest roomData
+      const updatedRoomData = store.roomData;
+      
+      // Clear selection
+      store.clearSelectedObject();
+      
+      // Manually update roomData to ensure all changes are saved
+      store.setRoomData(updatedRoomData);
+      
+      if (appliedChanges.length > 0) {
+        return {
+          success: true,
+          message: `Applied AI selected materials: ${appliedChanges.join(', ')}`,
+          selectedTextures,
+          explanation: selectedTextures.explanation || "AI selected these materials based on your requirements"
+        };
       } else {
         return {
           success: false,
-          message: "無法解析 AI 回應為 JSON 格式",
-          rawResponse: responseText
+          message: "No material changes applied",
+          selectedTextures
         };
       }
     } catch (error) {
-      console.error("解析 JSON 時出錯:", error);
+      console.error("Error finding and applying materials:", error);
       return {
         success: false,
-        message: "解析 JSON 時出錯: " + error.message,
-        rawResponse: responseText
-      };
-    }
-    
-    // 記錄應用的變更
-    const appliedChanges = [];
-    
-    // 應用地板材質
-    if (selectedTextures.floor && (targetType === 'all' || targetType === 'floor')) {
-      const floorTextureName = selectedTextures.floor;
-      const floorTexture = store.preloadedTextures[floorTextureName];
-      
-      if (floorTexture && store.roomData.floor) {
-        console.log(`應用地板材質: ${floorTextureName}`, floorTexture);
-        
-        // 首先選擇地板
-        store.setSelectedObject("floor", null, "room");
-        
-        // 然後應用材質
-        store.setMaterialTexture("floor", floorTextureName);
-        
-        appliedChanges.push(`地板: ${floorTextureName}`);
-      } else {
-        console.warn(`找不到地板材質: ${floorTextureName} 或地板數據不存在`);
-      }
-    }
-    
-    // 應用牆壁材質
-    if (selectedTextures.wall && (targetType === 'all' || targetType === 'wall')) {
-      const wallTextureName = selectedTextures.wall;
-      const wallTexture = store.preloadedTextures[wallTextureName];
-      
-      if (wallTexture) {
-        console.log(`應用牆壁材質: ${wallTextureName}`, wallTexture);
-        
-        // 找出所有牆壁
-        const wallKeys = Object.keys(store.roomData).filter(key => key.startsWith('wall-'));
-        
-        // 應用到每個牆壁
-        let wallsApplied = 0;
-        for (const wallKey of wallKeys) {
-          // 選擇牆壁
-          store.setSelectedObject(wallKey, null, "room");
-          
-          // 應用材質
-          store.setMaterialTexture(wallKey, wallTextureName);
-          
-          wallsApplied++;
-        }
-        
-        if (wallsApplied > 0) {
-          appliedChanges.push(`牆壁 (${wallsApplied}個): ${wallTextureName}`);
-        }
-      } else {
-        console.warn(`找不到牆壁材質: ${wallTextureName}`);
-      }
-    }
-    
-    // 應用天花板材質
-    if (selectedTextures.ceiling && (targetType === 'all' || targetType === 'ceiling')) {
-      const ceilingTextureName = selectedTextures.ceiling;
-      const ceilingTexture = store.preloadedTextures[ceilingTextureName];
-      
-      if (ceilingTexture && store.roomData.ceiling) {
-        console.log(`應用天花板材質: ${ceilingTextureName}`, ceilingTexture);
-        
-        // 選擇天花板
-        store.setSelectedObject("ceiling", null, "room");
-        
-        // 應用材質
-        store.setMaterialTexture("ceiling", ceilingTextureName);
-        
-        appliedChanges.push(`天花板: ${ceilingTextureName}`);
-      } else {
-        console.warn(`找不到天花板材質: ${ceilingTextureName} 或天花板數據不存在`);
-      }
-    }
-    
-    // 確保所有材質更改都已經被保存到roomData中
-    // 獲取最新的roomData
-    const updatedRoomData = { ...store.roomData };
-    
-    // 清除選擇
-    store.clearSelectedObject();
-    
-    // 手動更新roomData以確保所有更改都被保存
-    store.setRoomData(updatedRoomData);
-    
-    // 返回結果
-    if (appliedChanges.length > 0) {
-      return {
-        success: true,
-        message: `已應用 AI 選擇的材質: ${appliedChanges.join(', ')}`,
-        selectedTextures,
-        explanation: selectedTextures.explanation || "AI 根據您的需求選擇了這些材質"
-      };
-    } else {
-      return {
-        success: false,
-        message: "沒有應用任何材質變更",
-        selectedTextures
+        message: `Error finding and applying materials: ${error.message}`
       };
     }
   } catch (error) {

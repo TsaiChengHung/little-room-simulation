@@ -10,7 +10,7 @@ const AIAssistant = () => {
   const [connectionStatus, setConnectionStatus] = useState('checking');
   const messagesEndRef = useRef(null);
 
-  // 測試 Gemini 連接
+  // Test Gemini connection
   useEffect(() => {
     const checkConnection = async () => {
       setConnectionStatus('checking');
@@ -21,14 +21,14 @@ const AIAssistant = () => {
         setMessages([
           { 
             role: 'assistant', 
-            content: 'AI 助手已連接。您可以開始詢問有關房間設計的問題。' 
+            content: 'AI Assistant connected. You can start asking questions about room design.' 
           }
         ]);
       } else {
         setMessages([
           { 
             role: 'assistant', 
-            content: `連接失敗: ${result.message}。請檢查 API 密鑰和網絡連接。` 
+            content: `Connection failed: ${result.message}. Please check API key and network connection.` 
           }
         ]);
       }
@@ -37,101 +37,101 @@ const AIAssistant = () => {
     checkConnection();
   }, []);
 
-  // 自動滾動到最新消息
+  // Auto-scroll to latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // 增加處理材質指令的功能
+  // Function to process texture commands
   const processTextureCommand = async (userMessage) => {
     setIsLoading(true);
     
     try {
-      // 首先嘗試將用戶消息作為材質指令處理
+      // First try to process the user message as a texture command
       const result = await executeAITextureCommand(userMessage);
       
       if (result.success) {
-        // 如果成功解析並執行了材質指令
+        // If successfully parsed and executed texture command
         const successCount = result.details.filter(d => d.success).length;
         
-        // 添加AI回覆到對話
+        // Add AI response to conversation
         setMessages(prev => [
           ...prev, 
           { 
             role: 'assistant', 
-            content: `我已成功應用了${successCount}個材質變更。${
+            content: `I've successfully applied ${successCount} material changes. ${
               result.details.map(d => d.success ? 
-                `將${d.target === 'floor' ? '地板' : d.target === 'ceiling' ? '天花板' : '牆壁'}改為${d.textureName}` : 
-                '').filter(Boolean).join('，')
+                `Changed ${d.target === 'floor' ? 'floor' : d.target === 'ceiling' ? 'ceiling' : 'wall'} to ${d.textureName}` : 
+                '').filter(Boolean).join(', ')
             }`
           }
         ]);
         
-        return true; // 指令已處理
+        return true; // Command handled
       }
       
-      return false; // 不是有效的材質指令，交給通用AI處理
+      return false; // Not a valid texture command, pass to general AI handling
     } catch (error) {
-      console.error("處理材質指令時出錯:", error);
+      console.error("Error processing texture command:", error);
       setMessages(prev => [
         ...prev, 
         { 
           role: 'assistant', 
-          content: `處理材質指令時出錯: ${error.message}` 
+          content: `Error processing texture command: ${error.message}` 
         }
       ]);
-      return true; // 出錯了，但我們已經處理了
+      return true; // Error occurred, but we handled it
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 修改發送消息的函數
+  // Modified send message function
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
     
     const userMessage = input.trim();
     setInput('');
     
-    // 添加用戶消息到對話
+    // Add user message to conversation
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     
-    // 設置加載狀態
+    // Set loading state
     setIsLoading(true);
     
     try {
-      // 首先嘗試作為材質指令處理
+      // First try to process as texture command
       const commandProcessed = await processTextureCommand(userMessage);
       
-      // 如果不是材質指令，交給通用AI處理
+      // If not a texture command, pass to general AI handling
       if (!commandProcessed) {
-        // 獲取可用材質列表，以便AI參考
+        // Get available texture list for AI reference
         const availableTextures = getAvailableTextures();
         
-        // 構建上下文
+        // Build context
         const contextPrompt = `
-用戶正在使用一個3D室內設計應用程序，以下是可用的材質列表：
+The user is using a 3D interior design application. Here is a list of available materials:
 ${JSON.stringify(availableTextures, null, 2)}
 
-如果用戶想要更改房間的材質，你應該指導他們使用如下格式的指令：
-"將地板改為木地板" 或 "將牆壁改為白色磚塊" 等。
+If the user wants to change room materials, you should guide them to use commands like:
+"Change the floor to wood flooring" or "Change the wall to white brick" etc.
 
-用戶的問題或請求是：${userMessage}
+The user's question or request is: ${userMessage}
         `;
         
-        // 發送請求到 Gemini
+        // Send request to Gemini
         const response = await chatWithGemini(contextPrompt);
         
-        // 添加 AI 回覆到對話
+        // Add AI response to conversation
         setMessages(prev => [...prev, { role: 'assistant', content: response }]);
       }
     } catch (error) {
-      // 處理錯誤
+      // Handle errors
       setMessages(prev => [
         ...prev, 
         { 
           role: 'assistant', 
-          content: `發生錯誤: ${error.message}。請稍後再試。` 
+          content: `Error occurred: ${error.message}. Please try again later.` 
         }
       ]);
     } finally {
@@ -139,7 +139,7 @@ ${JSON.stringify(availableTextures, null, 2)}
     }
   };
 
-  // 處理按鍵事件 (按 Enter 發送消息)
+  // Handle key events (press Enter to send message)
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -150,11 +150,11 @@ ${JSON.stringify(availableTextures, null, 2)}
   return (
     <div className="ai-assistant">
       <div className="ai-header">
-        <h2>AI 設計助手</h2>
+        <h2>AI Design Assistant</h2>
         <div className={`connection-status ${connectionStatus}`}>
-          {connectionStatus === 'checking' && '檢查連接...'}
-          {connectionStatus === 'connected' && '已連接'}
-          {connectionStatus === 'failed' && '連接失敗'}
+          {connectionStatus === 'checking' && 'Checking connection...'}
+          {connectionStatus === 'connected' && 'Connected'}
+          {connectionStatus === 'failed' && 'Connection failed'}
         </div>
       </div>
       
@@ -181,14 +181,14 @@ ${JSON.stringify(availableTextures, null, 2)}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="輸入您的問題或指令..."
+          placeholder="Enter your question or command..."
           disabled={connectionStatus !== 'connected' || isLoading}
         />
         <button 
           onClick={sendMessage}
           disabled={!input.trim() || connectionStatus !== 'connected' || isLoading}
         >
-          {isLoading ? '發送中...' : '發送'}
+          {isLoading ? 'Sending...' : 'Send'}
         </button>
       </div>
     </div>

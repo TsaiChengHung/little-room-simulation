@@ -4,30 +4,30 @@ import * as THREE from 'three';
 
 const useSelectionStore = create((set, get) => ({
   designMode: "roomDesign", // 'roomDesign' or 'roomSimulation'
-  selectedObject: { object: null, objectId: null, type: null }, // type用於標誌選中的物件類型，例如 'room' 或 'customObject'
+  selectedObject: { object: null, objectId: null, type: null }, // type used to mark the type of selected object, e.g., 'room' or 'customObject'
   operationMode: null,
   transformMode: "translate",
   paintMode: "color",
   
   sunPosition: 0.5,
 
-  // 統一管理所有家具物件
+  // Unified management of all furniture objects
   objects: {},
 
-  // 統一管理的天地壁資料，初始為空，由組件設置
+  // Unified management of floor, wall, ceiling data, initially empty, set by components
   currentFloorPoints: [],
   wallHeight: 3,
-  roomData: null, // 初始為 null，等待組件初始化
+  roomData: null, // Initially null, waiting for component initialization
 
-  // 預載資源相關狀態
-  preloadedModels: {}, // 存儲預載的 3D 模型
-  preloadedTextures: {}, // 存儲預載的貼圖
-  isResourcesLoaded: false, // 資源是否已加載完成
+  // Preloaded resource related states
+  preloadedModels: {}, // Store preloaded 3D models
+  preloadedTextures: {}, // Store preloaded textures
+  isResourcesLoaded: false, // Whether resources have been loaded
 
-  // 原有的 general functions
+  // Original general functions
   setDesignMode: (mode) => set({ designMode: mode }),
 
-  // 原有的 room simulation functions
+  // Original room simulation functions
   setSelectedObject: (object, objectId, type) =>
     set({ selectedObject: { object, objectId, type } }),
 

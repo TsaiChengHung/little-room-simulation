@@ -1,37 +1,37 @@
 import useSelectionStore from "../components/Store/Store";
 
 /**
- * AI指令解析器 - 將AI的文本指令轉換為app操作
- * @param {string} aiPrompt - AI的文本指令
- * @returns {Object} - 操作結果
+ * AI Command Parser - Converts AI text commands into app operations
+ * @param {string} aiPrompt - AI text command
+ * @returns {Object} - Operation result
  */
 export const executeAITextureCommand = async (aiPrompt) => {
   try {
-    // 獲取store的當前狀態
+    // Get current state from store
     const store = useSelectionStore.getState();
     
-    // 1. 檢查是否有預加載的紋理
+    // 1. Check if there are preloaded textures
     if (!store.preloadedTextures || Object.keys(store.preloadedTextures).length === 0) {
       return {
         success: false,
-        message: "沒有可用的材質"
+        message: "No available materials"
       };
     }
     
-    // 2. 解析AI指令
+    // 2. Parse AI command
     const parsedCommand = parseAITextureCommand(aiPrompt, store.preloadedTextures);
     
-    // 3. 執行指令
+    // 3. Execute command
     if (parsedCommand.success) {
       const results = [];
       
-      // 應用每個指定的材質
+      // Apply each specified material
       for (const action of parsedCommand.actions) {
         const { target, textureId } = action;
         
-        // 確認目標和材質都有效
+        // Confirm both target and texture are valid
         if (target && textureId && store.preloadedTextures[textureId]) {
-          // 應用材質
+          // Apply material
           store.setMaterialTexture(target, textureId);
           
           results.push({
@@ -45,68 +45,73 @@ export const executeAITextureCommand = async (aiPrompt) => {
             target,
             textureId,
             success: false,
-            reason: !target ? "無效目標" : "無效材質ID"
+            reason: !target ? "Invalid target" : "Invalid texture ID"
           });
         }
       }
       
       return {
         success: true,
-        message: `已成功執行${results.filter(r => r.success).length}個材質操作`,
+        message: `Successfully executed ${results.filter(r => r.success).length} material operations`,
         details: results
       };
     } else {
-      return parsedCommand; // 返回解析錯誤
+      return parsedCommand; // Return parsing error
     }
   } catch (error) {
-    console.error("執行AI指令時出錯:", error);
+    console.error("Error executing AI command:", error);
     return {
       success: false,
-      message: `執行指令時出錯: ${error.message}`
+      message: `Error executing command: ${error.message}`
     };
   }
 };
 
 /**
- * 解析AI的文本指令
- * @param {string} aiPrompt - AI的文本指令
- * @param {Object} availableTextures - 可用的材質
- * @returns {Object} - 解析結果
+ * Parse AI text command
+ * @param {string} aiPrompt - AI text command
+ * @param {Object} availableTextures - Available materials
+ * @returns {Object} - Parsing result
  */
 function parseAITextureCommand(aiPrompt, availableTextures) {
   try {
-    // 初始化結果
+    // Initialize result
     const result = {
       success: false,
       actions: []
     };
     
-    // 縮寫映射表
+    // Target mapping abbreviations
     const targetMapping = {
-      '地板': 'floor',
-      '地面': 'floor',
-      '牆壁': 'wall', // 這裡可能需要特別處理來指定哪面牆
-      '牆': 'wall',
-      '天花板': 'ceiling',
-      '頂棚': 'ceiling',
-      '天頂': 'ceiling'
+      '地板': 'floor', // floor
+      '地面': 'floor', // ground
+      '牆壁': 'wall', // wall (may need special handling to specify which wall)
+      '牆': 'wall',    // wall
+      '天花板': 'ceiling', // ceiling
+      '頂棚': 'ceiling',   // ceiling
+      '天頂': 'ceiling',   // ceiling top
+      // English mappings
+      'floor': 'floor',
+      'ground': 'floor',
+      'wall': 'wall',
+      'ceiling': 'ceiling'
     };
     
-    // 創建一個材質名稱到ID的映射
+    // Create a mapping from texture name to ID
     const textureNameToId = {};
     for (const [id, texture] of Object.entries(availableTextures)) {
       textureNameToId[texture.name?.toLowerCase() || id.toLowerCase()] = id;
     }
     
-    // 提取指令中提到的目標和材質
-    // 例如: "將地板改為木地板，牆壁改為白色磚塊"
+    // Extract target and texture from the command
+    // For example: "Change floor to wooden floor, wall to white brick"
     
-    // 尋找地板相關指令
+    // Find floor-related command
     const floorMatches = aiPrompt.match(/(?:地板|地面)(?:.*?)(?:改為|改成|設為|設成|用|使用|換成|換為|應用)(?:.*?)([^\s,，.。!！?？]+)/i);
     if (floorMatches && floorMatches[1]) {
       const textureName = floorMatches[1].toLowerCase();
       
-      // 尋找匹配的材質ID
+      // Find matching texture ID
       let textureId = null;
       for (const [id, texture] of Object.entries(availableTextures)) {
         if (texture.name?.toLowerCase().includes(textureName) || id.toLowerCase().includes(textureName)) {
@@ -123,12 +128,12 @@ function parseAITextureCommand(aiPrompt, availableTextures) {
       }
     }
     
-    // 尋找牆壁相關指令
+    // Find wall-related command
     const wallMatches = aiPrompt.match(/(?:牆壁|牆)(?:.*?)(?:改為|改成|設為|設成|用|使用|換成|換為|應用)(?:.*?)([^\s,，.。!！?？]+)/i);
     if (wallMatches && wallMatches[1]) {
       const textureName = wallMatches[1].toLowerCase();
       
-      // 尋找匹配的材質ID
+      // Find matching texture ID
       let textureId = null;
       for (const [id, texture] of Object.entries(availableTextures)) {
         if (texture.name?.toLowerCase().includes(textureName) || id.toLowerCase().includes(textureName)) {
@@ -137,7 +142,7 @@ function parseAITextureCommand(aiPrompt, availableTextures) {
         }
       }
       
-      // 由於牆壁可能有多個，我們需要獲取roomData中所有的牆壁
+      // Since walls may be multiple, we need to get all walls from roomData
       if (textureId) {
         const store = useSelectionStore.getState();
         if (store.roomData) {
@@ -152,12 +157,12 @@ function parseAITextureCommand(aiPrompt, availableTextures) {
       }
     }
     
-    // 尋找天花板相關指令
+    // Find ceiling-related command
     const ceilingMatches = aiPrompt.match(/(?:天花板|頂棚|天頂)(?:.*?)(?:改為|改成|設為|設成|用|使用|換成|換為|應用)(?:.*?)([^\s,，.。!！?？]+)/i);
     if (ceilingMatches && ceilingMatches[1]) {
       const textureName = ceilingMatches[1].toLowerCase();
       
-      // 尋找匹配的材質ID
+      // Find matching texture ID
       let textureId = null;
       for (const [id, texture] of Object.entries(availableTextures)) {
         if (texture.name?.toLowerCase().includes(textureName) || id.toLowerCase().includes(textureName)) {
@@ -174,26 +179,26 @@ function parseAITextureCommand(aiPrompt, availableTextures) {
       }
     }
     
-    // 檢查是否找到任何操作
+    // Check if any operation is found
     if (result.actions.length > 0) {
       result.success = true;
     } else {
-      result.message = "無法從指令中識別出有效的材質變更";
+      result.message = "Cannot identify valid material changes from command";
     }
     
     return result;
   } catch (error) {
-    console.error("解析AI指令時出錯:", error);
+    console.error("Error parsing AI command:", error);
     return {
       success: false,
-      message: `解析指令時出錯: ${error.message}`
+      message: `Error parsing command: ${error.message}`
     };
   }
 }
 
 /**
- * 獲取所有可用材質的信息
- * @returns {Array} - 材質信息列表
+ * Get information about all available materials
+ * @returns {Array} - List of material information
  */
 export const getAvailableTextures = () => {
   const store = useSelectionStore.getState();

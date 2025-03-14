@@ -285,7 +285,7 @@ export async function preloadAllObjects(objectList = getObjectsUrlMap()) {
         console.error("Error during preloading objects:", error);
         isPreloading = false;
         
-        // 即使出錯，也更新已加載的模型到 Store
+        // Update the loaded models in Store even if there's an error
         const { setPreloadedModels } = useSelectionStore.getState();
         setPreloadedModels(cachedObjects);
         
