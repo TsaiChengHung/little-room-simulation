@@ -577,13 +577,8 @@ async function parseStyleGuidanceCommand(aiPrompt, availableTextures) {
               });
             }
           } else {
-            result.actions.push({
-              target: surface,
-              textureId: bestMatch.textureId
-            });
+            console.log(`Could not find matching texture for ${surface} in style ${matchedStyle.name}`);
           }
-        } else {
-          console.log(`Could not find matching texture for ${surface} in style ${matchedStyle.name}`);
         }
       }
     } else {
@@ -808,4 +803,500 @@ export const applyColdRoomStyle = () => {
       message: `Error applying cold room style: ${error.message}`
     };
   }
+};
+
+/**
+ * AI Command Parser - Converts AI text commands into object placement operations
+ * @param {string} aiPrompt - AI text command
+ * @returns {Object} - Operation result
+ */
+export const executeAIObjectCommand = async (aiPrompt) => {
+  try {
+    console.log("Processing AI object placement command:", aiPrompt);
+    
+    // Get current state from store
+    const store = useSelectionStore.getState();
+    
+    // 1. Check if there are preloaded objects
+    if (!store.preloadedObjects || Object.keys(store.preloadedObjects).length === 0) {
+      console.log("Error: No preloaded objects available");
+      return {
+        success: false,
+        message: "No available objects"
+      };
+    }
+    
+    // Log available objects for debugging
+    console.log("Available objects:", Object.keys(store.preloadedObjects).map(key => ({
+      id: key,
+      name: store.preloadedObjects[key].name,
+      category: store.preloadedObjects[key].category
+    })));
+    
+    // 2. Check if roomData is initialized
+    if (!store.roomData) {
+      console.log("Error: Room data not initialized");
+      return {
+        success: false,
+        message: "Room data not initialized"
+      };
+    }
+    
+    // Parse the object placement command
+    const parsedCommand = parseObjectPlacementCommand(aiPrompt, store.preloadedObjects);
+    
+    // Execute command if parsing was successful
+    if (parsedCommand.success) {
+      const results = [];
+      
+      // Place each specified object
+      for (const action of parsedCommand.actions) {
+        const { objectId, position, rotation, scale } = action;
+        
+        // Confirm object is valid
+        if (objectId && store.preloadedObjects[objectId]) {
+          try {
+            // Place object using the store's placeObject method
+            const objectInstance = store.placeObject(objectId, position, rotation, scale);
+            
+            // Log success for debugging
+            console.log(`Successfully placed ${store.preloadedObjects[objectId].name} at position ${JSON.stringify(position)}`);
+            
+            results.push({
+              objectId,
+              objectName: store.preloadedObjects[objectId].name || objectId,
+              position,
+              rotation,
+              scale,
+              instanceId: objectInstance.id,
+              success: true
+            });
+          } catch (error) {
+            console.error(`Error placing object ${objectId}:`, error);
+            results.push({
+              objectId,
+              success: false,
+              reason: `Error placing object: ${error.message}`
+            });
+          }
+        } else {
+          // Log invalid parameters
+          console.log(`Invalid parameters - ObjectId: ${objectId}, Exists: ${store.preloadedObjects[objectId] ? 'Yes' : 'No'}`);
+          
+          results.push({
+            objectId,
+            success: false,
+            reason: !objectId ? "Invalid object ID" : "Object not found in preloaded objects"
+          });
+        }
+      }
+      
+      return {
+        success: true,
+        message: `Successfully executed ${results.filter(r => r.success).length} object placement operations`,
+        details: results,
+        style: parsedCommand.style // Include style information if applicable
+      };
+    } else {
+      return parsedCommand; // Return parsing error
+    }
+  } catch (error) {
+    console.error("Error executing AI object command:", error);
+    return {
+      success: false,
+      message: `Error executing object command: ${error.message}`
+    };
+  }
+};
+
+/**
+ * Parse commands where user requests to place objects in the room
+ * @param {string} aiPrompt - AI text command
+ * @param {Object} availableObjects - Available objects
+ * @returns {Object} - Parsing result
+ */
+function parseObjectPlacementCommand(aiPrompt, availableObjects) {
+  try {
+    console.log("Attempting object placement command parsing:", aiPrompt);
+    
+    // Initialize result
+    const result = {
+      success: false,
+      actions: []
+    };
+    
+    // Get models from store instead of using passed availableObjects
+    const store = useSelectionStore.getState();
+    const preloadedModels = store.preloadedModels || {};
+    
+    // Normalize prompt - convert to lowercase for case-insensitive matching
+    const normalizedPrompt = aiPrompt.toLowerCase();
+    
+    // Create an array of models with normalized names for easier matching
+    const modelArray = Object.entries(preloadedModels).map(([id, model]) => ({
+      id,
+      name: model.name || id,
+      nameLower: (model.name || id).toLowerCase(),
+      category: model.category || '',
+      categoryLower: (model.category || '').toLowerCase(),
+      tags: model.tags || []
+    }));
+    
+    // Log available models for debugging
+    console.log("Available models for placement:", modelArray.map(model => ({
+      id: model.id,
+      name: model.name,
+      category: model.category
+    })));
+    
+    // Object categories (with aliases)
+    const categories = [
+      { type: 'chair', keywords: ['椅子', '凳子', 'chair', 'stool', 'seat'] },
+      { type: 'table', keywords: ['桌子', '桌', 'table', 'desk', '書桌', '餐桌'] },
+      { type: 'sofa', keywords: ['沙發', '沙发', 'sofa', 'couch', '長椅'] },
+      { type: 'bed', keywords: ['床', 'bed', '睡床', '寢具'] },
+      { type: 'storage', keywords: ['儲物', '櫃子', 'storage', 'cabinet', 'shelf', 'bookcase', '書櫃', '衣櫃'] },
+      { type: 'lighting', keywords: ['燈', '照明', 'light', 'lamp', 'lighting', '燈具'] },
+      { type: 'decoration', keywords: ['裝飾', '擺設', 'decoration', 'decor', 'ornament', '藝術品'] }
+    ];
+    
+    // Placement positions (with aliases)
+    const positions = [
+      { type: 'center', keywords: ['中央', '中心', '房間中間', 'center', 'middle', 'central'] },
+      { type: 'corner', keywords: ['角落', '轉角', 'corner', '角', '邊角'] },
+      { type: 'wall', keywords: ['牆邊', '靠牆', '貼牆', 'against wall', 'wall', '墙边', '靠墙'] },
+      { type: 'window', keywords: ['窗邊', '窗戶旁', '靠窗', 'by window', 'window', '窗前'] },
+      { type: 'door', keywords: ['門邊', '門口', '靠門', 'by door', 'doorway', 'entrance'] }
+    ];
+    
+    // Check for Chinese/English placement commands like "在房間中央放一張沙發" or "place a sofa in the center"
+    const placementPatterns = [
+      // Chinese patterns
+      /在(.*?)放([一两幾個个張张条条把件])?([^的]+)/i,
+      /([一两幾個个張张条条把件])?([^的]+)放在(.*)/i,
+      // English patterns
+      /place ([a|an|one|two|some|few|couple of]+)?(.+?) (in|at|near|by|on|against) (the )?(.+)/i,
+      /put ([a|an|one|two|some|few|couple of]+)?(.+?) (in|at|near|by|on|against) (the )?(.+)/i,
+      /add ([a|an|one|two|some|few|couple of]+)?(.+?) (in|at|near|by|on|against) (the )?(.+)/i
+    ];
+    
+    for (const pattern of placementPatterns) {
+      const match = aiPrompt.match(pattern);
+      
+      if (match) {
+        console.log(`Found object placement match: ${match[0]}`);
+        
+        let objectType, positionType;
+        
+        // Parse based on whether it's Chinese or English pattern
+        if (pattern.toString().includes('place') || pattern.toString().includes('put') || pattern.toString().includes('add')) {
+          // English pattern - e.g., "place a sofa in the center"
+          objectType = match[2].trim().toLowerCase();
+          positionType = match[5].trim().toLowerCase();
+        } else {
+          // Chinese pattern - either "在房間中央放一張沙發" or "一張沙發放在房間中央"
+          if (pattern.toString().includes('在(.*?)放')) {
+            positionType = match[1].trim().toLowerCase();
+            objectType = match[3].trim().toLowerCase();
+          } else {
+            objectType = match[2].trim().toLowerCase();
+            positionType = match[3].trim().toLowerCase();
+          }
+        }
+        
+        console.log(`Detected object: "${objectType}", position: "${positionType}"`);
+        
+        // Match object type to available models
+        let matchedModelId = null;
+        
+        // First try direct name match
+        for (const model of modelArray) {
+          if (model.nameLower.includes(objectType) || objectType.includes(model.nameLower)) {
+            matchedModelId = model.id;
+            break;
+          }
+        }
+        
+        // If no direct match, try matching by category
+        if (!matchedModelId) {
+          let matchedCategory = null;
+          
+          // Find which category the object belongs to
+          for (const category of categories) {
+            if (category.keywords.some(kw => objectType.includes(kw.toLowerCase()) || kw.toLowerCase().includes(objectType))) {
+              matchedCategory = category.type;
+              break;
+            }
+          }
+          
+          if (matchedCategory) {
+            // Find first model in this category
+            for (const model of modelArray) {
+              if (model.categoryLower === matchedCategory.toLowerCase()) {
+                matchedModelId = model.id;
+                break;
+              }
+            }
+          }
+        }
+        
+        // Determine placement position based on position keywords
+        let position = { x: 0, y: 0, z: 0 }; // Default center position
+        let rotation = { x: 0, y: 0, z: 0 }; // Default rotation
+        
+        // Try to match position keywords
+        let matchedPosition = null;
+        for (const pos of positions) {
+          if (pos.keywords.some(kw => positionType.includes(kw.toLowerCase()))) {
+            matchedPosition = pos.type;
+            break;
+          }
+        }
+        
+        // Calculate position based on matched position type
+        if (matchedPosition) {
+          // Get room dimensions from store
+          const roomWidth = store.roomData.width || 10;
+          const roomLength = store.roomData.length || 10;
+          const roomHeight = store.roomData.height || 3;
+          
+          switch (matchedPosition) {
+            case 'center':
+              position = { x: roomWidth / 2, y: 0, z: roomLength / 2 };
+              break;
+            case 'corner':
+              position = { x: roomWidth * 0.85, y: 0, z: roomLength * 0.85 };
+              break;
+            case 'wall':
+              position = { x: roomWidth * 0.85, y: 0, z: roomLength / 2 };
+              rotation = { x: 0, y: -Math.PI / 2, z: 0 }; // Rotate to face away from wall
+              break;
+            case 'window':
+              position = { x: roomWidth * 0.15, y: 0, z: roomLength / 2 };
+              rotation = { x: 0, y: Math.PI / 2, z: 0 }; // Rotate to face away from window
+              break;
+            case 'door':
+              position = { x: roomWidth / 2, y: 0, z: roomLength * 0.15 };
+              rotation = { x: 0, y: 0, z: 0 }; // Face door
+              break;
+            default:
+              position = { x: roomWidth / 2, y: 0, z: roomLength / 2 };
+          }
+        }
+        
+        // If we matched both a model and position, add the action
+        if (matchedModelId) {
+          result.actions.push({
+            objectId: matchedModelId,
+            position: position,
+            rotation: rotation,
+            scale: { x: 1, y: 1, z: 1 } // Default scale
+          });
+        }
+      }
+    }
+    
+    // Check if any operation is found
+    if (result.actions.length > 0) {
+      result.success = true;
+    } else {
+      result.message = "No valid object placement instruction found";
+    }
+    
+    console.log("Object placement parse result:", result);
+    return result;
+  } catch (error) {
+    console.error("Error in object placement parsing:", error);
+    return {
+      success: false,
+      message: `Error in object placement parsing: ${error.message}`
+    };
+  }
+}
+
+/**
+ * Create a room with preset furniture based on a style
+ * @param {string} style - Room style to apply
+ * @returns {Object} - Result of the operation
+ */
+export const applyRoomPreset = async (style) => {
+  try {
+    const store = useSelectionStore.getState();
+    
+    if (!store.roomData) {
+      return {
+        success: false,
+        message: "Room data not initialized"
+      };
+    }
+    
+    if (!store.preloadedObjects || Object.keys(store.preloadedObjects).length === 0) {
+      return {
+        success: false,
+        message: "No available objects"
+      };
+    }
+    
+    // Define preset arrangements based on style
+    const presets = {
+      "現代簡約": [
+        { type: "sofa", position: "center", facing: "front" },
+        { type: "coffee_table", position: "center_front", facing: "none" },
+        { type: "tv_stand", position: "front_wall", facing: "back" },
+        { type: "floor_lamp", position: "corner", facing: "none" }
+      ],
+      "工業風格": [
+        { type: "leather_sofa", position: "center", facing: "front" },
+        { type: "industrial_table", position: "center_front", facing: "none" },
+        { type: "bookshelf", position: "side_wall", facing: "center" },
+        { type: "pendant_light", position: "ceiling_center", facing: "down" }
+      ],
+      "北歐風格": [
+        { type: "wooden_sofa", position: "center", facing: "window" },
+        { type: "round_table", position: "center_front", facing: "none" },
+        { type: "console_table", position: "wall", facing: "center" },
+        { type: "plant", position: "corner", facing: "none" }
+      ],
+      // Add more presets for other styles
+    };
+    
+    // Get preset for selected style or use modern as default
+    const preset = presets[style] || presets["現代簡約"];
+    const results = [];
+    
+    // Place each object in the preset
+    for (const item of preset) {
+      try {
+        // Find matching object in available objects
+        let matchedObjectId = null;
+        
+        for (const [id, obj] of Object.entries(store.preloadedObjects)) {
+          if ((obj.category && obj.category.toLowerCase() === item.type.toLowerCase()) ||
+              (obj.name && obj.name.toLowerCase().includes(item.type.toLowerCase()))) {
+            matchedObjectId = id;
+            break;
+          }
+        }
+        
+        if (!matchedObjectId) continue;
+        
+        // Calculate position based on placement type
+        const roomWidth = store.roomData.width || 10;
+        const roomLength = store.roomData.length || 10;
+        
+        let position = { x: 0, y: 0, z: 0 };
+        let rotation = { x: 0, y: 0, z: 0 };
+        
+        // Position logic similar to parseObjectPlacementCommand
+        switch (item.position) {
+          case "center":
+            position = { x: roomWidth / 2, y: 0, z: roomLength / 2 };
+            break;
+          case "center_front":
+            position = { x: roomWidth / 2, y: 0, z: roomLength * 0.6 };
+            break;
+          case "front_wall":
+            position = { x: roomWidth / 2, y: 0, z: roomLength * 0.9 };
+            break;
+          // Add more position types as needed
+        }
+        
+        // Set rotation based on facing direction
+        switch (item.facing) {
+          case "front":
+            rotation = { x: 0, y: 0, z: 0 };
+            break;
+          case "back":
+            rotation = { x: 0, y: Math.PI, z: 0 };
+            break;
+          // Add more facing directions as needed
+        }
+        
+        // Place the object
+        const objectInstance = store.placeObject(matchedObjectId, position, rotation);
+        
+        results.push({
+          objectId: matchedObjectId,
+          objectName: store.preloadedObjects[matchedObjectId].name || matchedObjectId,
+          position,
+          rotation,
+          instanceId: objectInstance.id,
+          success: true
+        });
+        
+      } catch (error) {
+        console.error(`Error placing preset object of type ${item.type}:`, error);
+        results.push({
+          type: item.type,
+          success: false,
+          reason: `Error placing object: ${error.message}`
+        });
+      }
+    }
+    
+    return {
+      success: results.some(r => r.success),
+      message: `Applied ${style} preset with ${results.filter(r => r.success).length} objects`,
+      details: results,
+      style: style
+    };
+  } catch (error) {
+    console.error("Error applying room preset:", error);
+    return {
+      success: false,
+      message: `Error applying room preset: ${error.message}`
+    };
+  }
+};
+
+/**
+ * Examples of AI furniture placement commands
+ * 
+ * These examples demonstrate how to use natural language to place furniture in the room.
+ * The AI can understand both English and Chinese commands in various formats.
+ * 
+ * English examples:
+ * - "Place a sofa in the center of the room"
+ * - "Put a coffee table near the sofa"
+ * - "Add a lamp in the corner"
+ * - "Place a bookshelf against the wall"
+ * - "Put a dining table by the window"
+ * - "Add a bed in the corner of the room"
+ * - "Place a desk near the door"
+ * 
+ * Chinese examples:
+ * - "在房間中央放一張沙發"
+ * - "把一張咖啡桌放在沙發前面"
+ * - "在角落放一盞落地燈"
+ * - "靠牆放一個書櫃"
+ * - "在窗邊放一張餐桌"
+ * - "在房間角落放一張床"
+ * - "在門邊放一張書桌"
+ * 
+ * The AI will:
+ * 1. Identify the type of furniture you want to place
+ * 2. Find a matching model in the available models
+ * 3. Determine the appropriate position based on your instructions
+ * 4. Place the furniture in the room with proper orientation
+ * 
+ * If the exact furniture model isn't found, the AI will try to find the closest match
+ * based on the furniture category (sofa, table, chair, etc.)
+ */
+
+// Export the examples for documentation purposes
+export const furniturePlacementExamples = {
+  english: [
+    "Place a sofa in the center of the room",
+    "Put a coffee table near the sofa",
+    "Add a lamp in the corner",
+    "Place a bookshelf against the wall",
+    "Put a dining table by the window"
+  ],
+  chinese: [
+    "在房間中央放一張沙發",
+    "把一張咖啡桌放在沙發前面",
+    "在角落放一盞落地燈",
+    "靠牆放一個書櫃",
+    "在窗邊放一張餐桌"
+  ]
 }; 

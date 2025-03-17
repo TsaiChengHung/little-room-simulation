@@ -23,7 +23,7 @@ export const materialTextures = {
     aoMapIntensity: 1,
     roughness: 1,
     metalness: 0,
-    ratio: [1,1],
+    ratio: [1.5,1.5],
   },
   concrete: {
     price: 35,
@@ -40,7 +40,7 @@ export const materialTextures = {
     aoMapIntensity: 1,
     roughness: 0.9,
     metalness: 0,
-    ratio: [0.8,0.8],
+    ratio: [1,1],
   },
   dryWall: {
     price: 25,
@@ -55,7 +55,7 @@ export const materialTextures = {
     aoMapIntensity: 1,
     roughness: 0.7,
     metalness: 0,
-    ratio: [0.8,0.8],
+    ratio: [1,1],
   },
   wallpaper: {
     price: 40,
@@ -72,7 +72,7 @@ export const materialTextures = {
     aoMapIntensity: 1,
     roughness: 0.7,
     metalness: 0.5,
-    ratio: [0.8,0.8],
+    ratio: [1,1],
   },
   rock: {
     price: 30,
@@ -96,7 +96,7 @@ export const materialTextures = {
     aoMapIntensity: 1,
     roughness: 1,
     metalness: 0.2,
-    ratio: [0.75,0.75],
+    ratio: [1,1],
   },
   woodPlanksDark: {
     price: 40,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { chatWithGemini, testGeminiConnection } from '../../services/AIService';
-import { executeAITextureCommand, getAvailableTextures, applyColdRoomStyle } from '../../utils/AIModelContextProtocol';
+import { executeAITextureCommand, executeAIObjectCommand, getAvailableTextures, applyColdRoomStyle, applyRoomPreset } from '../../utils/AIModelContextProtocol';
 import './AIAssistant.css';
 
 const AIAssistant = () => {
@@ -140,6 +140,104 @@ const AIAssistant = () => {
     }
   }, []);
 
+  // Function to process object placement commands
+  const processObjectCommand = useCallback(async (userMessage) => {
+    setIsLoading(true);
+    
+    try {
+      console.log("Processing object placement command:", userMessage);
+      
+      // Check for room preset keywords
+      const presetKeywords = {
+        "modern room": "現代簡約",
+        "industrial room": "工業風格",
+        "scandinavian room": "北歐風格",
+        "現代房間": "現代簡約",
+        "工業房間": "工業風格",
+        "北歐房間": "北歐風格"
+      };
+      
+      let isPresetCommand = false;
+      let presetStyle = "";
+      
+      // Check if command matches any preset keywords
+      for (const [keyword, style] of Object.entries(presetKeywords)) {
+        if (userMessage.toLowerCase().includes(keyword.toLowerCase())) {
+          isPresetCommand = true;
+          presetStyle = style;
+          break;
+        }
+      }
+      
+      let result;
+      
+      if (isPresetCommand) {
+        // Apply room preset
+        result = await applyRoomPreset(presetStyle);
+      } else {
+        // Process as regular object placement command
+        result = await executeAIObjectCommand(userMessage);
+      }
+      
+      if (result.success) {
+        // If successfully parsed and executed object command
+        const successCount = result.details.filter(d => d.success).length;
+        const failCount = result.details.length - successCount;
+        
+        console.log("Command execution result:", result);
+        
+        // Construct detailed feedback message
+        let feedbackMessage = `I have `;
+        
+        if (result.style) {
+          feedbackMessage += `set up the room in ${result.style} style, `;
+        }
+        
+        feedbackMessage += `successfully placed ${successCount} object${successCount !== 1 ? 's' : ''}`;
+        
+        if (failCount > 0) {
+          feedbackMessage += `, but ${failCount} object placement${failCount !== 1 ? 's' : ''} failed`;
+        }
+        
+        // Add details about successful placements
+        const successDetails = result.details
+          .filter(d => d.success)
+          .map(d => `${d.objectName}`)
+          .join(', ');
+        
+        if (successDetails) {
+          feedbackMessage += `.\n\nPlaced objects: ${successDetails}`;
+        }
+        
+        // Add AI response to conversation
+        setMessages(prev => [
+          ...prev, 
+          { 
+            role: 'assistant', 
+            content: feedbackMessage
+          }
+        ]);
+        
+        return true; // Command handled
+      }
+      
+      console.log("Command not handled as object command, result:", result);
+      return false; // Not a valid object command, pass to general AI handling
+    } catch (error) {
+      console.error("Error processing object command:", error);
+      setMessages(prev => [
+        ...prev, 
+        { 
+          role: 'assistant', 
+          content: `Error processing object placement command: ${error.message}. Please try again or use different wording.` 
+        }
+      ]);
+      return true; // Error occurred, but we handled it
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   // Modified send message function
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -155,20 +253,30 @@ const AIAssistant = () => {
     
     try {
       // First try to process as texture command
-      const commandProcessed = await processTextureCommand(userMessage);
+      let commandProcessed = await processTextureCommand(userMessage);
       
-      // If not a texture command, pass to general AI handling
+      // If not a texture command, try to process as object placement command
       if (!commandProcessed) {
-        // Get available texture list for AI reference
+        commandProcessed = await processObjectCommand(userMessage);
+      }
+      
+      // If not a texture or object command, pass to general AI handling
+      if (!commandProcessed) {
+        // Get available textures and objects for AI reference
         const availableTextures = getAvailableTextures();
+        // Assume there's a similar function for objects
+        // const availableObjects = getAvailableObjects();
         
         // Build context
         const contextPrompt = `
 The user is using a 3D interior design application. Here is a list of available materials:
 ${JSON.stringify(availableTextures, null, 2)}
 
-If the user wants to change room materials, you should guide them to use commands like:
-"Change the floor to wood flooring" or "Change the wall to white brick" etc.
+If the user wants to change room materials, they can use commands like:
+"Change the floor to wood flooring" or "Change the wall to white brick"
+
+If the user wants to place furniture, they can use commands like:
+"Place a sofa in the center of the room" or "Put a lamp in the corner"
 
 The user's question or request is: ${userMessage}
         `;
