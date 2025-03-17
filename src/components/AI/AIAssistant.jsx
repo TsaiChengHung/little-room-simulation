@@ -73,42 +73,42 @@ const AIAssistant = () => {
         console.log("Command execution result:", result);
         
         // Construct detailed feedback message
-        let feedbackMessage = `我已經`;
+        let feedbackMessage = `I have `;
         
         if (result.style) {
-          feedbackMessage += `套用了${result.style}風格，`;
+          feedbackMessage += `applied ${result.style} style, `;
         }
         
-        feedbackMessage += `成功更改了${successCount}個材質`;
+        feedbackMessage += `successfully changed ${successCount} material${successCount !== 1 ? 's' : ''}`;
         
         if (failCount > 0) {
-          feedbackMessage += `，但有${failCount}個材質變更失敗`;
+          feedbackMessage += `, but ${failCount} material change${failCount !== 1 ? 's' : ''} failed`;
         }
         
         // Add style description if available
         if (result.description) {
-          feedbackMessage += `。\n\n${result.description}`;
+          feedbackMessage += `.\n\n${result.description}`;
         }
         
         // Add details about successful changes
         const successDetails = result.details
           .filter(d => d.success)
           .map(d => {
-            const targetName = d.target === 'floor' ? '地板' : 
-                            d.target === 'ceiling' ? '天花板' : 
-                            d.target.startsWith('wall') ? '牆壁' : d.target;
+            const targetName = d.target === 'floor' ? 'Floor' : 
+                            d.target === 'ceiling' ? 'Ceiling' : 
+                            d.target.startsWith('wall') ? 'Wall' : d.target;
             
             // Include description if available
             if (d.description) {
-              return `${targetName}變更為${d.textureName}（${d.description}）`;
+              return `${targetName} changed to ${d.textureName} (${d.description})`;
             } else {
-              return `${targetName}變更為${d.textureName}`;
+              return `${targetName} changed to ${d.textureName}`;
             }
           })
-          .join('，\n');
+          .join(',\n');
         
         if (successDetails) {
-          feedbackMessage += `。\n\n具體變更：\n${successDetails}`;
+          feedbackMessage += `.\n\nSpecific changes:\n${successDetails}`;
         }
         
         // Add AI response to conversation
@@ -149,12 +149,12 @@ const AIAssistant = () => {
       
       // Check for room preset keywords
       const presetKeywords = {
-        "modern room": "現代簡約",
-        "industrial room": "工業風格",
-        "scandinavian room": "北歐風格",
-        "現代房間": "現代簡約",
-        "工業房間": "工業風格",
-        "北歐房間": "北歐風格"
+        "modern room": "Modern Minimalist",
+        "industrial room": "Industrial Style",
+        "scandinavian room": "Scandinavian Style",
+        "現代房間": "Modern Minimalist",
+        "工業房間": "Industrial Style",
+        "北歐房間": "Scandinavian Style"
       };
       
       let isPresetCommand = false;

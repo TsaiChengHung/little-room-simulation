@@ -375,79 +375,79 @@ export const simplifyRoomDataForAI = (roomAnalysis) => {
 export const generateRoomDescription = (roomInfo) => {
   if (!roomInfo) return '';
   
-  let description = '房間信息:\n';
+  let description = 'Room Information:\n';
   
-  // 添加幾何信息
+  // Add geometric information
   if (roomInfo.geometry) {
-    if (roomInfo.geometry.shape) description += `- 形狀: ${roomInfo.geometry.shape}\n`;
-    if (roomInfo.geometry.area) description += `- 面積: ${roomInfo.geometry.area} 平方米\n`;
-    if (roomInfo.geometry.perimeter) description += `- 周長: ${roomInfo.geometry.perimeter} 米\n`;
+    if (roomInfo.geometry.shape) description += `- Shape: ${roomInfo.geometry.shape}\n`;
+    if (roomInfo.geometry.area) description += `- Area: ${roomInfo.geometry.area} square meters\n`;
+    if (roomInfo.geometry.perimeter) description += `- Perimeter: ${roomInfo.geometry.perimeter} meters\n`;
   }
   
-  // 添加尺寸信息
+  // Add dimension information
   if (roomInfo.dimensions) {
     const { width, length, height } = roomInfo.dimensions;
-    if (width && length) description += `- 尺寸: ${width.toFixed(2)}m × ${length.toFixed(2)}m`;
-    if (height) description += ` × ${height.toFixed(2)}m (高)\n`;
+    if (width && length) description += `- Dimensions: ${width.toFixed(2)}m × ${length.toFixed(2)}m`;
+    if (height) description += ` × ${height.toFixed(2)}m (height)\n`;
     else description += '\n';
   }
   
-  // 添加體積和總表面積
-  if (roomInfo.volume) description += `- 體積: ${roomInfo.volume.toFixed(2)} 立方米\n`;
-  if (roomInfo.totalSurfaceArea) description += `- 總表面積: ${roomInfo.totalSurfaceArea.toFixed(2)} 平方米\n`;
+  // Add volume and total surface area
+  if (roomInfo.volume) description += `- Volume: ${roomInfo.volume.toFixed(2)} cubic meters\n`;
+  if (roomInfo.totalSurfaceArea) description += `- Total Surface Area: ${roomInfo.totalSurfaceArea.toFixed(2)} square meters\n`;
   
-  // 添加材質信息
+  // Add material information
   if (roomInfo.materials) {
-    description += '\n材質信息:\n';
+    description += '\nMaterial Information:\n';
     
     if (roomInfo.materials.floor) {
       const floorColor = roomInfo.materials.floor.color ? 
-        `，顏色: ${roomInfo.materials.floor.color}` : '';
-      description += `- 地板: ${roomInfo.materials.floor.material} (面積: ${roomInfo.materials.floor.area} 平方米${floorColor})\n`;
+        `, Color: ${roomInfo.materials.floor.color}` : '';
+      description += `- Floor: ${roomInfo.materials.floor.material} (Area: ${roomInfo.materials.floor.area} square meters${floorColor})\n`;
     } else {
-      description += '- 地板: 未設置\n';
+      description += '- Floor: Not set\n';
     }
     
     if (roomInfo.materials.ceiling) {
       const ceilingColor = roomInfo.materials.ceiling.color ? 
-        `，顏色: ${roomInfo.materials.ceiling.color}` : '';
-      description += `- 天花板: ${roomInfo.materials.ceiling.material} (面積: ${roomInfo.materials.ceiling.area} 平方米${ceilingColor})\n`;
+        `, Color: ${roomInfo.materials.ceiling.color}` : '';
+      description += `- Ceiling: ${roomInfo.materials.ceiling.material} (Area: ${roomInfo.materials.ceiling.area} square meters${ceilingColor})\n`;
     } else {
-      description += '- 天花板: 未設置\n';
+      description += '- Ceiling: Not set\n';
     }
     
     if (roomInfo.materials.walls && roomInfo.materials.walls.length > 0) {
-      description += '- 牆壁:\n';
+      description += '- Walls:\n';
       roomInfo.materials.walls.forEach(wall => {
-        const wallColor = wall.color ? `，顏色: ${wall.color}` : '';
-        description += `  * ${wall.id}: ${wall.material} (面積: ${wall.area} 平方米${wallColor})\n`;
+        const wallColor = wall.color ? `, Color: ${wall.color}` : '';
+        description += `  * ${wall.id}: ${wall.material} (Area: ${wall.area} square meters${wallColor})\n`;
       });
     } else {
-      description += '- 牆壁: 未設置\n';
+      description += '- Walls: Not set\n';
     }
   }
   
-  // 添加物件信息
+  // Add object information
   if (roomInfo.objects) {
-    description += '\n物件信息:\n';
+    description += '\nObject Information:\n';
     
     if (roomInfo.objects.totalCount) {
-      description += `- 總數: ${roomInfo.objects.totalCount} 個物件\n`;
+      description += `- Total Count: ${roomInfo.objects.totalCount} objects\n`;
     }
     
     if (roomInfo.objects.density) {
-      description += `- 家具密度: ${roomInfo.objects.density} 個/平方米\n`;
+      description += `- Furniture Density: ${roomInfo.objects.density} items/square meter\n`;
     }
     
     if (roomInfo.objects.categoryBreakdown) {
-      description += '- 類別明細: ';
+      description += '- Category Breakdown: ';
       description += Object.entries(roomInfo.objects.categoryBreakdown)
-        .map(([category, count]) => `${category}: ${count}個`)
+        .map(([category, count]) => `${category}: ${count} items`)
         .join(', ');
       description += '\n';
     }
   } else {
-    description += '\n物件信息: 無物件\n';
+    description += '\nObject Information: No objects\n';
   }
   
   return description;
@@ -460,16 +460,16 @@ export const generateRoomDescription = (roomInfo) => {
  * @returns {String} 空間利用率評估
  */
 export const analyzeSpaceUtilization = (floorArea, furnitureCount) => {
-  if (!floorArea || floorArea <= 0) return "無法評估空間利用率：缺少地板面積資訊";
-  if (!furnitureCount) return "空間利用率：空房間，無家具";
+  if (!floorArea || floorArea <= 0) return "Cannot assess space utilization: Missing floor area information";
+  if (!furnitureCount) return "Space Utilization: Empty room, no furniture";
   
   const density = furnitureCount / floorArea;
   
-  if (density < 0.1) return "空間利用率：非常低，房間顯得空曠";
-  if (density < 0.2) return "空間利用率：較低，有充足的活動空間";
-  if (density < 0.3) return "空間利用率：適中，平衡了家具與活動空間";
-  if (density < 0.4) return "空間利用率：較高，家具佈置較為緊湊";
-  return "空間利用率：非常高，空間可能顯得擁擠";
+  if (density < 0.1) return "Space Utilization: Very low, room appears spacious";
+  if (density < 0.2) return "Space Utilization: Low, plenty of activity space";
+  if (density < 0.3) return "Space Utilization: Moderate, balanced furniture and activity space";
+  if (density < 0.4) return "Space Utilization: High, furniture arrangement is compact";
+  return "Space Utilization: Very high, space may appear crowded";
 };
 
 /**
@@ -502,126 +502,126 @@ export const generateAIPrompt = (userPrompt, task = 'general') => {
   switch (task) {
     case 'material':
       enhancedPrompt = `
-你是一位專業的室內設計師 AI 助手。請根據以下房間信息和用戶需求，提供詳細的材質建議：
+You are a professional AI assistant for interior design. Please provide detailed material suggestions based on the following room information and user requirements:
 
 ${roomDescription}
 
 ${spaceUtilization ? spaceUtilization + "\n" : ""}
 
-用戶需求:
+User Requirements:
 ${userPrompt}
 
-請考慮房間的形狀、尺寸、體積和現有材質，提供以下內容：
-1. 為地板推薦的材質，包括名稱、顏色和質感描述
-2. 為牆壁推薦的材質，包括名稱、顏色和質感描述
-3. 為天花板推薦的材質，包括名稱、顏色和質感描述
-4. 這些材質如何搭配，以及整體效果描述
-5. 考慮到房間高度的特殊建議（如高牆壁適合垂直設計元素）
+Please consider the shape, dimensions, volume, and existing materials of the room, and provide the following content:
+1. Material suggestions for the floor, including name, color, and texture description
+2. Material suggestions for the walls, including name, color, and texture description
+3. Material suggestions for the ceiling, including name, color, and texture description
+4. How these materials can be combined and describe the overall effect
+5. Considerations for special design suggestions based on room height (e.g., high walls are suitable for vertical design elements)
 
-請以JSON格式回答，格式如下：
+Please answer in JSON format, as follows:
 {
   "floor": {
-    "name": "材質名稱",
-    "color": "顏色代碼或描述",
-    "description": "質感和外觀描述"
+    "name": "Material Name",
+    "color": "Color Code or Description",
+    "description": "Texture and Appearance Description"
   },
   "walls": {
-    "name": "材質名稱",
-    "color": "顏色代碼或描述",
-    "description": "質感和外觀描述"
+    "name": "Material Name",
+    "color": "Color Code or Description",
+    "description": "Texture and Appearance Description"
   },
   "ceiling": {
-    "name": "材質名稱",
-    "color": "顏色代碼或描述",
-    "description": "質感和外觀描述"
+    "name": "Material Name",
+    "color": "Color Code or Description",
+    "description": "Texture and Appearance Description"
   },
-  "overall": "整體效果描述",
-  "heightConsiderations": "考慮房間高度的特殊建議"
+  "overall": "Overall Effect Description",
+  "heightConsiderations": "Special Design Suggestions Based on Room Height"
 }
 `;
       break;
     
     case 'furniture':
       enhancedPrompt = `
-你是一位專業的室內設計師 AI 助手。請根據以下房間信息和用戶需求，提供詳細的家具擺放建議：
+You are a professional AI assistant for interior design. Please provide detailed furniture placement suggestions based on the following room information and user requirements:
 
 ${roomDescription}
 
 ${spaceUtilization ? spaceUtilization + "\n" : ""}
 
-用戶需求:
+User Requirements:
 ${userPrompt}
 
-請考慮房間的形狀、尺寸、體積和現有家具，提供以下內容：
-1. 推薦的家具列表，包括名稱、尺寸和位置
-2. 家具擺放的整體布局描述
-3. 考慮到房間形狀和大小的特殊建議
-4. 考慮到房間高度的垂直空間利用建議
+Please consider the shape, dimensions, volume, and existing furniture of the room, and provide the following content:
+1. Recommended furniture list, including name, dimensions, and position
+2. Describe the overall layout of furniture placement
+3. Considerations for special design suggestions based on room shape and size
+4. Considerations for vertical space utilization based on room height
 
-請以JSON格式回答，格式如下：
+Please answer in JSON format, as follows:
 {
   "furniture": [
     {
-      "name": "家具名稱",
-      "type": "家具類型",
+      "name": "Furniture Name",
+      "type": "Furniture Type",
       "dimensions": {
-        "width": 寬度,
-        "depth": 深度,
-        "height": 高度
+        "width": Width,
+        "depth": Depth,
+        "height": Height
       },
       "position": {
-        "x": x座標,
-        "y": y座標,
-        "z": z座標
+        "x": x Coordinate,
+        "y": y Coordinate,
+        "z": z Coordinate
       },
-      "rotation": 旋轉角度（度）
+      "rotation": Rotation Angle (degrees)
     }
   ],
-  "layout": "整體布局描述",
-  "specialNotes": "特殊建議",
-  "verticalSpaceUtilization": "垂直空間利用建議"
+  "layout": "Overall Layout Description",
+  "specialNotes": "Special Suggestions",
+  "verticalSpaceUtilization": "Vertical Space Utilization Suggestions"
 }
 `;
       break;
     
     case 'lighting':
       enhancedPrompt = `
-你是一位專業的室內設計師 AI 助手。請根據以下房間信息和用戶需求，提供詳細的照明設計建議：
+You are a professional AI assistant for interior design. Please provide detailed lighting design suggestions based on the following room information and user requirements:
 
 ${roomDescription}
 
 ${spaceUtilization ? spaceUtilization + "\n" : ""}
 
-用戶需求:
+User Requirements:
 ${userPrompt}
 
-請考慮房間的形狀、尺寸、體積和現有材質，提供以下內容：
-1. 推薦的照明方案，包括主照明和輔助照明
-2. 燈具的類型、數量和位置
-3. 光源的色溫和亮度建議
-4. 考慮到房間高度的特殊照明建議
-5. 照明與材質的互動效果
+Please consider the shape, dimensions, volume, and existing materials of the room, and provide the following content:
+1. Recommended lighting solutions, including main lighting and auxiliary lighting
+2. Type, quantity, and position of lights
+3. Light source color temperature and brightness suggestions
+4. Considerations for special lighting suggestions based on room height
+5. Lighting interaction with materials
 
-請以JSON格式回答，格式如下：
+Please answer in JSON format, as follows:
 {
   "mainLighting": {
-    "type": "照明類型",
-    "quantity": 數量,
-    "position": "位置描述",
-    "colorTemperature": "色溫描述",
-    "brightness": "亮度描述"
+    "type": "Lighting Type",
+    "quantity": Quantity,
+    "position": "Position Description",
+    "colorTemperature": "Color Temperature Description",
+    "brightness": "Brightness Description"
   },
   "auxiliaryLighting": [
     {
-      "type": "照明類型",
-      "quantity": 數量,
-      "position": "位置描述",
-      "purpose": "用途描述"
+      "type": "Lighting Type",
+      "quantity": Quantity,
+      "position": "Position Description",
+      "purpose": "Purpose Description"
     }
   ],
-  "heightConsiderations": "考慮房間高度的特殊照明建議",
-  "materialInteraction": "照明與材質的互動效果",
-  "overallEffect": "整體照明效果描述"
+  "heightConsiderations": "Special Lighting Suggestions Based on Room Height",
+  "materialInteraction": "Lighting Interaction with Materials",
+  "overallEffect": "Overall Lighting Effect Description"
 }
 `;
       break;
@@ -632,16 +632,16 @@ ${roomDescription}
 
 ${spaceUtilization ? spaceUtilization + "\n" : ""}
 
-用戶問題: ${userPrompt}
+User Question: ${userPrompt}
 
-請根據以上房間信息回答用戶問題。在回答時，請考慮以下因素：
-1. 房間的形狀、尺寸、體積和總表面積
-2. 房間的材質和顏色
-3. 現有的家具佈置和密度
-4. 房間的空間利用率
-5. 房間高度對設計的影響
+Please answer the user question based on the above room information. When answering, please consider the following factors:
+1. Room shape, dimensions, volume, and total surface area
+2. Room materials and colors
+3. Existing furniture arrangement and density
+4. Room space utilization
+5. Room height's impact on design
 
-如果是關於房間設計、家具擺放或材質選擇的問題，請提供具體、可行的建議，並解釋這些建議如何適合房間的特性。
+If the question is about room design, furniture placement, or material selection, please provide specific and feasible suggestions, and explain how these suggestions are suitable for the room's characteristics.
 `;
   }
   

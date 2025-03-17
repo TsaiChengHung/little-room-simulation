@@ -37,11 +37,12 @@ export default function InteractiveUI() {
                     maxWidth: '40vw',
                 }}
             >
-                <DesignModeToggle />
+                {/* <DesignModeToggle /> */}
 
-                {designMode === "roomSimulation" && (
+                {/* {designMode === "roomSimulation" && (
                     <SunPositionSlider />
-                )}
+                )} */}
+                
             </Stack>
 
             {designMode === "roomSimulation" && (
@@ -86,7 +87,7 @@ export default function InteractiveUI() {
                     </Box>
                 </>
             )}
-            <DebugButton/>
+            {/* <DebugButton/> */}
             <QuotationPanel/>
         </Box>
         

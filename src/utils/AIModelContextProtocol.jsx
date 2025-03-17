@@ -357,33 +357,33 @@ async function parseStyleGuidanceCommand(aiPrompt, availableTextures) {
     
     // Predefined styles and their keywords
     const styles = [
-      { name: "現代簡約", keywords: ["現代", "簡約", "簡潔", "modern", "minimal", "簡單"], 
+      { name: "Modern Minimalist", keywords: ["現代", "簡約", "簡潔", "modern", "minimal", "簡單"], 
         floorTextures: ["wood_floor", "white_tiles", "gray_concrete"], 
         wallTextures: ["white_paint", "light_gray_paint", "concrete"], 
         ceilingTextures: ["white_paint", "light_fixtures"] },
       
-      { name: "工業風格", keywords: ["工業", "工廠", "loft", "industrial", "復古工業"], 
+      { name: "Industrial Style", keywords: ["工業", "工廠", "loft", "industrial", "復古工業"], 
         floorTextures: ["concrete_floor", "dark_wood", "rough_concrete"], 
         wallTextures: ["exposed_brick", "concrete", "metal_panels"], 
         ceilingTextures: ["exposed_pipes", "concrete"] },
       
-      { name: "北歐風格", keywords: ["北歐", "斯堪地納維亞", "scandinavian", "nordic"], 
+      { name: "Scandinavian Style", keywords: ["北歐", "斯堪地納維亞", "scandinavian", "nordic"], 
         floorTextures: ["light_wood_floor", "white_wood", "light_tiles"], 
         wallTextures: ["white_paint", "light_pastel", "blue_accent"], 
         ceilingTextures: ["white_paint", "simple_light"] },
       
-      { name: "鄉村風格", keywords: ["鄉村", "田園", "rustic", "country", "farmhouse"], 
+      { name: "Rustic Style", keywords: ["鄉村", "田園", "rustic", "country", "farmhouse"], 
         floorTextures: ["distressed_wood", "terracotta", "stone_tiles"], 
         wallTextures: ["beige_paint", "floral_wallpaper", "wood_panels"], 
         ceilingTextures: ["wooden_beams", "cream_paint"] },
       
-      { name: "日式風格", keywords: ["日式", "和風", "日本", "japanese", "zen"], 
+      { name: "Japanese Style", keywords: ["日式", "和風", "日本", "japanese", "zen"], 
         floorTextures: ["tatami", "bamboo", "light_wood"], 
         wallTextures: ["shoji", "neutral_paint", "wood_panels"], 
         ceilingTextures: ["wood_panels", "simple_design"] },
       
       // Add a new style for cold room designs
-      { name: "冷調設計", 
+      { name: "Cold Design", 
         keywords: ["冷", "寒冷", "冷色", "冷調", "涼爽", "冷色調", "cool", "cold", "冰冷", "清涼"], 
         floorTextures: ["newPascoGrayGlossTiles", "phantomStoneWarmLightGreyFloorAndWallTiles", "concrete"], 
         wallTextures: ["dryWall", "whiteAndGrayPaint", "luminousWaterWhiteGrayPaint", "concrete", "newPascoGrayGlossTiles", "phantomStoneWarmLightGreyFloorAndWallTiles"], 
@@ -391,56 +391,56 @@ async function parseStyleGuidanceCommand(aiPrompt, availableTextures) {
       },
       
       // New styles added below
-      { name: "中世紀現代風格", 
+      { name: "Mid-Century Modern", 
         keywords: ["中世紀現代", "mid century", "中世紀", "復古現代", "50年代", "60年代"], 
         floorTextures: ["wood_floor", "walnut_wood", "teak_wood"], 
         wallTextures: ["neutral_paint", "wood_panels", "accent_wall"], 
         ceilingTextures: ["white_paint", "wood_beams"] 
       },
       
-      { name: "極簡主義", 
+      { name: "Minimalist", 
         keywords: ["極簡", "簡約", "minimalist", "極簡主義", "簡單"], 
         floorTextures: ["concrete", "white_tiles", "light_wood_floor"], 
         wallTextures: ["white_paint", "concrete", "neutral_paint"], 
         ceilingTextures: ["white_paint", "recessed_lighting"] 
       },
       
-      { name: "地中海風格", 
+      { name: "Mediterranean Style", 
         keywords: ["地中海", "mediterranean", "希臘", "西班牙", "摩洛哥"], 
         floorTextures: ["terracotta", "ceramic_tile", "stone_tiles"], 
         wallTextures: ["stucco", "white_paint", "blue_accent"], 
         ceilingTextures: ["white_paint", "wooden_beams"] 
       },
       
-      { name: "波西米亞風格", 
+      { name: "Bohemian Style", 
         keywords: ["波西米亞", "bohemian", "boho", "自由風格", "異國情調"], 
         floorTextures: ["natural_fiber", "patterned_rugs", "wood_floor"], 
         wallTextures: ["textured_wall", "accent_wall", "neutral_paint"], 
         ceilingTextures: ["white_paint", "wooden_beams"] 
       },
       
-      { name: "奢華風格", 
+      { name: "Luxury Style", 
         keywords: ["奢華", "豪華", "luxury", "glamour", "典雅", "高級"], 
         floorTextures: ["marble", "polished_stone", "high_end_wood"], 
         wallTextures: ["wallpaper", "accent_wall", "paneling"], 
         ceilingTextures: ["coffered_ceiling", "chandelier", "ornate_molding"] 
       },
       
-      { name: "當代風格", 
+      { name: "Contemporary Style", 
         keywords: ["當代", "contemporary", "現代感", "時尚"], 
         floorTextures: ["engineered_wood", "large_format_tile", "polished_concrete"], 
         wallTextures: ["accent_wall", "neutral_paint", "large_windows"], 
         ceilingTextures: ["white_paint", "track_lighting", "recessed_lighting"] 
       },
       
-      { name: "熱帶風格", 
+      { name: "Tropical Style", 
         keywords: ["熱帶", "tropical", "海灘", "度假", "島嶼"], 
         floorTextures: ["bamboo", "rattan", "light_wood_floor"], 
         wallTextures: ["bamboo_wall", "tropical_print", "light_colors"], 
         ceilingTextures: ["natural_fiber", "fan", "thatch"] 
       },
       
-      { name: "裝飾藝術風格", 
+      { name: "Art Deco Style", 
         keywords: ["art deco", "裝飾藝術", "1920年代", "30年代", "幾何圖案"], 
         floorTextures: ["geometric_tile", "parquet", "marble"], 
         wallTextures: ["bold_colors", "geometric_pattern", "metallic_finish"], 
@@ -793,8 +793,8 @@ export const applyColdRoomStyle = () => {
       success: true,
       message: "Successfully applied cold room style",
       details: results,
-      style: "冷調設計",
-      description: "冷調設計使用了灰色和白色系列材質，營造出清爽、冷靜的空間氛圍。灰色光澤地磚反射光線，白灰色牆面增加空間感，整體設計簡潔現代。"
+      style: "Cold Design",
+      description: "The cold design utilizes a series of gray and white materials to create a fresh and calm atmosphere. Gray glossy floor tiles reflect light while white-gray walls increase the sense of space, resulting in a clean and modern overall design."
     };
   } catch (error) {
     console.error("Error applying cold room style:", error);
@@ -1139,19 +1139,19 @@ export const applyRoomPreset = async (style) => {
     
     // Define preset arrangements based on style
     const presets = {
-      "現代簡約": [
+      "Modern Minimalist": [
         { type: "sofa", position: "center", facing: "front" },
         { type: "coffee_table", position: "center_front", facing: "none" },
         { type: "tv_stand", position: "front_wall", facing: "back" },
         { type: "floor_lamp", position: "corner", facing: "none" }
       ],
-      "工業風格": [
+      "Industrial Style": [
         { type: "leather_sofa", position: "center", facing: "front" },
         { type: "industrial_table", position: "center_front", facing: "none" },
         { type: "bookshelf", position: "side_wall", facing: "center" },
         { type: "pendant_light", position: "ceiling_center", facing: "down" }
       ],
-      "北歐風格": [
+      "Scandinavian Style": [
         { type: "wooden_sofa", position: "center", facing: "window" },
         { type: "round_table", position: "center_front", facing: "none" },
         { type: "console_table", position: "wall", facing: "center" },
@@ -1161,7 +1161,7 @@ export const applyRoomPreset = async (style) => {
     };
     
     // Get preset for selected style or use modern as default
-    const preset = presets[style] || presets["現代簡約"];
+    const preset = presets[style] || presets["Modern Minimalist"];
     const results = [];
     
     // Place each object in the preset
