@@ -30,22 +30,10 @@ export default function ObjectsManager() {
         }
     }, [preloadedModels]);
 
-    const handleObjectSelect = (key, objectData) => {
-        // Add object to scene
-        addObject('furniture', {
-            name: objectData.name,
-            object: objectData.object,
-            glbFile: objectData.glbFile,
-            price: objectData.price,
-            thumbnailUrl: objectData.thumbnailUrl,
-            description: objectData.description || '',
-            transform: {
-                translate: [0, 0, 0],
-                rotate: [0, 0, 0],
-                scale: [1, 1, 1]
-            }
-        });
-        console.log("Object added:", key, objectData);
+    const handleObjectSelect = (key) => {
+        // 更新使用新的 addObject 結構
+        addObject(key);
+        console.log("Object added:", key);
     };
 
     if (isLoading) {
@@ -99,7 +87,7 @@ export default function ObjectsManager() {
                         <Stack direction={'column'} spacing={1}>
                             {Object.entries(objectsList).map(([key, objectData]) => (
                                 <Card key={key} sx={{ maxWidth: 345, backgroundColor: 'rgba(0, 0, 0, 0.1)' }} >
-                                    <CardActionArea onClick={() => handleObjectSelect(key, objectData)}>
+                                    <CardActionArea onClick={() => handleObjectSelect(key, objectData.name)}>
                                         <CardMedia
                                             component="img"
                                             height="140"

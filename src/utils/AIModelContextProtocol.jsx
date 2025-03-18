@@ -273,7 +273,7 @@ function parseDirectTextureCommand(aiPrompt, availableTextures) {
               const bestMatch = textureMatches[0];
               console.log(`Selected texture ${bestMatch.textureId} with score ${bestMatch.score}`);
               
-              // Handle special case for walls
+              // Handle walls specially
               if (surface.type === 'wall') {
                 const store = useSelectionStore.getState();
                 if (store.roomData) {
@@ -816,10 +816,14 @@ export const executeAIObjectCommand = async (aiPrompt) => {
     
     // Get current state from store
     const store = useSelectionStore.getState();
+    console.log("Current design mode:", store.designMode);
+    console.log("Room data:", store.roomData);
+    console.log("Preloaded models:", store.preloadedModels);
+    console.log("Objects before placement:", store.objects);
     
     // 1. Check if there are preloaded objects
-    if (!store.preloadedObjects || Object.keys(store.preloadedObjects).length === 0) {
-      console.log("Error: No preloaded objects available");
+    if (!store.preloadedModels || Object.keys(store.preloadedModels).length === 0) {
+      console.log("Error: No preloaded models available");
       return {
         success: false,
         message: "No available objects"
@@ -827,10 +831,10 @@ export const executeAIObjectCommand = async (aiPrompt) => {
     }
     
     // Log available objects for debugging
-    console.log("Available objects:", Object.keys(store.preloadedObjects).map(key => ({
+    console.log("Available models:", Object.keys(store.preloadedModels).map(key => ({
       id: key,
-      name: store.preloadedObjects[key].name,
-      category: store.preloadedObjects[key].category
+      name: store.preloadedModels[key].info?.name,
+      category: store.preloadedModels[key].info?.tags?.[0] || "unknown"
     })));
     
     // 2. Check if roomData is initialized
@@ -843,7 +847,8 @@ export const executeAIObjectCommand = async (aiPrompt) => {
     }
     
     // Parse the object placement command
-    const parsedCommand = parseObjectPlacementCommand(aiPrompt, store.preloadedObjects);
+    const parsedCommand = parseObjectPlacementCommand(aiPrompt, store.preloadedModels);
+    console.log("Parsed command:", parsedCommand);
     
     // Execute command if parsing was successful
     if (parsedCommand.success) {
@@ -852,19 +857,51 @@ export const executeAIObjectCommand = async (aiPrompt) => {
       // Place each specified object
       for (const action of parsedCommand.actions) {
         const { objectId, position, rotation, scale } = action;
+        console.log("Processing action:", action);
         
         // Confirm object is valid
-        if (objectId && store.preloadedObjects[objectId]) {
+        if (objectId && store.preloadedModels[objectId]) {
           try {
-            // Place object using the store's placeObject method
-            const objectInstance = store.placeObject(objectId, position, rotation, scale);
+            // Get the model data
+            const modelData = store.preloadedModels[objectId];
+            console.log("Found model data:", modelData);
+            
+            // Create transform data from position, rotation, scale
+            const transform = {
+              translate: [position.x, position.y, position.z],
+              rotate: [rotation.x, rotation.y, rotation.z],
+              scale: [scale.x, scale.y, scale.z]
+            };
+            
+            // Prepare object data for addObject
+            const objectData = {
+              object: modelData.object,
+              name: modelData.info?.name || "Unknown Object",
+              description: modelData.info?.description || "",
+              price: modelData.info?.price || 0,
+              glbFile: modelData.info?.modelFileGLB || "",
+              thumbnailUrl: modelData.info?.thumbnailUrl || "",
+              transform: transform
+            };
+            
+            // Use the category from tags or default to "furniture"
+            const category = modelData.info?.tags?.[0] || "furniture";
+            console.log("Using category:", category);
+            
+            // Add the object to the store
+            store.addObject(objectId);
+            console.log("Object added to store");
+            console.log("Objects after placement:", useSelectionStore.getState().objects);
+            
+            // Create a simple object instance reference for compatibility
+            const objectInstance = { id: objectData.id };
             
             // Log success for debugging
-            console.log(`Successfully placed ${store.preloadedObjects[objectId].name} at position ${JSON.stringify(position)}`);
+            console.log(`Successfully placed ${objectData.name} at position [${transform.translate}]`);
             
             results.push({
               objectId,
-              objectName: store.preloadedObjects[objectId].name || objectId,
+              objectName: objectData.name || objectId,
               position,
               rotation,
               scale,
@@ -881,12 +918,12 @@ export const executeAIObjectCommand = async (aiPrompt) => {
           }
         } else {
           // Log invalid parameters
-          console.log(`Invalid parameters - ObjectId: ${objectId}, Exists: ${store.preloadedObjects[objectId] ? 'Yes' : 'No'}`);
+          console.log(`Invalid parameters - ObjectId: ${objectId}, Exists: ${store.preloadedModels[objectId] ? 'Yes' : 'No'}`);
           
           results.push({
             objectId,
             success: false,
-            reason: !objectId ? "Invalid object ID" : "Object not found in preloaded objects"
+            reason: !objectId ? "Invalid object ID" : "Object not found in preloaded models"
           });
         }
       }
@@ -912,12 +949,13 @@ export const executeAIObjectCommand = async (aiPrompt) => {
 /**
  * Parse commands where user requests to place objects in the room
  * @param {string} aiPrompt - AI text command
- * @param {Object} availableObjects - Available objects
+ * @param {Object} availableModels - Available models
  * @returns {Object} - Parsing result
  */
-function parseObjectPlacementCommand(aiPrompt, availableObjects) {
+function parseObjectPlacementCommand(aiPrompt, availableModels) {
   try {
     console.log("Attempting object placement command parsing:", aiPrompt);
+    console.log("Available models for parsing:", availableModels);
     
     // Initialize result
     const result = {
@@ -925,9 +963,10 @@ function parseObjectPlacementCommand(aiPrompt, availableObjects) {
       actions: []
     };
     
-    // Get models from store instead of using passed availableObjects
+    // Get models from store instead of using passed availableModels
     const store = useSelectionStore.getState();
     const preloadedModels = store.preloadedModels || {};
+    console.log("Preloaded models from store:", preloadedModels);
     
     // Normalize prompt - convert to lowercase for case-insensitive matching
     const normalizedPrompt = aiPrompt.toLowerCase();
@@ -935,11 +974,11 @@ function parseObjectPlacementCommand(aiPrompt, availableObjects) {
     // Create an array of models with normalized names for easier matching
     const modelArray = Object.entries(preloadedModels).map(([id, model]) => ({
       id,
-      name: model.name || id,
-      nameLower: (model.name || id).toLowerCase(),
-      category: model.category || '',
-      categoryLower: (model.category || '').toLowerCase(),
-      tags: model.tags || []
+      name: model.info?.name || id,
+      nameLower: (model.info?.name || id).toLowerCase(),
+      category: model.info?.tags?.[0] || '',
+      categoryLower: (model.info?.tags?.[0] || '').toLowerCase(),
+      tags: model.info?.tags || []
     }));
     
     // Log available models for debugging
@@ -1013,6 +1052,7 @@ function parseObjectPlacementCommand(aiPrompt, availableObjects) {
         for (const model of modelArray) {
           if (model.nameLower.includes(objectType) || objectType.includes(model.nameLower)) {
             matchedModelId = model.id;
+            console.log(`Direct name match found: ${model.name} (${model.id})`);
             break;
           }
         }
@@ -1025,6 +1065,7 @@ function parseObjectPlacementCommand(aiPrompt, availableObjects) {
           for (const category of categories) {
             if (category.keywords.some(kw => objectType.includes(kw.toLowerCase()) || kw.toLowerCase().includes(objectType))) {
               matchedCategory = category.type;
+              console.log(`Category match found: ${category.type}`);
               break;
             }
           }
@@ -1034,9 +1075,28 @@ function parseObjectPlacementCommand(aiPrompt, availableObjects) {
             for (const model of modelArray) {
               if (model.categoryLower === matchedCategory.toLowerCase()) {
                 matchedModelId = model.id;
+                console.log(`Found model in category ${matchedCategory}: ${model.name} (${model.id})`);
                 break;
               }
             }
+          }
+        }
+        
+        if (!matchedModelId) {
+          console.log(`No matching model found for object type: ${objectType}`);
+          // Try a more flexible approach - look for any model that might match
+          for (const model of modelArray) {
+            if (model.tags && model.tags.some(tag => tag.toLowerCase().includes(objectType) || objectType.includes(tag.toLowerCase()))) {
+              matchedModelId = model.id;
+              console.log(`Tag match found: ${model.name} (${model.id})`);
+              break;
+            }
+          }
+          
+          // If still no match, just use the first model as a fallback
+          if (!matchedModelId && modelArray.length > 0) {
+            matchedModelId = modelArray[0].id;
+            console.log(`No match found, using first available model as fallback: ${modelArray[0].name} (${modelArray[0].id})`);
           }
         }
         
@@ -1049,6 +1109,7 @@ function parseObjectPlacementCommand(aiPrompt, availableObjects) {
         for (const pos of positions) {
           if (pos.keywords.some(kw => positionType.includes(kw.toLowerCase()))) {
             matchedPosition = pos.type;
+            console.log(`Position match found: ${pos.type}`);
             break;
           }
         }
@@ -1059,6 +1120,8 @@ function parseObjectPlacementCommand(aiPrompt, availableObjects) {
           const roomWidth = store.roomData.width || 10;
           const roomLength = store.roomData.length || 10;
           const roomHeight = store.roomData.height || 3;
+          
+          console.log(`Room dimensions: ${roomWidth}x${roomLength}x${roomHeight}`);
           
           switch (matchedPosition) {
             case 'center':
@@ -1082,6 +1145,14 @@ function parseObjectPlacementCommand(aiPrompt, availableObjects) {
             default:
               position = { x: roomWidth / 2, y: 0, z: roomLength / 2 };
           }
+          
+          console.log(`Calculated position: ${JSON.stringify(position)}, rotation: ${JSON.stringify(rotation)}`);
+        } else {
+          console.log(`No position match found, using default center position`);
+          // Default to center if no position match
+          const roomWidth = store.roomData.width || 10;
+          const roomLength = store.roomData.length || 10;
+          position = { x: roomWidth / 2, y: 0, z: roomLength / 2 };
         }
         
         // If we matched both a model and position, add the action
@@ -1092,6 +1163,9 @@ function parseObjectPlacementCommand(aiPrompt, availableObjects) {
             rotation: rotation,
             scale: { x: 1, y: 1, z: 1 } // Default scale
           });
+          console.log(`Added action: objectId=${matchedModelId}, position=${JSON.stringify(position)}`);
+        } else {
+          console.log(`No model matched, cannot add action`);
         }
       }
     }
@@ -1099,8 +1173,10 @@ function parseObjectPlacementCommand(aiPrompt, availableObjects) {
     // Check if any operation is found
     if (result.actions.length > 0) {
       result.success = true;
+      console.log(`Parsing successful, found ${result.actions.length} actions`);
     } else {
       result.message = "No valid object placement instruction found";
+      console.log(`Parsing failed: ${result.message}`);
     }
     
     console.log("Object placement parse result:", result);
@@ -1130,7 +1206,7 @@ export const applyRoomPreset = async (style) => {
       };
     }
     
-    if (!store.preloadedObjects || Object.keys(store.preloadedObjects).length === 0) {
+    if (!store.preloadedModels || Object.keys(store.preloadedModels).length === 0) {
       return {
         success: false,
         message: "No available objects"
@@ -1143,7 +1219,7 @@ export const applyRoomPreset = async (style) => {
         { type: "sofa", position: "center", facing: "front" },
         { type: "coffee_table", position: "center_front", facing: "none" },
         { type: "tv_stand", position: "front_wall", facing: "back" },
-        { type: "floor_lamp", position: "corner", facing: "none" }
+        { type: "lamp", position: "corner", facing: "none" }
       ],
       "Industrial Style": [
         { type: "leather_sofa", position: "center", facing: "front" },
@@ -1164,74 +1240,115 @@ export const applyRoomPreset = async (style) => {
     const preset = presets[style] || presets["Modern Minimalist"];
     const results = [];
     
-    // Place each object in the preset
+    // Find matching object for each item in the preset
     for (const item of preset) {
-      try {
-        // Find matching object in available objects
-        let matchedObjectId = null;
-        
-        for (const [id, obj] of Object.entries(store.preloadedObjects)) {
-          if ((obj.category && obj.category.toLowerCase() === item.type.toLowerCase()) ||
-              (obj.name && obj.name.toLowerCase().includes(item.type.toLowerCase()))) {
-            matchedObjectId = id;
-            break;
-          }
+      let matchedObjectId = null;
+      
+      for (const [id, obj] of Object.entries(store.preloadedModels)) {
+        if ((obj.info?.tags && obj.info.tags.some(tag => tag.toLowerCase() === item.type.toLowerCase())) ||
+            (obj.info?.name && obj.info.name.toLowerCase().includes(item.type.toLowerCase()))) {
+          matchedObjectId = id;
+          break;
         }
-        
-        if (!matchedObjectId) continue;
-        
-        // Calculate position based on placement type
-        const roomWidth = store.roomData.width || 10;
-        const roomLength = store.roomData.length || 10;
-        
-        let position = { x: 0, y: 0, z: 0 };
-        let rotation = { x: 0, y: 0, z: 0 };
-        
-        // Position logic similar to parseObjectPlacementCommand
-        switch (item.position) {
-          case "center":
-            position = { x: roomWidth / 2, y: 0, z: roomLength / 2 };
-            break;
-          case "center_front":
-            position = { x: roomWidth / 2, y: 0, z: roomLength * 0.6 };
-            break;
-          case "front_wall":
-            position = { x: roomWidth / 2, y: 0, z: roomLength * 0.9 };
-            break;
-          // Add more position types as needed
-        }
-        
-        // Set rotation based on facing direction
-        switch (item.facing) {
-          case "front":
-            rotation = { x: 0, y: 0, z: 0 };
-            break;
-          case "back":
-            rotation = { x: 0, y: Math.PI, z: 0 };
-            break;
-          // Add more facing directions as needed
-        }
-        
-        // Place the object
-        const objectInstance = store.placeObject(matchedObjectId, position, rotation);
-        
-        results.push({
-          objectId: matchedObjectId,
-          objectName: store.preloadedObjects[matchedObjectId].name || matchedObjectId,
-          position,
-          rotation,
-          instanceId: objectInstance.id,
-          success: true
-        });
-        
-      } catch (error) {
-        console.error(`Error placing preset object of type ${item.type}:`, error);
-        results.push({
-          type: item.type,
-          success: false,
-          reason: `Error placing object: ${error.message}`
-        });
       }
+      
+      if (!matchedObjectId) {
+        console.log(`No matching object found for type: ${item.type}`);
+        continue;
+      }
+      
+      // Calculate position based on room dimensions and item position
+      const roomWidth = store.roomData.width || 10;
+      const roomLength = store.roomData.length || 10;
+      const roomHeight = store.roomData.height || 3;
+      
+      let position = { x: roomWidth / 2, y: 0, z: roomLength / 2 };
+      let rotation = { x: 0, y: 0, z: 0 };
+      
+      // Set position based on placement type
+      switch (item.position) {
+        case 'center':
+          position = { x: roomWidth / 2, y: 0, z: roomLength / 2 };
+          break;
+        case 'center_front':
+          position = { x: roomWidth / 2, y: 0, z: roomLength * 0.65 };
+          break;
+        case 'front_wall':
+          position = { x: roomWidth / 2, y: 0, z: roomLength * 0.85 };
+          break;
+        case 'side_wall':
+          position = { x: roomWidth * 0.85, y: 0, z: roomLength / 2 };
+          break;
+        case 'corner':
+          position = { x: roomWidth * 0.85, y: 0, z: roomLength * 0.85 };
+          break;
+        case 'ceiling_center':
+          position = { x: roomWidth / 2, y: roomHeight * 0.9, z: roomLength / 2 };
+          break;
+        default:
+          position = { x: roomWidth / 2, y: 0, z: roomLength / 2 };
+      }
+      
+      // Set rotation based on facing direction
+      switch (item.facing) {
+        case 'front':
+          rotation = { x: 0, y: 0, z: 0 };
+          break;
+        case 'back':
+          rotation = { x: 0, y: Math.PI, z: 0 };
+          break;
+        case 'center':
+          rotation = { x: 0, y: -Math.PI / 2, z: 0 };
+          break;
+        case 'window':
+          rotation = { x: 0, y: Math.PI / 2, z: 0 };
+          break;
+        case 'down':
+          rotation = { x: Math.PI / 2, y: 0, z: 0 };
+          break;
+        default:
+          rotation = { x: 0, y: 0, z: 0 };
+      }
+      
+      // Get the model data
+      const modelData = store.preloadedModels[matchedObjectId];
+      
+      // Create transform data
+      const transform = {
+        translate: [position.x, position.y, position.z],
+        rotate: [rotation.x, rotation.y, rotation.z],
+        scale: [1, 1, 1]
+      };
+      
+      // Prepare object data for addObject
+      const objectData = {
+        object: modelData.object,
+        name: modelData.info?.name || "Unknown Object",
+        description: modelData.info?.description || "",
+        price: modelData.info?.price || 0,
+        glbFile: modelData.info?.modelFileGLB || "",
+        thumbnailUrl: modelData.info?.thumbnailUrl || "",
+        transform: transform
+      };
+      
+      // Use the category from tags or default to "furniture"
+      const category = modelData.info?.tags?.[0] || "furniture";
+      
+      // Add the object to the store
+      store.addObject(objectId);
+      
+      // Create a simple object instance reference for compatibility
+      const objectInstance = { id: objectData.id };
+      
+      results.push({
+        objectId: matchedObjectId,
+        objectName: modelData.info?.name || matchedObjectId,
+        position,
+        rotation,
+        scale: { x: 1, y: 1, z: 1 },
+        instanceId: objectInstance.id,
+        success: true
+      });
     }
     
     return {

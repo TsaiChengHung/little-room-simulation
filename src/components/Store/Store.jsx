@@ -12,7 +12,7 @@ const useSelectionStore = create((set, get) => ({
   sunPosition: 0.5,
 
   // Unified management of all furniture objects
-  objects: {},
+  objects: {}, // Changed from array to object to store categories
 
   // Unified management of floor, wall, ceiling data, initially empty, set by components
   currentFloorPoints: [],
@@ -44,16 +44,24 @@ const useSelectionStore = create((set, get) => ({
 
   setPaintMode: (mode) => set({ paintMode: mode }),
 
-  addObject: (objectKey, objectData) =>
+  addObject: (objectKey) =>
     set((state) => {
-      if (!objectKey || !objectData) return state;
+      if (!objectKey) return state;
+      
+      const modelObject = state.preloadedModels[objectKey];
+      if (!modelObject) {
+        console.error(`Model with name ${objectKey} not found in preloaded models`);
+        return state;
+      }
 
-      if (!state.objects[objectKey]) {
-        state.objects[objectKey] = [];
+      // Initialize the category if it doesn't exist
+      const updatedObjects = { ...state.objects };
+      if (!updatedObjects[objectKey]) {
+        updatedObjects[objectKey] = [];
       }
 
       // Clone the 3D object to create an independent instance
-      const clonedObject = objectData.object.clone();
+      const clonedObject = modelObject.object.clone();
       clonedObject.traverse((child) => {
         if (child.isMesh) {
           child.material = child.material.clone();
@@ -62,22 +70,24 @@ const useSelectionStore = create((set, get) => ({
 
       const newObject = {
         id: uuidv4(),
-        object: clonedObject, // Use the cloned object instead of the original
-        objectName: objectData?.name ?? null,
-        description: objectData?.description ?? null,
-        price: objectData?.price ?? null,
-        glbFile: objectData?.glbFile ?? null,
-        thumbnailUrl: objectData?.thumbnailUrl ?? null,
-        transform: objectData?.transform ?? {
+        object: clonedObject,
+        objectName: modelObject.info.name || null,
+        description: modelObject.info.description || null,
+        tags: modelObject.info.tags || null,
+        price: modelObject.info.price || null,
+        glbFile: modelObject.info.glbFile || null,
+        thumbnailUrl: modelObject.info.thumbnailUrl || null,
+        transform: {
           translate: [0, 0, 0],
           rotate: [0, 0, 0],
           scale: [1, 1, 1]
         }
       };
 
-      state.objects[objectKey].push(newObject);
+      // Add the new object to the appropriate category
+      updatedObjects[objectKey].push(newObject);
 
-      return { objects: { ...state.objects } };
+      return { objects: updatedObjects };
     }),
 
   removeObject: (objectId) =>

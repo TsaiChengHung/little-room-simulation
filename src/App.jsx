@@ -17,6 +17,7 @@ import { initializeTextures } from "./components/AssetManage/Textures";
 import CustomObjectControl from "./components/UI/CustomObjectControl";
 import SunPosition from "./components/SFX/SunPosition";
 import AIAssistant from './components/AI/AIAssistant';
+import TestAIPlacement from './components/AI/TestAIPlacement';
 import Room from './components/RoomSelector/RoomGenerator';
 import './App.css';
 
@@ -146,6 +147,14 @@ export function App() {
         {showAI && (
           <div className="ai-assistant-container">
             <AIAssistant />
+          </div>
+        )}
+
+        {designMode === "roomSimulation" && (
+          <div className="interactive-ui-container">
+            <InteractiveUI />
+            {showAI && <AIAssistant />}
+            <TestAIPlacement />
           </div>
         )}
       </div>

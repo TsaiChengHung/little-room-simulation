@@ -42,7 +42,7 @@ export default function InteractiveUI() {
                 {/* {designMode === "roomSimulation" && (
                     <SunPositionSlider />
                 )} */}
-                
+
             </Stack>
 
             {designMode === "roomSimulation" && (
@@ -87,7 +87,7 @@ export default function InteractiveUI() {
                     </Box>
                 </>
             )}
-            {/* <DebugButton/> */}
+            <DebugButton/>
             <QuotationPanel/>
         </Box>
         

@@ -1,5 +1,6 @@
 import { TransformControls } from '@react-three/drei';
 import useSelectionStore from "../Store/Store";
+import { useRef } from 'react';
 
 const getObject = (objects, selectedObject) => {
   if (selectedObject && selectedObject.type === "customObject") {
@@ -16,16 +17,25 @@ const CustomObjectControl = () => {
   const isEnabled = (selectedObject && selectedObject.type === "customObject") && (operationMode === "object");
   
   const targetObject = getObject(objects, selectedObject);
+  const isDragging = useRef(false);
   
   if (!isEnabled || !targetObject) return null;
 
-  const handleTransformChange = (event) => {
-    const { position, rotation, scale } = event.target.object;
-    updateObjectTransform(selectedObject.objectId, {
-      translate: [position.x, position.y, position.z],
-      rotate: [rotation.x, rotation.y, rotation.z],
-      scale: [scale.x, scale.y, scale.z]
-    });
+  const handleObjectChange = (event) => {
+    // 在拖曳過程中不執行任何store更新
+  };
+
+  const handleDraggingChange = (event) => {
+    isDragging.current = event.value;
+    
+    if (!event.value) {
+      const { position, rotation, scale } = targetObject;
+      updateObjectTransform(selectedObject.objectId, {
+        translate: [position.x, position.y, position.z],
+        rotate: [rotation.x, rotation.y, rotation.z],
+        scale: [scale.x, scale.y, scale.z]
+      });
+    }
   };
 
   return (
@@ -37,7 +47,8 @@ const CustomObjectControl = () => {
       showX={isEnabled}
       showY={isEnabled}
       showZ={isEnabled}
-      onObjectChange={handleTransformChange}
+      onObjectChange={handleObjectChange}
+      onDraggingChange={handleDraggingChange}
     />
   );
 };
