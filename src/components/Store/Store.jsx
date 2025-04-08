@@ -1,110 +1,323 @@
+import { v4 as uuidv4 } from 'uuid';
 import { create } from "zustand";
+import * as THREE from 'three';
 
 const useSelectionStore = create((set, get) => ({
-  // general params
-  designMode: 'roomSimulation', // 'roomDesign' or 'roomSimulation'
-
-  // room simulation params
-  selectedObject: null, // 儲存選中的物件名稱
-  selectedObjectType: null, // 用於標誌選中的物件類型，例如 'room' 或 'customObject'
-  roomMaterials: {},
+  designMode: "roomDesign", // 'roomDesign' or 'roomSimulation'
+  selectedObject: { object: null, objectId: null, type: null }, // type used to mark the type of selected object, e.g., 'room' or 'customObject'
   operationMode: null,
   transformMode: "translate",
   paintMode: "color",
-  objects: {},
+  
+  sunPosition: 0.5,
 
-  // room design params
-  roomDimensions: {
-    width: 4, // meters
-    depth: 3, // meters
-    wallThickness: 0.1, // meters
-  },
+  // Unified management of all furniture objects
+  objects: {}, // Changed from array to object to store categories
 
-  // sun position params
-  sunPosition: 0.5, // Default to noon
+  // Unified management of floor, wall, ceiling data, initially empty, set by components
+  currentFloorPoints: [],
+  wallHeight: 3,
+  roomData: null, // Initially null, waiting for component initialization
 
-  // general functions
+  // Preloaded resource related states
+  preloadedModels: {}, // Store preloaded 3D models
+  preloadedTextures: {}, // Store preloaded textures
+  isResourcesLoaded: false, // Whether resources have been loaded
+
+  // Original general functions
   setDesignMode: (mode) => set({ designMode: mode }),
 
-  // room simulation functions
-  setSelectedObject: (object, type) => set({ selectedObject: object, selectedObjectType: type }),
+  // Original room simulation functions
+  setSelectedObject: (object, objectId, type) =>
+    set({ selectedObject: { object, objectId, type } }),
 
-  clearSelectedObject: () => set({ selectedObject: null, selectedObjectType: null }),
+  clearSelectedObject: () =>
+    set({ selectedObject: null }),
 
-  setOperationMode: (mode) => set({ operationMode: mode, selectedObject: null, selectedObjectType: null }), //paint or object
+  setOperationMode: (mode) =>
+    set({
+      operationMode: mode,
+      selectedObject: {object: null, objectId: null, type: null},
+    }),
 
   setTransformMode: (mode) => set({ transformMode: mode }),
 
   setPaintMode: (mode) => set({ paintMode: mode }),
 
-  addRoomMaterial: (key, material) => set((state) => ({ roomMaterials: { ...state.roomMaterials, [key]: material } })),
-
-  addObject: (objectKey, objectData) =>
-    set((state) => {
-      if (!objectKey || !objectData) return state;
-      return { objects: { ...state.objects, [objectKey]: objectData } };
-    }),
-
-  removeObject: (objectKey) =>
+  addObject: (objectKey) =>
     set((state) => {
       if (!objectKey) return state;
+      
+      const modelObject = state.preloadedModels[objectKey];
+      if (!modelObject) {
+        console.error(`Model with name ${objectKey} not found in preloaded models`);
+        return state;
+      }
+
+      // Initialize the category if it doesn't exist
       const updatedObjects = { ...state.objects };
-      if (updatedObjects[objectKey]) {
-        delete updatedObjects[objectKey];
+      if (!updatedObjects[objectKey]) {
+        updatedObjects[objectKey] = [];
       }
-      return { objects: updatedObjects, selectedObject: null, selectedObjectType: null };
-    }),
 
-  setMaterialTexture: (material, textures) =>
-    set((state) => {
-      const selectedObjectKey = state.selectedObject;
-      if (selectedObjectKey && state.selectedObjectType === 'room') {
-        const currentMaterial = state.roomMaterials[selectedObjectKey];
-        if (currentMaterial) {
-          // Update existing material's textures
-          currentMaterial.map = textures.baseColor || null;
-          currentMaterial.normalMap = textures.normalMap || null;
-          currentMaterial.roughnessMap = textures.roughnessMap || null;
-          currentMaterial.aoMap = textures.aoMap || null;
-          currentMaterial.bumpMap = textures.bumpMap || null;
-
-          // Update material properties
-          if (textures.aoMapIntensity !== undefined) {
-            currentMaterial.aoMapIntensity = textures.aoMapIntensity;
-          }
-          if (textures.roughness !== undefined) {
-            currentMaterial.roughness = textures.roughness;
-          }
-          if (textures.metalness !== undefined) {
-            currentMaterial.metalness = textures.metalness;
-          }
-
-          // Force material update
-          currentMaterial.needsUpdate = true;
-
-          return { roomMaterials: { ...state.roomMaterials } };
+      // Clone the 3D object to create an independent instance
+      const clonedObject = modelObject.object.clone();
+      clonedObject.traverse((child) => {
+        if (child.isMesh) {
+          child.material = child.material.clone();
         }
+      });
 
-        // If no existing material, create new one
-        return { roomMaterials: { ...state.roomMaterials, [selectedObjectKey]: material } };
-      }
-      return {};
+      const newObject = {
+        id: uuidv4(),
+        object: clonedObject,
+        objectName: modelObject.info.name || null,
+        description: modelObject.info.description || null,
+        tags: modelObject.info.tags || null,
+        price: modelObject.info.price || null,
+        glbFile: modelObject.info.glbFile || null,
+        thumbnailUrl: modelObject.info.thumbnailUrl || null,
+        transform: {
+          translate: [0, 0, 0],
+          rotate: [0, 0, 0],
+          scale: [1, 1, 1]
+        }
+      };
+
+      // Add the new object to the appropriate category
+      updatedObjects[objectKey].push(newObject);
+
+      return { objects: updatedObjects };
     }),
 
-  setMaterialColor: (material, color) => {
-    const state = get();
-    if (state.roomMaterials[material]) {
-      state.roomMaterials[material].color.set(color);
-    }
-  },
+  removeObject: (objectId) =>
+    set((state) => {
+      if (!objectId) return state;
+
+      const updatedObjects = { ...state.objects };
+
+      // Search through all object categories to find and remove the object with matching ID
+      Object.keys(updatedObjects).forEach(key => {
+        updatedObjects[key] = updatedObjects[key].filter(item => item.id !== objectId);
+
+        // Remove the category if it's empty
+        if (updatedObjects[key].length === 0) {
+          delete updatedObjects[key];
+        }
+      });
+
+      return {
+        objects: updatedObjects,
+        selectedObject: state.selectedObject?.objectId === objectId ?
+          { object: null, objectId: null, type: null } :
+          state.selectedObject
+      };
+    }),
+
+  setWallHeight: (height) => set({ wallHeight: height }),
+
+  addRoomDataObject: (objectKey, objectArea, objectData) =>
+    set((state) => {
+      const roomDataObject = {
+        id: objectKey,
+        area: objectArea,
+        price: 0,
+        description: objectData?.description ?? null,
+        tags: objectData?.tags ?? null,
+        materialName: objectData?.materialName ?? null,
+        isModified: objectData?.isModified ?? false,
+        textures: {
+          // texture
+          map: objectData?.textures?.mapPath ?? null,
+          normalMap: objectData?.textures?.normalMapPath ?? null,
+          roughnessMap: objectData?.textures?.roughnessMapPath ?? null,
+          aoMap: objectData?.textures?.aoMapPath ?? null,
+          bumpMap: objectData?.textures?.bumpMapPath ?? null,
+          color: objectData?.textures?.color ?? null,
+          // value
+          aoMapIntensity: objectData?.textures?.aoMapIntensity ?? 1,
+          roughness: objectData?.textures?.roughness ?? 1,
+          metalness: objectData?.textures?.metalness ?? 0,
+          ratio: objectData?.textures?.ratio ?? [1, 1],
+        },
+      };
+
+      return {
+        roomData: {
+          ...state.roomData,
+          [objectKey]: roomDataObject,
+        },
+      };
+    }),
+
+  // 更新材質貼圖（統一管理於 roomData）
+  setMaterialTexture: (targetRoomObject, newTextureName) =>
+    set((state) => {
+      const textureObject = state.preloadedTextures[newTextureName];
+      if (!state.roomData || !targetRoomObject)
+        return state;
+
+      const textures = textureObject.textures;
+      const updatedRoomData = {
+        ...state.roomData,
+        [targetRoomObject]: {
+          ...state.roomData[targetRoomObject],
+           materialName: textureObject.name,
+          price: textureObject.price,
+          description: textureObject.description,
+          tags: textureObject.tags,
+          textures: {
+            ...state.roomData[targetRoomObject].textures,
+            map: textures.map || null,
+            normalMap: textures.normalMap || null,
+            roughnessMap: textures.roughnessMap || null,
+            aoMap: textures.aoMap || null,
+            bumpMap: textures.bumpMap || null,
+            color:
+              textures.color ??
+              state.roomData[targetRoomObject].textures.color,
+            aoMapIntensity:
+              textures.aoMapIntensity ??
+              state.roomData[targetRoomObject].textures.aoMapIntensity,
+            roughness:
+              textures.roughness ??
+              state.roomData[targetRoomObject].textures.roughness,
+            metalness:
+              textures.metalness ??
+              state.roomData[targetRoomObject].textures.metalness,
+            needsUpdate: true,
+          },
+          isModified: true,
+        },
+      };
+      return {
+        roomData: updatedRoomData,
+      };
+    }),
+
+  // 更新材質顏色（統一管理於 roomData）
+  setMaterialColor: (targetRoomObject, color) =>
+    set((state) => {
+      if (!state.roomData || !targetRoomObject)
+        return state;
+      
+      const updatedRoomData = {
+        ...state.roomData,
+        [targetRoomObject]: {
+          ...state.roomData[targetRoomObject],
+          textures: {
+            ...state.roomData[targetRoomObject].textures,
+            color: color,
+          },
+          isModified: true,
+        },
+      };
+
+      return {
+        roomData: updatedRoomData,
+      };
+    }),
 
   setSunPosition: (position) => set({ sunPosition: position }),
 
-  // room design functions
-  setRoomDimensions: (dimensions) =>
-    set((state) => ({
-      roomDimensions: { ...state.roomDimensions, ...dimensions }
-    })),
+  setCurrentFloorPoints: (points) => set({ currentFloorPoints: points }),
+
+  resetRoomData: () => set({ roomData: {} }),
+
+  // 直接設置roomData
+  setRoomData: (newRoomData) => set({ roomData: newRoomData }),
+
+  getModifiedItems: () => {
+    if (!get().roomData) return [];
+    const { ceiling, floor, walls } = get().roomData;
+    return [
+      ceiling.isModified ? ceiling : null,
+      floor.isModified ? floor : null,
+      ...walls.filter((wall) => wall.isModified),
+    ].filter(Boolean);
+  },
+
+  updateObjectTransform: (objectId, newTransform) =>
+    set((state) => {
+      const updatedObjects = { ...state.objects };
+
+      // Find and update the object with matching ID
+      Object.keys(updatedObjects).forEach(key => {
+        const objectIndex = updatedObjects[key].findIndex(item => item.id === objectId);
+        if (objectIndex !== -1) {
+          updatedObjects[key][objectIndex] = {
+            ...updatedObjects[key][objectIndex],
+            transform: {
+              ...updatedObjects[key][objectIndex].transform,
+              ...newTransform
+            }
+          };
+        }
+      });
+
+      return { objects: updatedObjects };
+    }),
+
+  // 設置預載模型
+  setPreloadedModels: (models) => set({ preloadedModels: models }),
+  
+  // 設置預載貼圖
+  setPreloadedTextures: (textures) => set({ preloadedTextures: textures }),
+  
+  // 標記資源加載完成
+  setResourcesLoaded: (loaded) => set({ isResourcesLoaded: loaded }),
+  
+  // 獲取特定模型
+  getModel: (modelId) => {
+    const { preloadedModels } = get();
+    return preloadedModels[modelId] || null;
+  },
+  
+  // 獲取特定貼圖
+  getTexture: (textureId) => {
+    const { preloadedTextures } = get();
+    return preloadedTextures[textureId] || null;
+  },
+  
+  // 初始化預載資源
+  initializeResources: async () => {
+    try {
+      // 這裡將調用修改後的 preloadAllObjects 和 loadAllTextures 函數
+      const { preloadAllObjects } = await import('../Objects/ObjectsPreload');
+      const { getTextureBuffers } = await import('../AssetManage/Textures');
+      
+      // 加載模型
+      const models = await preloadAllObjects();
+      set({ preloadedModels: models });
+      
+      // 加載貼圖
+      const textures = getTextureBuffers();
+      set({ preloadedTextures: textures });
+      
+      // 標記加載完成
+      set({ isResourcesLoaded: true });
+      
+      return true;
+    } catch (error) {
+      console.error("初始化資源時出錯:", error);
+      return false;
+    }
+  },
 }));
+
+// 輔助函數：加載貼圖
+async function loadTexture(path) {
+  if (!path) return null;
+  
+  return new Promise((resolve) => {
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load(path, (texture) => {
+      // 設置貼圖屬性
+      texture.isTexture = true;
+      texture.uuid = THREE.MathUtils.generateUUID();
+      resolve(texture);
+    });
+  });
+}
 
 export default useSelectionStore;

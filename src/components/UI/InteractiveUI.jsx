@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import ObjectsManager from "../AssetManage/ObjectsManager";
+import ObjectsManager from "../Objects/ObjectsManager";
 import TextureSelector from "../AssetManage/TextureSelector";
 import ToggleButtons from "./ModeToggleButton";
 import "../../../src/style.css";
@@ -8,6 +8,8 @@ import useSelectionStore from "../Store/Store";
 import ColorPicker from "../AssetManage/ColorPicker";
 import SunPositionSlider from "./SunPositionSlider";
 import { Box, Stack } from '@mui/material';
+import QuotationPanel from "../QuotationPanel/QuotationPanel";
+import DebugButton from "./DebugButton";
 
 export default function InteractiveUI() {
     const { designMode } = useSelectionStore();
@@ -35,11 +37,12 @@ export default function InteractiveUI() {
                     maxWidth: '40vw',
                 }}
             >
-                <DesignModeToggle />
+                {/* <DesignModeToggle /> */}
 
-                {designMode === "roomSimulation" && (
+                {/* {designMode === "roomSimulation" && (
                     <SunPositionSlider />
-                )}
+                )} */}
+
             </Stack>
 
             {designMode === "roomSimulation" && (
@@ -84,6 +87,11 @@ export default function InteractiveUI() {
                     </Box>
                 </>
             )}
+            {/* debug buttons */}
+            {/* <DebugButton/> */}
+            
+            <QuotationPanel/>
         </Box>
+        
     );
 }

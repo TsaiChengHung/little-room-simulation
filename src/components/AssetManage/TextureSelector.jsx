@@ -1,26 +1,75 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Box, Stack, Button } from '@mui/material';
-import { useTextureLoader } from './Textures';
 import useSelectionStore from '../Store/Store';
 
-// App 主組件
 export default function MaterialSelector() {
-  const { selectedObject, selectedObjectType, clearSelectedObject, roomMaterials, setMaterialTexture, operationMode, paintMode } = useSelectionStore();
-
-  const [selectedTexture, setSelectedTexture] = useState(null);
-  const textureBuffers = useTextureLoader();
+  const {
+    selectedObject,
+    clearSelectedObject,
+    setMaterialTexture,
+    operationMode,
+    paintMode,
+    preloadedTextures,
+  } = useSelectionStore();
 
   // 點擊材質時觸發的功能
   const handleMaterialClick = (textureName) => {
-      setSelectedTexture(textureName);
-      setMaterialTexture(roomMaterials[selectedObject], textureBuffers[textureName]);
-      clearSelectedObject(); // 清除選中的物件以防止同時進行物件選擇和材質更改
-      console.log('Selected Material:', textureName);
+    if (preloadedTextures[textureName] && selectedObject && selectedObject.object) {
+      setMaterialTexture(selectedObject.object, textureName);
+    }
+    clearSelectedObject(); // Clear selected object to prevent simultaneous object selection and material change
   };
+
+  // If preloadedTextures is not fully loaded, display loading prompt
+  if (!preloadedTextures || Object.keys(preloadedTextures).length === 0) {
+    return <div>Loading textures...</div>;
+  }
+
+  // Memoize the texture buttons
+  const textureButtons = useMemo(() => {
+    if (!preloadedTextures) return null;
+
+    return Object.entries(preloadedTextures).map(([textureName, textureData]) => {
+      const imageSrc = textureData.textures.map?.image?.src || '/placeholder.png';
+      return (
+        <Button
+          variant="contained"
+          key={textureName}
+          onClick={() => handleMaterialClick(textureName)}
+          style={{
+            fontSize: '9pt',
+            backgroundImage: `url(${imageSrc})`,
+            backgroundPosition: 'center',
+            color: 'white',
+            minWidth: '80px',
+            height: '80px',
+            backgroundSize: 'cover',
+            margin: '4px',
+            position: 'relative',
+          }}
+        >
+          <div style={{
+            position: 'absolute',
+            bottom: '3px',
+            right: '3px',
+            backgroundColor: 'rgba(0,0,0,0.3)',
+            padding: '1px 3px',
+            borderRadius: '2px',
+            fontSize: '8pt',
+            color: 'rgba(255,255,255,0.7)',
+          }}>
+            {textureData.price || '$0.00'}
+          </div>
+        </Button>
+      );
+    });
+  }, [preloadedTextures, handleMaterialClick]); // Only re-render when textures or click handler changes
+
+  const scene = document.querySelector('canvas')?.['__r3f']?.scene;
 
   return (
     <>
-      {selectedObject && selectedObjectType === 'room' && operationMode === 'paint' && paintMode === 'texture' && (
+      {selectedObject && selectedObject.type === 'room' && operationMode === 'paint' && paintMode === 'texture' && (
         <Stack
           direction="row"
           spacing={0.5}
@@ -31,28 +80,10 @@ export default function MaterialSelector() {
             whiteSpace: 'nowrap',
             maxWidth: '80vw',
             backgroundColor: 'rgba(0, 0, 0, 0.2)',
-            borderRadius: 1
+            borderRadius: 1,
           }}
         >
-          {Object.keys(textureBuffers).map((textureName) => (
-            <Button
-              variant='contained'
-              key={textureName}
-              onClick={() => handleMaterialClick(textureName)}
-              style={{
-                fontSize: '9pt',
-                backgroundImage: `url(${textureBuffers[textureName].baseColor.image.src})`,
-                backgroundPosition: 'center',
-                color: 'white',
-                minWidth: '80px',
-                height: '80px',
-                backgroundSize: 'cover',
-                margin: '4px'
-              }}
-            >
-              
-            </Button>
-          ))}
+          {textureButtons}
         </Stack>
       )}
     </>

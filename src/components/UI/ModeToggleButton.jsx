@@ -19,7 +19,7 @@ const subButtonStyles = {
 }
 
 export default function ToggleButtons() {
-    const { removeObject, removeDefaultObject, selectedObject, selectedObjectType, setOperationMode, operationMode, transformMode, setTransformMode, setPaintMode, paintMode } = useSelectionStore();
+    const { removeObject, selectedObject, setOperationMode, operationMode, transformMode, setTransformMode, setPaintMode, paintMode } = useSelectionStore();
 
     const handleMode = (event, newMode) => {
         setOperationMode(newMode);
@@ -35,11 +35,8 @@ export default function ToggleButtons() {
 
     const handleRemove = (e) => {
         e.stopPropagation();
-        if (selectedObjectType === "customObject") {
-            removeObject(selectedObject);
-        }
-        else if (selectedObjectType === "defaultObject") {
-            removeDefaultObject(selectedObject);
+        if (selectedObject.type === "customObject") {
+            removeObject(selectedObject.objectId);
         }
     };
 
