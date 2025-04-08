@@ -16,13 +16,10 @@ import { preloadAllObjects } from "./components/Objects/ObjectsPreload";
 import { initializeTextures } from "./components/AssetManage/Textures";
 import CustomObjectControl from "./components/UI/CustomObjectControl";
 import SunPosition from "./components/SFX/SunPosition";
-import AIAssistant from './components/AI/AIAssistant';
-import TestAIPlacement from './components/AI/TestAIPlacement';
 import Room from './components/RoomSelector/RoomGenerator';
 import './App.css';
 
 export function App() {
-  const [showAI, setShowAI] = useState(false);
   const [resourcesLoaded, setResourcesLoaded] = useState(false);
   const { clearSelectedObject, setCurrentScene, designMode, isAIGenerating, setResourcesLoaded: storeSetResourcesLoaded } = useSelectionStore();
 
@@ -99,15 +96,6 @@ export function App() {
 
             <Scene rotation={[0, Math.PI / 2, 0]} />
 
-            {/* Loading indicator during AI generation */}
-            {isAIGenerating && (
-              <Html center>
-                <div className="loading-indicator">
-                  <div className="spinner"></div>
-                  <p>AI is generating design...</p>
-                </div>
-              </Html>
-            )}
           </Canvas>
         )}
 
@@ -122,39 +110,13 @@ export function App() {
             <RoomSelectorUI />
             <OrbitControls />
             
-            {/* Loading indicator during AI generation */}
-            {isAIGenerating && (
-              <Html center>
-                <div className="loading-indicator">
-                  <div className="spinner"></div>
-                  <p>AI is generating design...</p>
-                </div>
-              </Html>
-            )}
           </Canvas>
         )}
-        
-        <div className="controls-container">
-          <button 
-            className="ai-toggle-button"
-            onClick={() => setShowAI(!showAI)}
-          >
-            {showAI ? 'Hide AI Assistant' : 'Show AI Assistant'}
-          </button>
-          {/* Other control panels */}
-        </div>
-        
-        {showAI && (
-          <div className="ai-assistant-container">
-            <AIAssistant />
-          </div>
-        )}
+
 
         {designMode === "roomSimulation" && (
           <div className="interactive-ui-container">
             <InteractiveUI />
-            {showAI && <AIAssistant />}
-            <TestAIPlacement />
           </div>
         )}
       </div>

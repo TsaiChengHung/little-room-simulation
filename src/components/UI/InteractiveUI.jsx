@@ -87,7 +87,9 @@ export default function InteractiveUI() {
                     </Box>
                 </>
             )}
-            <DebugButton/>
+            {/* debug buttons */}
+            {/* <DebugButton/> */}
+            
             <QuotationPanel/>
         </Box>
         
