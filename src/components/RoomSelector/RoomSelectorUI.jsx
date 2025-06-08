@@ -31,14 +31,6 @@ function Frame({
 
   const { setCurrentFloorPoints, setDesignMode} = useSelectionStore()
 
-  const onDoubleClickHandle = (e) => {
-    name = e.object.name
-    if (name === "01") setCurrentFloorPoints(RoomPointsTemplate(0))
-    else if (name === "02") setCurrentFloorPoints(RoomPointsTemplate(1))
-    else if (name === "03") setCurrentFloorPoints(RoomPointsTemplate(2))
-    setDesignMode("roomSimulation")
-  }
-
   return (
     <group {...props}>
       <Text
@@ -71,7 +63,13 @@ function Frame({
         name={id}
         onPointerOver={(e) => hover(true)}
         onPointerOut={() => hover(false)}
-        onDoubleClick={onDoubleClickHandle}
+        onDoubleClick={(e) => {
+          const roomIndex = parseInt(e.object.name, 10) - 1;
+          if (roomIndex >= 0 && roomIndex < 3) {
+            setCurrentFloorPoints(RoomPointsTemplate(roomIndex));
+            setDesignMode("roomSimulation");
+          }
+        }}
       >
         <roundedPlaneGeometry args={[width, height, 0.1]} />
         <MeshPortalMaterial ref={portal} side={THREE.DoubleSide}>
@@ -83,7 +81,37 @@ function Frame({
   );
 }
 
-export default function RoomSelector() {
+const roomsData = [
+  {
+    id: "01",
+    name: `Basic\nsquare`,
+    describe: "5 x 5 x 3.6 m",
+    bg: "#e4cdac",
+    position: [-1.15, 0.35, 0],
+    rotation: [0, 0.5, 0],
+    roomIndex: 0
+  },
+  {
+    id: "02",
+    name: `Basic\nnarrow`,
+    describe: "6 x 4 x 3.6 m",
+    bg: "#e4cdac",
+    position: [0, 0.35, 0],
+    rotation: [0, 0, 0],
+    roomIndex: 1
+  },
+  {
+    id: "03",
+    name: `L-shaped\nroom`,
+    describe: "5 x 3.75 x 3.6 + 1.25 x 2.5 m",
+    bg: "#e4cdac",
+    position: [1.15, 0.35, 0],
+    rotation: [0, -0.5, 0],
+    roomIndex: 2
+  }
+];
+
+export default function RoomSelectorUI() {
 return (
     <>
         <color attach="background" args={['#f0f0f0']} />
@@ -101,68 +129,29 @@ return (
             enableDamping={true}
         />
 
-        <Frame
-            id="01"
-            name={`Basic\nsquare`}
-            describe="5 x 5 x 3.6 m"
-            bg="#e4cdac"
-            position={[-1.15, 0.35, 0]}
-            rotation={[0, 0.5, 0]}
-            
-        >
+        {roomsData.map(room => (
+          <Frame
+            key={room.id}
+            id={room.id}
+            name={room.name}
+            describe={room.describe}
+            bg={room.bg}
+            position={room.position}
+            rotation={room.rotation}
+          >
             <Environment
                 preset={"studio"}
                 background={false}
                 environmentIntensity={0.5}
             />
             <Room
-                floorPoints={RoomPointsTemplate(0)}
+                floorPoints={RoomPointsTemplate(room.roomIndex)}
                 wallHeight={3.6}
                 scale={0.15}
                 position={[0, -0.3, 0]}
             />
-        </Frame>
-
-        <Frame
-            id="02"
-            name={`Basic\nnarrow`}
-            describe="6 x 4 x 3.6 m"
-            bg="#e4cdac"
-            position={[0, 0.35, 0]}
-        >
-            <Environment
-                preset={"studio"}
-                background={false}
-                environmentIntensity={0.5}
-            />
-            <Room
-                floorPoints={RoomPointsTemplate(1)}
-                wallHeight={3.6}
-                scale={0.15}
-                position={[0, -0.3, 0]}
-            />
-        </Frame>
-
-        <Frame
-            id="03"
-            name={`L-shaped\nroom`}
-            describe="5 x 3.75 x 3.6 + 1.25 x 2.5 m"
-            bg="#e4cdac"
-            position={[1.15, 0.35, 0]}
-            rotation={[0, -0.5, 0]}
-        >
-            <Environment
-                preset={"studio"}
-                background={false}
-                environmentIntensity={0.5}
-            />
-            <Room
-                floorPoints={RoomPointsTemplate(2)}
-                wallHeight={3.6}
-                scale={0.15}
-                position={[0, -0.3, 0]}
-            />
-        </Frame>
+          </Frame>
+        ))}
     </>
 );
 }

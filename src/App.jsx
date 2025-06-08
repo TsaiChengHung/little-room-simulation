@@ -16,12 +16,11 @@ import { preloadAllObjects } from "./components/Objects/ObjectsPreload";
 import { initializeTextures } from "./components/AssetManage/Textures";
 import CustomObjectControl from "./components/UI/CustomObjectControl";
 import SunPosition from "./components/SFX/SunPosition";
-import Room from './components/RoomSelector/RoomGenerator';
 import './App.css';
 
-export function App() {
+function App() {
   const [resourcesLoaded, setResourcesLoaded] = useState(false);
-  const { clearSelectedObject, setCurrentScene, designMode, isAIGenerating, setResourcesLoaded: storeSetResourcesLoaded } = useSelectionStore();
+  const { clearSelectedObject, designMode, isAIGenerating, setResourcesLoaded: storeSetResourcesLoaded } = useSelectionStore();
 
   // Preload objects and textures when app starts
   useEffect(() => {
@@ -48,7 +47,7 @@ export function App() {
     };
     
     initializeResources();
-  }, [storeSetResourcesLoaded]);
+  }, []);
 
   const handleCanvasClick = () => {
     clearSelectedObject();
@@ -60,65 +59,49 @@ export function App() {
         style={{ position: "fixed", width: "100%", height: "100%", zIndex: 0 }}
         className="app-container"
       >
-        {designMode === "roomSimulation" && (
-          <Canvas
-            shadows
-            gl={{ antialias: true }}
-            camera={{ position: [0, 1, 10], fov: 15, near: 1, far: 100 }}
-            onPointerMissed={handleCanvasClick}
-            className="canvas-container"
-          >
-            <Environment
-              preset={"studio"}
-              background={true}
-              environmentIntensity={0.3}
-            />
+        <Canvas
+          shadows
+          gl={{ antialias: true }}
+          camera={{ position: [0, 1, 10], fov: 15, near: 1, far: 100 }}
+          onPointerMissed={handleCanvasClick}
+          className="canvas-container"
+        >
+          {designMode === "roomSimulation" && (
+            <>
+              <Environment
+                preset={"studio"}
+                background={true}
+                environmentIntensity={0.3}
+              />
 
-            {/* <Perf position="top-right" /> */}
-            <OrbitControls
-              makeDefault
-              target={[0, 1, 0]}
-              maxPolarAngle={Math.PI * 0.5} // Maximum ~135 degrees from top
-              enableZoom={true}
-              enablePan={true}
-              rotateSpeed={0.5}
-              zoomSpeed={0.7}
-              panSpeed={0.5}
-              dampingFactor={0.05}
-              enableDamping={true}
-            />
+              {/* <Perf position="top-right" /> */}
+              <OrbitControls
+                makeDefault
+                target={[0, 1, 0]}
+                maxPolarAngle={Math.PI * 0.5} // Maximum ~135 degrees from top
+                enableZoom={true}
+                enablePan={true}
+                rotateSpeed={0.5}
+                zoomSpeed={0.7}
+                panSpeed={0.5}
+                dampingFactor={0.05}
+                enableDamping={true}
+              />
 
-            <Effects />
+              <Effects />
 
-            <CustomObjectControl />
+              <CustomObjectControl />
 
-            <SunPosition />
+              <SunPosition />
 
-            <Scene rotation={[0, Math.PI / 2, 0]} />
+              <Scene rotation={[0, Math.PI / 2, 0]} />
+            </>
+          )}
 
-          </Canvas>
-        )}
-
-        {designMode === "roomDesign" && (
-          <Canvas
-            shadows
-            gl={{ antialias: true }}
-            camera={{ position: [0, 1, 10], fov: 15, near: 1, far: 100 }}
-            onPointerMissed={handleCanvasClick}
-            className="canvas-container"
-          >
+          {designMode === "roomDesign" && (
             <RoomSelectorUI />
-            <OrbitControls />
-            
-          </Canvas>
-        )}
-
-
-        {designMode === "roomSimulation" && (
-          <div className="interactive-ui-container">
-            <InteractiveUI />
-          </div>
-        )}
+          )}
+        </Canvas>
       </div>
 
       <InteractiveUI />
