@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Box, Stack, Button } from '@mui/material';
 import useSelectionStore from '../Store/Store';
 
@@ -13,17 +13,12 @@ export default function MaterialSelector() {
   } = useSelectionStore();
 
   // 點擊材質時觸發的功能
-  const handleMaterialClick = (textureName) => {
+  const handleMaterialClick = useCallback((textureName) => {
     if (preloadedTextures[textureName] && selectedObject && selectedObject.object) {
       setMaterialTexture(selectedObject.object, textureName);
     }
     clearSelectedObject(); // Clear selected object to prevent simultaneous object selection and material change
-  };
-
-  // If preloadedTextures is not fully loaded, display loading prompt
-  if (!preloadedTextures || Object.keys(preloadedTextures).length === 0) {
-    return <div>Loading textures...</div>;
-  }
+  }, [preloadedTextures, selectedObject, setMaterialTexture, clearSelectedObject]);
 
   // Memoize the texture buttons
   const textureButtons = useMemo(() => {
@@ -64,6 +59,11 @@ export default function MaterialSelector() {
       );
     });
   }, [preloadedTextures, handleMaterialClick]); // Only re-render when textures or click handler changes
+
+  // If preloadedTextures is not fully loaded, display loading prompt
+  if (!preloadedTextures || Object.keys(preloadedTextures).length === 0) {
+    return <div>Loading textures...</div>;
+  }
 
   const scene = document.querySelector('canvas')?.['__r3f']?.scene;
 
