@@ -3,13 +3,10 @@ import ObjectsManager from "../Objects/ObjectsManager";
 import TextureSelector from "../AssetManage/TextureSelector";
 import ToggleButtons from "./ModeToggleButton";
 import "../../../src/style.css";
-import DesignModeToggle from './DesignModeToggle';
 import useSelectionStore from "../Store/Store";
 import ColorPicker from "../AssetManage/ColorPicker";
-import SunPositionSlider from "./SunPositionSlider";
 import { Box, Stack } from '@mui/material';
 import QuotationPanel from "../QuotationPanel/QuotationPanel";
-import DebugButton from "./DebugButton";
 
 export default function InteractiveUI() {
     const { designMode } = useSelectionStore();

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Environment, Html } from "@react-three/drei";
+import { OrbitControls, Environment } from "@react-three/drei";
 import {
   EffectComposer,
   TiltShift2,
@@ -20,7 +20,7 @@ import './App.css';
 
 function App() {
   const [resourcesLoaded, setResourcesLoaded] = useState(false);
-  const { clearSelectedObject, designMode, isAIGenerating, setResourcesLoaded: storeSetResourcesLoaded } = useSelectionStore();
+  const { clearSelectedObject, designMode, setResourcesLoaded: storeSetResourcesLoaded } = useSelectionStore();
 
   // Preload objects and textures when app starts
   useEffect(() => {

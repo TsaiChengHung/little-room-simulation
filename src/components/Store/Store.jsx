@@ -227,16 +227,6 @@ const useSelectionStore = create((set, get) => ({
   // 直接設置roomData
   setRoomData: (newRoomData) => set({ roomData: newRoomData }),
 
-  getModifiedItems: () => {
-    if (!get().roomData) return [];
-    const { ceiling, floor, walls } = get().roomData;
-    return [
-      ceiling.isModified ? ceiling : null,
-      floor.isModified ? floor : null,
-      ...walls.filter((wall) => wall.isModified),
-    ].filter(Boolean);
-  },
-
   updateObjectTransform: (objectId, newTransform) =>
     set((state) => {
       const updatedObjects = { ...state.objects };
@@ -278,46 +268,6 @@ const useSelectionStore = create((set, get) => ({
     const { preloadedTextures } = get();
     return preloadedTextures[textureId] || null;
   },
-  
-  // 初始化預載資源
-  initializeResources: async () => {
-    try {
-      // 這裡將調用修改後的 preloadAllObjects 和 loadAllTextures 函數
-      const { preloadAllObjects } = await import('../Objects/ObjectsPreload');
-      const { getTextureBuffers } = await import('../AssetManage/Textures');
-      
-      // 加載模型
-      const models = await preloadAllObjects();
-      set({ preloadedModels: models });
-      
-      // 加載貼圖
-      const textures = getTextureBuffers();
-      set({ preloadedTextures: textures });
-      
-      // 標記加載完成
-      set({ isResourcesLoaded: true });
-      
-      return true;
-    } catch (error) {
-      console.error("初始化資源時出錯:", error);
-      return false;
-    }
-  },
 }));
-
-// 輔助函數：加載貼圖
-async function loadTexture(path) {
-  if (!path) return null;
-  
-  return new Promise((resolve) => {
-    const textureLoader = new THREE.TextureLoader();
-    textureLoader.load(path, (texture) => {
-      // 設置貼圖屬性
-      texture.isTexture = true;
-      texture.uuid = THREE.MathUtils.generateUUID();
-      resolve(texture);
-    });
-  });
-}
 
 export default useSelectionStore;

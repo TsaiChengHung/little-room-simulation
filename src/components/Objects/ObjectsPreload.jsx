@@ -192,7 +192,6 @@ const resources = [
 
 // Cache structure will store both object and info
 export const cachedObjects = {}
-const { setPreloadedModels } = useSelectionStore.getState();
 
 const loader = new GLTFLoader();
 const dracoLoader = new DRACOLoader();
